@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="420" viewBox="0 0 960 420" font-family="'SF Pro Rounded','Helvetica Neue',sans-serif">
+  <rect width="960" height="420" fill="#FFFDFB"/>
+  <text x="48" y="64" font-size="34" font-weight="700" fill="#3B3A4E">컬러 시스템</text>
+  <text x="48" y="98" font-size="18" fill="#9A8F86">jd-coloring · 화면 1 디자인 팔레트</text>
+
+  <!-- accent row -->
+  <g transform="translate(48,140)">
+    <g transform="translate(0,0)"><rect width="130" height="130" rx="26" fill="#FF7A59"/><text x="65" y="170" font-size="18" font-weight="700" fill="#3B3A4E" text-anchor="middle">코랄</text><text x="65" y="194" font-size="15" fill="#9A8F86" text-anchor="middle">#FF7A59</text></g>
+    <g transform="translate(150,0)"><rect width="130" height="130" rx="26" fill="#8A6CFF"/><text x="65" y="170" font-size="18" font-weight="700" fill="#3B3A4E" text-anchor="middle">퍼플</text><text x="65" y="194" font-size="15" fill="#9A8F86" text-anchor="middle">#8A6CFF</text></g>
+    <g transform="translate(300,0)"><rect width="130" height="130" rx="26" fill="#36C5C0"/><text x="65" y="170" font-size="18" font-weight="700" fill="#3B3A4E" text-anchor="middle">티일</text><text x="65" y="194" font-size="15" fill="#9A8F86" text-anchor="middle">#36C5C0</text></g>
+    <g transform="translate(450,0)"><rect width="130" height="130" rx="26" fill="#FFC740"/><text x="65" y="170" font-size="18" font-weight="700" fill="#3B3A4E" text-anchor="middle">옐로</text><text x="65" y="194" font-size="15" fill="#9A8F86" text-anchor="middle">#FFC740</text></g>
+    <g transform="translate(600,0)"><rect width="130" height="130" rx="26" fill="#FF6FAF"/><text x="65" y="170" font-size="18" font-weight="700" fill="#3B3A4E" text-anchor="middle">핑크</text><text x="65" y="194" font-size="15" fill="#9A8F86" text-anchor="middle">#FF6FAF</text></g>
+    <g transform="translate(750,0)"><rect width="130" height="130" rx="26" fill="#5FD08A"/><text x="65" y="170" font-size="18" font-weight="700" fill="#3B3A4E" text-anchor="middle">그린</text><text x="65" y="194" font-size="15" fill="#9A8F86" text-anchor="middle">#5FD08A</text></g>
+  </g>
+
+  <!-- neutral row -->
+  <g transform="translate(48,330)">
+    <g transform="translate(0,0)"><rect width="86" height="60" rx="14" fill="#FFF4EC" stroke="#EBDFD2"/><text x="43" y="80" font-size="13" fill="#9A8F86" text-anchor="middle">배경 #FFF4EC</text></g>
+    <g transform="translate(150,0)"><rect width="86" height="60" rx="14" fill="#3B3A4E"/><text x="43" y="80" font-size="13" fill="#9A8F86" text-anchor="middle">잉크 #3B3A4E</text></g>
+    <g transform="translate(300,0)"><rect width="86" height="60" rx="14" fill="#9A8F86"/><text x="43" y="80" font-size="13" fill="#9A8F86" text-anchor="middle">보조텍스트</text></g>
+    <g transform="translate(450,0)"><rect width="86" height="60" rx="14" fill="#FF5A5F"/><text x="43" y="80" font-size="13" fill="#9A8F86" text-anchor="middle">위험 #FF5A5F</text></g>
+    <g transform="translate(600,0)"><rect width="86" height="60" rx="14" fill="#FFFFFF" stroke="#EBDFD2"/><text x="43" y="80" font-size="13" fill="#9A8F86" text-anchor="middle">카드 #FFFFFF</text></g>
+  </g>
+</svg>

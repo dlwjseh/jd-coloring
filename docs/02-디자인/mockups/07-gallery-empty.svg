@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1180" height="820" viewBox="0 0 1180 820" font-family="'SF Pro Rounded','Helvetica Neue',sans-serif">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#FFF4EC"/>
+    </linearGradient>
+    <filter id="sh" x="-40%" y="-40%" width="180%" height="180%">
+      <feDropShadow dx="0" dy="7" stdDeviation="11" flood-color="#C9A88C" flood-opacity="0.35"/>
+    </filter>
+    <filter id="shCard" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="6" stdDeviation="10" flood-color="#C9A88C" flood-opacity="0.28"/>
+    </filter>
+    <g id="face2e">
+      <circle cx="-9" cy="-5" r="3.2" fill="#3B3A4E"/>
+      <circle cx="9" cy="-5" r="3.2" fill="#3B3A4E"/>
+      <path d="M -11 6 Q 0 16 11 6" fill="none" stroke="#3B3A4E" stroke-width="2.6" stroke-linecap="round"/>
+    </g>
+  </defs>
+
+  <rect width="1180" height="820" fill="url(#bg)"/>
+  <circle cx="70" cy="150" r="120" fill="#8A6CFF" opacity="0.10"/>
+  <circle cx="1120" cy="120" r="140" fill="#36C5C0" opacity="0.10"/>
+  <circle cx="120" cy="720" r="90" fill="#5FD08A" opacity="0.11"/>
+  <circle cx="1080" cy="760" r="80" fill="#FFC740" opacity="0.10"/>
+
+  <!-- top bar -->
+  <g filter="url(#shCard)">
+    <circle cx="74" cy="74" r="30" fill="#FFFFFF" stroke="#EBDFD2" stroke-width="2"/>
+    <path d="M 84 60 L 66 74 L 84 88" fill="none" stroke="#3B3A4E" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <text x="590" y="66" font-size="40" font-weight="800" fill="#3B3A4E" text-anchor="middle">무엇을 색칠해볼까요?</text>
+  <text x="590" y="102" font-size="20" fill="#9A8F86" text-anchor="middle">주언이의 색칠 도안 · 0개</text>
+  <g>
+    <text x="1048" y="82" font-size="24" font-weight="700" fill="#3B3A4E" text-anchor="end">주언이</text>
+    <circle cx="1090" cy="74" r="28" fill="#FFE4DB" stroke="#FF7A59" stroke-width="5" filter="url(#shCard)"/>
+    <use href="#face2e" transform="translate(1090,74)"/>
+  </g>
+
+  <!-- empty state -->
+  <g transform="translate(590,400)">
+    <!-- dashed canvas -->
+    <rect x="-150" y="-128" width="300" height="232" rx="36" fill="#FFFFFF" stroke="#E4D5C6" stroke-width="4" stroke-dasharray="14 12"/>
+    <!-- crayon (clean) -->
+    <g transform="translate(4,-12) rotate(-14)">
+      <!-- body: flat top so the tip seats cleanly, rounded bottom -->
+      <path d="M -24 -44 L 24 -44 L 24 60 Q 24 70 14 70 L -14 70 Q -24 70 -24 60 Z" fill="#FFB3C7" stroke="#3B3A4E" stroke-width="4" stroke-linejoin="round"/>
+      <!-- conic tip seated on the flat top -->
+      <path d="M -24 -44 Q 0 -92 24 -44 Z" fill="#FFC740" stroke="#3B3A4E" stroke-width="4" stroke-linejoin="round"/>
+      <!-- wrapper bands -->
+      <path d="M -24 -16 L 24 -16 M -24 10 L 24 10 M -24 36 L 24 36" fill="none" stroke="#3B3A4E" stroke-width="3.4" stroke-linecap="round"/>
+    </g>
+  </g>
+  <text x="590" y="558" font-size="30" font-weight="800" fill="#3B3A4E" text-anchor="middle">아직 색칠할 도안이 없어요</text>
+  <text x="590" y="596" font-size="21" fill="#9A8F86" text-anchor="middle">오른쪽 아래 ＋ 버튼으로 사진을 올려 도안을 만들어요</text>
+
+  <!-- add button -->
+  <g filter="url(#sh)">
+    <circle cx="1085" cy="710" r="48" fill="#FF7A59"/>
+    <path d="M 1085 688 L 1085 732 M 1063 710 L 1107 710" stroke="#fff" stroke-width="8" stroke-linecap="round"/>
+  </g>
+  <text x="1085" y="780" font-size="18" font-weight="600" fill="#7A6E64" text-anchor="middle">도안 추가</text>
+</svg>

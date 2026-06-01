@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1180" height="820" viewBox="0 0 1180 820" font-family="'SF Pro Rounded','Helvetica Neue',sans-serif">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#FFF4EC"/>
+    </linearGradient>
+    <filter id="sh" x="-40%" y="-40%" width="180%" height="180%">
+      <feDropShadow dx="0" dy="10" stdDeviation="16" flood-color="#C9A88C" flood-opacity="0.40"/>
+    </filter>
+  </defs>
+
+  <rect width="1180" height="820" fill="url(#bg)"/>
+  <!-- dim overlay (시트가 위로 떠오름) -->
+  <rect width="1180" height="820" fill="#3B3A4E" opacity="0.28"/>
+
+  <!-- ===== sheet card ===== -->
+  <g filter="url(#sh)">
+    <rect x="290" y="130" width="600" height="580" rx="40" fill="#FFFFFF"/>
+  </g>
+  <text x="590" y="206" font-size="34" font-weight="800" fill="#3B3A4E" text-anchor="middle">도안 만들기</text>
+  <text x="590" y="242" font-size="19" fill="#9A8F86" text-anchor="middle">사진을 골라 색칠 도안으로 추가해요</text>
+
+  <!-- preview (선택한 도안 이미지 그대로) -->
+  <clipPath id="clipP"><rect x="440" y="272" width="300" height="300" rx="28"/></clipPath>
+  <rect x="440" y="272" width="300" height="300" rx="28" fill="#FFFFFF" stroke="#EBDFD2" stroke-width="2"/>
+  <g clip-path="url(#clipP)" fill="none" stroke="#3B3A4E" stroke-width="4" stroke-linejoin="round" stroke-linecap="round">
+    <!-- 사용자가 올린 색칠 도안(라인아트) 예시: 집 + 해님 -->
+    <path d="M 440 516 L 740 516"/>
+    <circle cx="540" cy="372" r="24"/>
+    <rect x="572" y="418" width="116" height="98"/>
+    <path d="M 562 418 L 630 366 L 698 418 Z"/>
+    <rect x="612" y="466" width="36" height="50"/>
+  </g>
+
+  <!-- 사진 다시 선택 -->
+  <text x="590" y="612" font-size="18" font-weight="600" fill="#FF7A59" text-anchor="middle">사진 다시 선택</text>
+
+  <!-- buttons -->
+  <g>
+    <rect x="360" y="634" width="220" height="58" rx="29" fill="#FFFFFF" stroke="#E4D5C6" stroke-width="2.5"/>
+    <text x="470" y="671" font-size="22" font-weight="700" fill="#7A6E64" text-anchor="middle">취소</text>
+  </g>
+  <g filter="url(#sh)">
+    <rect x="600" y="634" width="220" height="58" rx="29" fill="#FF7A59"/>
+    <text x="710" y="671" font-size="22" font-weight="700" fill="#FFFFFF" text-anchor="middle">도안 저장</text>
+  </g>
+</svg>

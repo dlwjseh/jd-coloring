@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1180" height="820" viewBox="0 0 1180 820" font-family="'SF Pro Rounded','Helvetica Neue',sans-serif">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#FFF4EC"/>
+    </linearGradient>
+    <filter id="sh" x="-40%" y="-40%" width="180%" height="180%">
+      <feDropShadow dx="0" dy="7" stdDeviation="11" flood-color="#C9A88C" flood-opacity="0.35"/>
+    </filter>
+    <g id="face">
+      <circle cx="-24" cy="-12" r="8" fill="#3B3A4E"/>
+      <circle cx="24" cy="-12" r="8" fill="#3B3A4E"/>
+      <path d="M -28 16 Q 0 44 28 16" fill="none" stroke="#3B3A4E" stroke-width="7" stroke-linecap="round"/>
+      <circle cx="-40" cy="14" r="9" fill="#FF6FAF" opacity="0.4"/>
+      <circle cx="40" cy="14" r="9" fill="#FF6FAF" opacity="0.4"/>
+    </g>
+  </defs>
+
+  <rect width="1180" height="820" fill="url(#bg)"/>
+  <!-- decorative blobs -->
+  <circle cx="80" cy="120" r="70" fill="#8A6CFF" opacity="0.10"/>
+  <circle cx="1110" cy="180" r="90" fill="#36C5C0" opacity="0.10"/>
+  <circle cx="120" cy="720" r="60" fill="#FFC740" opacity="0.12"/>
+
+  <!-- title -->
+  <text x="590" y="128" font-size="48" font-weight="800" fill="#3B3A4E" text-anchor="middle">오늘은 누가 색칠할까요?</text>
+  <text x="590" y="172" font-size="24" fill="#9A8F86" text-anchor="middle">프로필을 선택하세요</text>
+
+  <!-- profiles row (cy=400, r=76) -->
+  <!-- 지호 coral -->
+  <g><circle cx="195" cy="400" r="76" fill="#FFE4DB" stroke="#FF7A59" stroke-width="8" filter="url(#sh)"/><use href="#face" transform="translate(195,400)"/><text x="195" y="525" font-size="27" font-weight="700" fill="#3B3A4E" text-anchor="middle">지호</text></g>
+  <!-- 서연 purple -->
+  <g><circle cx="390" cy="400" r="76" fill="#ECE6FF" stroke="#8A6CFF" stroke-width="8" filter="url(#sh)"/><use href="#face" transform="translate(390,400)"/><text x="390" y="525" font-size="27" font-weight="700" fill="#3B3A4E" text-anchor="middle">서연</text></g>
+  <!-- 민준 teal -->
+  <g><circle cx="585" cy="400" r="76" fill="#DBF6F5" stroke="#36C5C0" stroke-width="8" filter="url(#sh)"/><use href="#face" transform="translate(585,400)"/><text x="585" y="525" font-size="27" font-weight="700" fill="#3B3A4E" text-anchor="middle">민준</text></g>
+  <!-- 하윤 yellow -->
+  <g><circle cx="780" cy="400" r="76" fill="#FFF1CC" stroke="#FFC740" stroke-width="8" filter="url(#sh)"/><use href="#face" transform="translate(780,400)"/><text x="780" y="525" font-size="27" font-weight="700" fill="#3B3A4E" text-anchor="middle">하윤</text></g>
+  <!-- 도윤 pink -->
+  <g><circle cx="975" cy="400" r="76" fill="#FFE1EF" stroke="#FF6FAF" stroke-width="8" filter="url(#sh)"/><use href="#face" transform="translate(975,400)"/><text x="975" y="525" font-size="27" font-weight="700" fill="#3B3A4E" text-anchor="middle">도윤</text></g>
+  <!-- peeking (scroll hint) green -->
+  <g opacity="0.9"><circle cx="1168" cy="400" r="76" fill="#E0F6E9" stroke="#5FD08A" stroke-width="8" filter="url(#sh)"/></g>
+
+  <!-- drag hint -->
+  <text x="590" y="630" font-size="22" fill="#B6A89B" text-anchor="middle">‹   좌우로 드래그해서 더 보기   ›</text>
+
+  <!-- add button (bottom-right corner) -->
+  <g filter="url(#sh)">
+    <circle cx="1085" cy="710" r="48" fill="#FF7A59"/>
+    <path d="M 1085 688 L 1085 732 M 1063 710 L 1107 710" stroke="#fff" stroke-width="8" stroke-linecap="round"/>
+  </g>
+  <text x="1085" y="780" font-size="18" font-weight="600" fill="#7A6E64" text-anchor="middle">프로필 추가</text>
+</svg>

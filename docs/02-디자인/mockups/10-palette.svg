@@ -1,0 +1,109 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1180" height="820" viewBox="0 0 1180 820" font-family="'SF Pro Rounded','Helvetica Neue',sans-serif">
+<defs><linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#FFF4EC"/></linearGradient>
+<filter id="sh" x="-40%" y="-40%" width="180%" height="180%"><feDropShadow dx="0" dy="8" stdDeviation="16" flood-color="#C9A88C" flood-opacity="0.40"/></filter></defs>
+<rect width="1180" height="820" fill="url(#bg)"/>
+<circle cx="60" cy="150" r="120" fill="#8A6CFF" opacity="0.08"/><circle cx="1130" cy="130" r="140" fill="#36C5C0" opacity="0.08"/>
+<circle cx="74" cy="74" r="30" fill="#FFFFFF" stroke="#EBDFD2" stroke-width="2"/>
+<path d="M 84 60 L 66 74 L 84 88" fill="none" stroke="#3B3A4E" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="590" y="66" font-size="32" font-weight="800" fill="#3B3A4E" text-anchor="middle">도안 1 색칠하기</text>
+<text x="590" y="100" font-size="18" fill="#9A8F86" text-anchor="middle">색칠하면 자동으로 저장돼요</text>
+<g filter="url(#sh)"><rect x="210" y="150" width="760" height="508" rx="32" fill="#FFFFFF" stroke="#EBDFD2" stroke-width="2"/></g>
+<text x="240" y="202" font-size="26" font-weight="800" fill="#3B3A4E">색 고르기</text>
+<text x="240" y="230" font-size="16" fill="#9A8F86">프리즈마컬러 72색 · 탭하면 선택돼요</text>
+<circle cx="374" cy="288" r="19" fill="#F6E7B5" stroke="#E6DDD3" stroke-width="1.5"/>
+<circle cx="428" cy="288" r="19" fill="#B98A5A" stroke="#E6DDD3" stroke-width="1.5"/>
+<circle cx="482" cy="288" r="19" fill="#F8EE4A" stroke="#E6DDD3" stroke-width="1.5"/>
+<circle cx="536" cy="288" r="19" fill="#F5D93A" stroke="#E6DDD3" stroke-width="1.5"/>
+<circle cx="590" cy="288" r="19" fill="#E6A13B" stroke="#E6DDD3" stroke-width="1.5"/>
+<circle cx="644" cy="288" r="19" fill="#C89A3C" stroke="#E6DDD3" stroke-width="1.5"/>
+<circle cx="698" cy="288" r="19" fill="#D97A1F" stroke="#E6DDD3" stroke-width="1.5"/>
+<circle cx="752" cy="288" r="19" fill="#C89126" stroke="#E6DDD3" stroke-width="1.5"/>
+<circle cx="806" cy="288" r="19" fill="#F5B223" stroke="#E6DDD3" stroke-width="1.5"/>
+<circle cx="374" cy="334" r="19" fill="#D7B48A" stroke="#E6DDD3" stroke-width="1.5"/>
+<circle cx="428" cy="334" r="19" fill="#F07C1B" stroke="#E6DDD3" stroke-width="1.5"/>
+<circle cx="482" cy="334" r="19" fill="#F48D6B" stroke="#E6DDD3" stroke-width="1.5"/>
+<circle cx="536" cy="334" r="19" fill="#D9493C" stroke="#E6DDD3" stroke-width="1.5"/>
+<circle cx="590" cy="334" r="19" fill="#C6353B" stroke="#E6DDD3" stroke-width="1.5"/>
+<circle cx="644" cy="334" r="19" fill="#A8262C" stroke="#E6DDD3" stroke-width="1.5"/>
+<circle cx="698" cy="334" r="19" fill="#7F2434" stroke="#E6DDD3" stroke-width="1.5"/>
+<circle cx="752" cy="334" r="19" fill="#B53A7A" stroke="#E6DDD3" stroke-width="1.5"/>
+<circle cx="806" cy="334" r="19" fill="#E63D56" stroke="#E6DDD3" stroke-width="1.5"/>
+<circle cx="374" cy="380" r="19" fill="#6F395F" stroke="#E6DDD3" stroke-width="1.5"/>
+<circle cx="428" cy="380" r="24" fill="#F29CB4" stroke="#3B3A4E" stroke-width="3.5"/>
+<circle cx="482" cy="380" r="19" fill="#F6C0C4" stroke="#E6DDD3" stroke-width="1.5"/>
+<circle cx="536" cy="380" r="19" fill="#F5C9A7" stroke="#E6DDD3" stroke-width="1.5"/>
+<circle cx="590" cy="380" r="19" fill="#DCC5AA" stroke="#E6DDD3" stroke-width="1.5"/>
+<circle cx="644" cy="380" r="19" fill="#E9AE8D" stroke="#E6DDD3" stroke-width="1.5"/>
+<circle cx="698" cy="380" r="19" fill="#4A254E" stroke="#E6DDD3" stroke-width="1.5"/>
+<circle cx="752" cy="380" r="19" fill="#7A5DA9" stroke="#E6DDD3" stroke-width="1.5"/>
+<circle cx="806" cy="380" r="19" fill="#B9A3D6" stroke="#E6DDD3" stroke-width="1.5"/>
+<circle cx="374" cy="426" r="19" fill="#6D4AA2" stroke="#E6DDD3" stroke-width="1.5"/>
+<circle cx="428" cy="426" r="19" fill="#56327A" stroke="#E6DDD3" stroke-width="1.5"/>
+<circle cx="482" cy="426" r="19" fill="#4C5BB2" stroke="#E6DDD3" stroke-width="1.5"/>
+<circle cx="536" cy="426" r="19" fill="#3249A5" stroke="#E6DDD3" stroke-width="1.5"/>
+<circle cx="590" cy="426" r="19" fill="#24406B" stroke="#E6DDD3" stroke-width="1.5"/>
+<circle cx="644" cy="426" r="19" fill="#2E75C8" stroke="#E6DDD3" stroke-width="1.5"/>
+<circle cx="698" cy="426" r="19" fill="#5FA6D7" stroke="#E6DDD3" stroke-width="1.5"/>
+<circle cx="752" cy="426" r="19" fill="#006F8A" stroke="#E6DDD3" stroke-width="1.5"/>
+<circle cx="806" cy="426" r="19" fill="#A7CDEB" stroke="#E6DDD3" stroke-width="1.5"/>
+<circle cx="374" cy="472" r="19" fill="#25365C" stroke="#E6DDD3" stroke-width="1.5"/>
+<circle cx="428" cy="472" r="19" fill="#8DD7D6" stroke="#E6DDD3" stroke-width="1.5"/>
+<circle cx="482" cy="472" r="19" fill="#3DB9B5" stroke="#E6DDD3" stroke-width="1.5"/>
+<circle cx="536" cy="472" r="19" fill="#37A85A" stroke="#E6DDD3" stroke-width="1.5"/>
+<circle cx="590" cy="472" r="19" fill="#BFD636" stroke="#E6DDD3" stroke-width="1.5"/>
+<circle cx="644" cy="472" r="19" fill="#9CC63B" stroke="#E6DDD3" stroke-width="1.5"/>
+<circle cx="698" cy="472" r="19" fill="#6AA83D" stroke="#E6DDD3" stroke-width="1.5"/>
+<circle cx="752" cy="472" r="19" fill="#79C86D" stroke="#E6DDD3" stroke-width="1.5"/>
+<circle cx="806" cy="472" r="19" fill="#4FA648" stroke="#E6DDD3" stroke-width="1.5"/>
+<circle cx="374" cy="518" r="19" fill="#24854B" stroke="#E6DDD3" stroke-width="1.5"/>
+<circle cx="428" cy="518" r="19" fill="#34733B" stroke="#E6DDD3" stroke-width="1.5"/>
+<circle cx="482" cy="518" r="19" fill="#5D6733" stroke="#E6DDD3" stroke-width="1.5"/>
+<circle cx="536" cy="518" r="19" fill="#2C4B31" stroke="#E6DDD3" stroke-width="1.5"/>
+<circle cx="590" cy="518" r="19" fill="#4B3428" stroke="#E6DDD3" stroke-width="1.5"/>
+<circle cx="644" cy="518" r="19" fill="#2D7464" stroke="#E6DDD3" stroke-width="1.5"/>
+<circle cx="698" cy="518" r="19" fill="#C4AE95" stroke="#E6DDD3" stroke-width="1.5"/>
+<circle cx="752" cy="518" r="19" fill="#8E6C4D" stroke="#E6DDD3" stroke-width="1.5"/>
+<circle cx="806" cy="518" r="19" fill="#A06638" stroke="#E6DDD3" stroke-width="1.5"/>
+<circle cx="374" cy="564" r="19" fill="#7D4F33" stroke="#E6DDD3" stroke-width="1.5"/>
+<circle cx="428" cy="564" r="19" fill="#A6533D" stroke="#E6DDD3" stroke-width="1.5"/>
+<circle cx="482" cy="564" r="19" fill="#5C1F22" stroke="#E6DDD3" stroke-width="1.5"/>
+<circle cx="536" cy="564" r="19" fill="#4B3528" stroke="#E6DDD3" stroke-width="1.5"/>
+<circle cx="590" cy="564" r="19" fill="#5A3B2A" stroke="#E6DDD3" stroke-width="1.5"/>
+<circle cx="644" cy="564" r="19" fill="#D2CCC4" stroke="#E6DDD3" stroke-width="1.5"/>
+<circle cx="698" cy="564" r="19" fill="#9E948B" stroke="#E6DDD3" stroke-width="1.5"/>
+<circle cx="752" cy="564" r="19" fill="#6F665F" stroke="#E6DDD3" stroke-width="1.5"/>
+<circle cx="806" cy="564" r="19" fill="#D0D4D8" stroke="#E6DDD3" stroke-width="1.5"/>
+<circle cx="374" cy="610" r="19" fill="#979DA3" stroke="#E6DDD3" stroke-width="1.5"/>
+<circle cx="428" cy="610" r="19" fill="#676E76" stroke="#E6DDD3" stroke-width="1.5"/>
+<circle cx="482" cy="610" r="19" fill="#1C1C1C" stroke="#E6DDD3" stroke-width="1.5"/>
+<circle cx="536" cy="610" r="19" fill="#D8D3CC" stroke="#E6DDD3" stroke-width="1.5"/>
+<circle cx="590" cy="610" r="19" fill="#AAA39A" stroke="#E6DDD3" stroke-width="1.5"/>
+<circle cx="644" cy="610" r="19" fill="#7A726A" stroke="#E6DDD3" stroke-width="1.5"/>
+<circle cx="698" cy="610" r="19" fill="#FFFFFF" stroke="#E6DDD3" stroke-width="1.5"/>
+<circle cx="752" cy="610" r="19" fill="#B7BCC3" stroke="#E6DDD3" stroke-width="1.5"/>
+<circle cx="806" cy="610" r="19" fill="#C8A14A" stroke="#E6DDD3" stroke-width="1.5"/>
+<path d="M 545 658 L 577 658 L 561 678 Z" fill="#FFFFFF"/>
+<g filter="url(#sh)"><rect x="170" y="672" width="840" height="108" rx="40" fill="#FFFFFF" stroke="#EBDFD2" stroke-width="2"/></g>
+<circle cx="215" cy="716" r="26" fill="#F29CB4" stroke="#3B3A4E" stroke-width="3.5"/>
+<circle cx="263" cy="716" r="17" fill="#F8EE4A"/>
+<circle cx="303" cy="716" r="17" fill="#D9493C"/>
+<circle cx="343" cy="716" r="17" fill="#2E75C8"/>
+<circle cx="383" cy="716" r="17" fill="#4FA648"/>
+<circle cx="423" cy="716" r="17" fill="#6D4AA2"/>
+<circle cx="463" cy="716" r="17" fill="#7D4F33"/>
+<text x="345" y="760" font-size="15" font-weight="600" fill="#B6A89B" text-anchor="middle">최근 색</text>
+<line x1="505" y1="694" x2="505" y2="748" stroke="#EBDFD2" stroke-width="2"/>
+<rect x="528" y="690" width="66" height="58" rx="16" fill="#FFF0EA" stroke="#FF7A59" stroke-width="2.5"/>
+<rect x="545" y="701" width="15" height="15" rx="3.5" fill="#FF7A59"/>
+<rect x="562" y="701" width="15" height="15" rx="3.5" fill="#FFC740"/>
+<rect x="545" y="718" width="15" height="15" rx="3.5" fill="#36C5C0"/>
+<rect x="562" y="718" width="15" height="15" rx="3.5" fill="#8A6CFF"/>
+<text x="561" y="760" font-size="15" font-weight="700" fill="#FF7A59" text-anchor="middle">색</text>
+<line x1="618" y1="694" x2="618" y2="748" stroke="#EBDFD2" stroke-width="2"/>
+<g fill="#3B3A4E"><circle cx="665" cy="716" r="6"/><circle cx="707" cy="716" r="10"/><circle cx="752" cy="716" r="15"/></g>
+<circle cx="707" cy="716" r="19" fill="none" stroke="#FF6FAF" stroke-width="3"/>
+<text x="708" y="760" font-size="15" font-weight="600" fill="#B6A89B" text-anchor="middle">굵기</text>
+<line x1="800" y1="694" x2="800" y2="748" stroke="#EBDFD2" stroke-width="2"/>
+<g transform="translate(865,714) rotate(-18)"><rect x="-23" y="-17" width="46" height="34" rx="7" fill="#FFFFFF" stroke="#3B3A4E" stroke-width="3"/><path d="M -23 -10 a7 7 0 0 1 7 -7 h32 a7 7 0 0 1 7 7 v7 h-46 Z" fill="#FF9FB5" stroke="#3B3A4E" stroke-width="3" stroke-linejoin="round"/></g>
+<text x="865" y="760" font-size="15" font-weight="600" fill="#B6A89B" text-anchor="middle">지우개</text>
+</svg>
