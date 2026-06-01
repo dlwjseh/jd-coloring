@@ -1,0 +1,164 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1180" height="820" viewBox="0 0 1180 820" font-family="'SF Pro Rounded','Helvetica Neue',sans-serif">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#FFF4EC"/>
+    </linearGradient>
+    <filter id="sh" x="-40%" y="-40%" width="180%" height="180%">
+      <feDropShadow dx="0" dy="7" stdDeviation="11" flood-color="#C9A88C" flood-opacity="0.35"/>
+    </filter>
+    <filter id="shCard" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="6" stdDeviation="12" flood-color="#C9A88C" flood-opacity="0.28"/>
+    </filter>
+    <filter id="shPanel" x="-40%" y="-20%" width="180%" height="140%">
+      <feDropShadow dx="-6" dy="0" stdDeviation="16" flood-color="#C9A88C" flood-opacity="0.30"/>
+    </filter>
+  </defs>
+
+  <rect width="1180" height="820" fill="url(#bg)"/>
+  <circle cx="60" cy="150" r="120" fill="#8A6CFF" opacity="0.10"/>
+  <circle cx="80" cy="720" r="90" fill="#FFC740" opacity="0.10"/>
+
+  <!-- slim top -->
+  <g filter="url(#shCard)">
+    <circle cx="72" cy="62" r="30" fill="#FFFFFF" stroke="#EBDFD2" stroke-width="2"/>
+    <path d="M 82 48 L 64 62 L 82 76" fill="none" stroke="#3B3A4E" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <text x="118" y="71" font-size="22" font-weight="700" fill="#3B3A4E">도안 1</text>
+
+  <!-- 대형 캔버스 -->
+  <g filter="url(#shCard)">
+    <rect x="40" y="116" width="956" height="664" rx="32" fill="#FFFFFF" stroke="#EBDFD2" stroke-width="2"/>
+  </g>
+  <g transform="translate(-396,-130) scale(1.55)">
+    <rect x="583" y="360" width="14" height="188" rx="7" fill="#8FD3A0"/>
+    <g transform="translate(548,476) rotate(-28)"><ellipse cx="0" cy="0" rx="40" ry="21" fill="#8FD3A0"/></g>
+    <circle cx="590" cy="252" r="46" fill="#FFC6DD"/>
+    <circle cx="664" cy="306" r="46" fill="#FFC6DD"/>
+    <circle cx="516" cy="306" r="46" fill="#FFC6DD"/>
+    <circle cx="590" cy="330" r="38" fill="#FFD66B"/>
+    <g fill="none" stroke="#3B3A4E" stroke-width="6" stroke-linejoin="round">
+      <rect x="583" y="360" width="14" height="188" rx="7"/>
+      <g transform="translate(548,476) rotate(-28)"><ellipse cx="0" cy="0" rx="40" ry="21"/></g>
+      <circle cx="590" cy="252" r="46"/>
+      <circle cx="664" cy="306" r="46"/>
+      <circle cx="636" cy="393" r="46"/>
+      <circle cx="544" cy="393" r="46"/>
+      <circle cx="516" cy="306" r="46"/>
+      <circle cx="590" cy="330" r="38"/>
+    </g>
+  </g>
+
+  <!-- 우측 세로 레일 (색 버튼 활성) -->
+  <g filter="url(#sh)">
+    <rect x="1028" y="150" width="110" height="500" rx="46" fill="#FFFFFF" stroke="#EBDFD2" stroke-width="2"/>
+  </g>
+  <circle cx="1083" cy="206" r="27" fill="#F29CB4" stroke="#3B3A4E" stroke-width="3.5"/>
+  <line x1="1048" y1="252" x2="1118" y2="252" stroke="#EBDFD2" stroke-width="2"/>
+  <circle cx="1083" cy="291" r="28" fill="none" stroke="#FF7A59" stroke-width="3"/>
+  <g>
+    <rect x="1067" y="276" width="15" height="15" rx="3.5" fill="#FF7A59"/>
+    <rect x="1084" y="276" width="15" height="15" rx="3.5" fill="#FFC740"/>
+    <rect x="1067" y="293" width="15" height="15" rx="3.5" fill="#36C5C0"/>
+    <rect x="1084" y="293" width="15" height="15" rx="3.5" fill="#8A6CFF"/>
+  </g>
+  <text x="1083" y="334" font-size="15" font-weight="700" fill="#FF7A59" text-anchor="middle">색</text>
+  <line x1="1048" y1="348" x2="1118" y2="348" stroke="#EBDFD2" stroke-width="2"/>
+  <g fill="#3B3A4E">
+    <circle cx="1083" cy="378" r="6"/>
+    <circle cx="1083" cy="416" r="10"/>
+    <circle cx="1083" cy="462" r="15"/>
+  </g>
+  <circle cx="1083" cy="416" r="19" fill="none" stroke="#FF6FAF" stroke-width="3"/>
+  <text x="1083" y="500" font-size="15" font-weight="600" fill="#B6A89B" text-anchor="middle">굵기</text>
+  <line x1="1048" y1="520" x2="1118" y2="520" stroke="#EBDFD2" stroke-width="2"/>
+  <g transform="translate(1083,560) rotate(-18)">
+    <rect x="-23" y="-17" width="46" height="34" rx="7" fill="#FFFFFF" stroke="#3B3A4E" stroke-width="3"/>
+    <path d="M -23 -10 a7 7 0 0 1 7 -7 h32 a7 7 0 0 1 7 7 v7 h-46 Z" fill="#FF9FB5" stroke="#3B3A4E" stroke-width="3" stroke-linejoin="round"/>
+  </g>
+  <text x="1083" y="604" font-size="15" font-weight="600" fill="#B6A89B" text-anchor="middle">지우개</text>
+  <!-- ===== 우측 슬라이드 팔레트 패널 (레일 왼쪽 옆, 캔버스 위 오버레이) ===== -->
+  <g filter="url(#shPanel)"><rect x="632" y="150" width="380" height="478" rx="28" fill="#FFFFFF" stroke="#EBDFD2" stroke-width="2"/></g>
+  <text x="658" y="194" font-size="22" font-weight="800" fill="#3B3A4E">색 고르기</text>
+  <text x="658" y="230" font-size="14" font-weight="600" fill="#B6A89B">최근 색</text>
+  <circle cx="666" cy="254" r="14" fill="#F29CB4"/>
+  <circle cx="706" cy="254" r="14" fill="#FFD66B"/>
+  <circle cx="746" cy="254" r="14" fill="#8FD3A0"/>
+  <circle cx="786" cy="254" r="14" fill="#2E75C8"/>
+  <circle cx="826" cy="254" r="14" fill="#6D4AA2"/>
+  <circle cx="866" cy="254" r="14" fill="#D9493C"/>
+  <!-- 72색 (8행 x 9열) -->
+  <rect x="661.0" y="300.0" width="30" height="30" rx="7" fill="#F6E7B5" stroke="#E6DDD3" stroke-width="1.5"/>
+  <rect x="697.5" y="300.0" width="30" height="30" rx="7" fill="#B98A5A"/>
+  <rect x="734.0" y="300.0" width="30" height="30" rx="7" fill="#F8EE4A"/>
+  <rect x="770.5" y="300.0" width="30" height="30" rx="7" fill="#F5D93A"/>
+  <rect x="807.0" y="300.0" width="30" height="30" rx="7" fill="#E6A13B"/>
+  <rect x="843.5" y="300.0" width="30" height="30" rx="7" fill="#C89A3C"/>
+  <rect x="880.0" y="300.0" width="30" height="30" rx="7" fill="#D97A1F"/>
+  <rect x="916.5" y="300.0" width="30" height="30" rx="7" fill="#C89126"/>
+  <rect x="953.0" y="300.0" width="30" height="30" rx="7" fill="#F5B223"/>
+  <rect x="661.0" y="336.5" width="30" height="30" rx="7" fill="#D7B48A"/>
+  <rect x="697.5" y="336.5" width="30" height="30" rx="7" fill="#F07C1B"/>
+  <rect x="734.0" y="336.5" width="30" height="30" rx="7" fill="#F48D6B"/>
+  <rect x="770.5" y="336.5" width="30" height="30" rx="7" fill="#D9493C"/>
+  <rect x="807.0" y="336.5" width="30" height="30" rx="7" fill="#C6353B"/>
+  <rect x="843.5" y="336.5" width="30" height="30" rx="7" fill="#A8262C"/>
+  <rect x="880.0" y="336.5" width="30" height="30" rx="7" fill="#7F2434"/>
+  <rect x="916.5" y="336.5" width="30" height="30" rx="7" fill="#B53A7A"/>
+  <rect x="953.0" y="336.5" width="30" height="30" rx="7" fill="#E63D56"/>
+  <rect x="661.0" y="373.0" width="30" height="30" rx="7" fill="#6F395F"/>
+  <rect x="697.5" y="373.0" width="30" height="30" rx="7" fill="#F29CB4"/>
+  <rect x="693.5" y="369.0" width="38" height="38" rx="10" fill="none" stroke="#3B3A4E" stroke-width="3.5"/>
+  <rect x="734.0" y="373.0" width="30" height="30" rx="7" fill="#F6C0C4"/>
+  <rect x="770.5" y="373.0" width="30" height="30" rx="7" fill="#F5C9A7"/>
+  <rect x="807.0" y="373.0" width="30" height="30" rx="7" fill="#DCC5AA"/>
+  <rect x="843.5" y="373.0" width="30" height="30" rx="7" fill="#E9AE8D"/>
+  <rect x="880.0" y="373.0" width="30" height="30" rx="7" fill="#4A254E"/>
+  <rect x="916.5" y="373.0" width="30" height="30" rx="7" fill="#7A5DA9"/>
+  <rect x="953.0" y="373.0" width="30" height="30" rx="7" fill="#B9A3D6"/>
+  <rect x="661.0" y="409.5" width="30" height="30" rx="7" fill="#6D4AA2"/>
+  <rect x="697.5" y="409.5" width="30" height="30" rx="7" fill="#56327A"/>
+  <rect x="734.0" y="409.5" width="30" height="30" rx="7" fill="#4C5BB2"/>
+  <rect x="770.5" y="409.5" width="30" height="30" rx="7" fill="#3249A5"/>
+  <rect x="807.0" y="409.5" width="30" height="30" rx="7" fill="#24406B"/>
+  <rect x="843.5" y="409.5" width="30" height="30" rx="7" fill="#2E75C8"/>
+  <rect x="880.0" y="409.5" width="30" height="30" rx="7" fill="#5FA6D7"/>
+  <rect x="916.5" y="409.5" width="30" height="30" rx="7" fill="#006F8A"/>
+  <rect x="953.0" y="409.5" width="30" height="30" rx="7" fill="#A7CDEB"/>
+  <rect x="661.0" y="446.0" width="30" height="30" rx="7" fill="#25365C"/>
+  <rect x="697.5" y="446.0" width="30" height="30" rx="7" fill="#8DD7D6"/>
+  <rect x="734.0" y="446.0" width="30" height="30" rx="7" fill="#3DB9B5"/>
+  <rect x="770.5" y="446.0" width="30" height="30" rx="7" fill="#37A85A"/>
+  <rect x="807.0" y="446.0" width="30" height="30" rx="7" fill="#BFD636"/>
+  <rect x="843.5" y="446.0" width="30" height="30" rx="7" fill="#9CC63B"/>
+  <rect x="880.0" y="446.0" width="30" height="30" rx="7" fill="#6AA83D"/>
+  <rect x="916.5" y="446.0" width="30" height="30" rx="7" fill="#79C86D"/>
+  <rect x="953.0" y="446.0" width="30" height="30" rx="7" fill="#4FA648"/>
+  <rect x="661.0" y="482.5" width="30" height="30" rx="7" fill="#24854B"/>
+  <rect x="697.5" y="482.5" width="30" height="30" rx="7" fill="#34733B"/>
+  <rect x="734.0" y="482.5" width="30" height="30" rx="7" fill="#5D6733"/>
+  <rect x="770.5" y="482.5" width="30" height="30" rx="7" fill="#2C4B31"/>
+  <rect x="807.0" y="482.5" width="30" height="30" rx="7" fill="#4B3428"/>
+  <rect x="843.5" y="482.5" width="30" height="30" rx="7" fill="#2D7464"/>
+  <rect x="880.0" y="482.5" width="30" height="30" rx="7" fill="#C4AE95"/>
+  <rect x="916.5" y="482.5" width="30" height="30" rx="7" fill="#8E6C4D"/>
+  <rect x="953.0" y="482.5" width="30" height="30" rx="7" fill="#A06638"/>
+  <rect x="661.0" y="519.0" width="30" height="30" rx="7" fill="#7D4F33"/>
+  <rect x="697.5" y="519.0" width="30" height="30" rx="7" fill="#A6533D"/>
+  <rect x="734.0" y="519.0" width="30" height="30" rx="7" fill="#5C1F22"/>
+  <rect x="770.5" y="519.0" width="30" height="30" rx="7" fill="#4B3528"/>
+  <rect x="807.0" y="519.0" width="30" height="30" rx="7" fill="#5A3B2A"/>
+  <rect x="843.5" y="519.0" width="30" height="30" rx="7" fill="#D2CCC4"/>
+  <rect x="880.0" y="519.0" width="30" height="30" rx="7" fill="#9E948B"/>
+  <rect x="916.5" y="519.0" width="30" height="30" rx="7" fill="#6F665F"/>
+  <rect x="953.0" y="519.0" width="30" height="30" rx="7" fill="#D0D4D8"/>
+  <rect x="661.0" y="555.5" width="30" height="30" rx="7" fill="#979DA3"/>
+  <rect x="697.5" y="555.5" width="30" height="30" rx="7" fill="#676E76"/>
+  <rect x="734.0" y="555.5" width="30" height="30" rx="7" fill="#1C1C1C"/>
+  <rect x="770.5" y="555.5" width="30" height="30" rx="7" fill="#D8D3CC"/>
+  <rect x="807.0" y="555.5" width="30" height="30" rx="7" fill="#AAA39A"/>
+  <rect x="843.5" y="555.5" width="30" height="30" rx="7" fill="#7A726A"/>
+  <rect x="880.0" y="555.5" width="30" height="30" rx="7" fill="#FFFFFF" stroke="#E6DDD3" stroke-width="1.5"/>
+  <rect x="916.5" y="555.5" width="30" height="30" rx="7" fill="#B7BCC3"/>
+  <rect x="953.0" y="555.5" width="30" height="30" rx="7" fill="#C8A14A"/>
+</svg>

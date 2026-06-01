@@ -1,8 +1,9 @@
 import SwiftUI
 
-/// 72색 펼침 그리드 팝오버 (8행 × 9열). 디자인 `10-palette.svg`.
+/// 72색 펼침 패널 (8행 × 9열) + 최근색 줄. 디자인 `12-canvas-v2-palette.svg`.
 struct ColorPaletteGrid: View {
     var selected: Color
+    var recent: [Color] = []
     var onPick: (Color) -> Void
 
     var body: some View {
@@ -14,6 +15,23 @@ struct ColorPaletteGrid: View {
                 Text("프리즈마컬러 72색 · 탭하면 선택돼요")
                     .font(Theme.rounded(15))
                     .foregroundStyle(Theme.subText)
+            }
+
+            if !recent.isEmpty {
+                VStack(alignment: .leading, spacing: 7) {
+                    Text("최근 색")
+                        .font(Theme.rounded(14, weight: .semibold))
+                        .foregroundStyle(Theme.subText)
+                    HStack(spacing: 10) {
+                        ForEach(Array(recent.prefix(9).enumerated()), id: \.offset) { _, color in
+                            Button { onPick(color) } label: {
+                                Circle().fill(color).frame(width: 30, height: 30)
+                                    .overlay(Circle().stroke(Color(hex: 0xE6DDD3), lineWidth: 1.5))
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                }
             }
 
             VStack(spacing: 10) {

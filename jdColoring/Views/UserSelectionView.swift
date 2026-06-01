@@ -3,6 +3,8 @@ import SwiftData
 
 /// 화면 1 — 사용자 선택
 struct UserSelectionView: View {
+    @Binding var path: [Route]
+
     @Environment(\.modelContext) private var context
     @Query(sort: \Profile.createdAt) private var profiles: [Profile]
 
@@ -20,9 +22,6 @@ struct UserSelectionView: View {
 
     /// 삭제 확인 다이얼로그 대상 (nil = 미표시)
     @State private var pendingDelete: Profile?
-
-    /// 선택해서 갤러리로 진입할 프로필 (nil = 현재 화면)
-    @State private var selected: Profile?
 
     private let editorAnimation: Animation = .spring(response: 0.5, dampingFraction: 0.82)
 
@@ -97,10 +96,6 @@ struct UserSelectionView: View {
             Button("취소", role: .cancel) { }  // 닫힘 시 Binding이 pendingDelete를 nil로 정리
         } message: { _ in
             Text("이 작업은 되돌릴 수 없어요")
-        }
-        // 프로필 선택 → 화면 2(갤러리) 진입
-        .navigationDestination(item: $selected) { profile in
-            GalleryView(profile: profile)
         }
         #if os(iOS)
         .toolbar(.hidden, for: .navigationBar)
@@ -236,11 +231,11 @@ struct UserSelectionView: View {
     }
 
     private func selectProfile(_ profile: Profile) {
-        selected = profile
+        path.append(.gallery(profile))
     }
 }
 
 #Preview {
-    UserSelectionView()
+    UserSelectionView(path: .constant([]))
         .modelContainer(for: Profile.self, inMemory: true)
 }

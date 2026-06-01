@@ -4,6 +4,7 @@ import SwiftData
 /// 화면 2 — 색칠 도안 갤러리. 프로필 선택 후 진입.
 struct GalleryView: View {
     let profile: Profile
+    @Binding var path: [Route]
 
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var context
@@ -15,13 +16,13 @@ struct GalleryView: View {
     @State private var appeared = false
     @State private var isUploadPresented = false
     @State private var pendingDelete: Template?
-    @State private var selectedTemplate: Template?   // 탭 → 색칠 캔버스 진입
 
     private let columns = [GridItem(.adaptive(minimum: 190, maximum: 240), spacing: 44)]
     private let sheetAnimation: Animation = .spring(response: 0.5, dampingFraction: 0.82)
 
-    init(profile: Profile) {
+    init(profile: Profile, path: Binding<[Route]>) {
         self.profile = profile
+        self._path = path
         // 검수 increment4 #3: 전체 작업물을 가져와 거르지 않고, 현재 프로필 것만 fetch.
         let pid = profile.persistentModelID
         _allArtworks = Query(filter: #Predicate<Artwork> { $0.profile?.persistentModelID == pid })
@@ -95,9 +96,6 @@ struct GalleryView: View {
             Button("취소", role: .cancel) { }
         } message: { _ in
             Text("이 도안과 모든 식구의 색칠 작업물이 함께 사라져요. 되돌릴 수 없어요.")
-        }
-        .navigationDestination(item: $selectedTemplate) { template in
-            ColoringCanvasView(profile: profile, template: template)
         }
     }
 
@@ -252,6 +250,6 @@ struct GalleryView: View {
     }
 
     private func openColoring(_ template: Template) {
-        selectedTemplate = template
+        path.append(.coloring(profile, template))
     }
 }

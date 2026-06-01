@@ -1,0 +1,108 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1180" height="820" viewBox="0 0 1180 820" font-family="'SF Pro Rounded','Helvetica Neue',sans-serif">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#FFF4EC"/>
+    </linearGradient>
+    <filter id="sh" x="-40%" y="-40%" width="180%" height="180%">
+      <feDropShadow dx="0" dy="7" stdDeviation="11" flood-color="#C9A88C" flood-opacity="0.35"/>
+    </filter>
+    <filter id="shCard" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="6" stdDeviation="12" flood-color="#C9A88C" flood-opacity="0.28"/>
+    </filter>
+  </defs>
+
+  <rect width="1180" height="820" fill="url(#bg)"/>
+  <circle cx="60" cy="150" r="120" fill="#8A6CFF" opacity="0.10"/>
+  <circle cx="1150" cy="120" r="120" fill="#36C5C0" opacity="0.10"/>
+  <circle cx="80" cy="720" r="90" fill="#FFC740" opacity="0.10"/>
+
+  <!-- ===== slim top: 뒤로가기 + (작은) 도안명만 ===== -->
+  <g filter="url(#shCard)">
+    <circle cx="72" cy="62" r="30" fill="#FFFFFF" stroke="#EBDFD2" stroke-width="2"/>
+    <path d="M 82 48 L 64 62 L 82 76" fill="none" stroke="#3B3A4E" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <text x="118" y="71" font-size="22" font-weight="700" fill="#3B3A4E">도안 1</text>
+
+  <!-- 자동 저장 안심 토스트(작게, 잠깐 떴다 사라짐) -->
+  <g opacity="0.95">
+    <rect x="500" y="42" width="116" height="36" rx="18" fill="#E0F6E9"/>
+    <path d="M 524 60 l 7 7 l 13 -15" fill="none" stroke="#3FA86B" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="582" y="66" font-size="17" font-weight="700" fill="#3FA86B" text-anchor="middle">저장됨</text>
+  </g>
+
+  <!-- ===== 좌측: 대형 캔버스 (우측 레일 뺀 나머지 전체) ===== -->
+  <g filter="url(#shCard)">
+    <rect x="40" y="116" width="956" height="664" rx="32" fill="#FFFFFF" stroke="#EBDFD2" stroke-width="2"/>
+  </g>
+
+  <!-- 도안(라인아트) + 색칠 : 1.55배로 크게. 영역 가두기로 선 안쪽만 깔끔히 채워짐 -->
+  <g transform="translate(-396,-130) scale(1.55)">
+    <!-- 색칠 레이어 (선 안쪽에만, 번짐 없음) -->
+    <rect x="583" y="360" width="14" height="188" rx="7" fill="#8FD3A0"/>
+    <g transform="translate(548,476) rotate(-28)"><ellipse cx="0" cy="0" rx="40" ry="21" fill="#8FD3A0"/></g>
+    <circle cx="590" cy="252" r="46" fill="#FFC6DD"/>
+    <circle cx="664" cy="306" r="46" fill="#FFC6DD"/>
+    <circle cx="516" cy="306" r="46" fill="#FFC6DD"/>
+    <circle cx="590" cy="330" r="38" fill="#FFD66B"/>
+
+    <!-- 라인아트 오버레이 (항상 위에 보이는 검은 선) -->
+    <g fill="none" stroke="#3B3A4E" stroke-width="6" stroke-linejoin="round">
+      <rect x="583" y="360" width="14" height="188" rx="7"/>
+      <g transform="translate(548,476) rotate(-28)"><ellipse cx="0" cy="0" rx="40" ry="21"/></g>
+      <circle cx="590" cy="252" r="46"/>
+      <circle cx="664" cy="306" r="46"/>
+      <circle cx="636" cy="393" r="46"/>
+      <circle cx="544" cy="393" r="46"/>
+      <circle cx="516" cy="306" r="46"/>
+      <circle cx="590" cy="330" r="38"/>
+    </g>
+
+    <!-- Apple Pencil 커서 힌트 (아직 안 칠한 꽃잎을 가리킴) -->
+    <g transform="translate(636,393) rotate(38)">
+      <g transform="translate(0,70)">
+        <rect x="-7" y="0" width="14" height="92" rx="7" fill="#FFFFFF" stroke="#3B3A4E" stroke-width="3"/>
+        <path d="M -7 0 L 0 -16 L 7 0 Z" fill="#FF6FAF" stroke="#3B3A4E" stroke-width="3" stroke-linejoin="round"/>
+      </g>
+    </g>
+  </g>
+
+  <!-- ===== 우측: 세로 툴 레일 (핵심 도구만) ===== -->
+  <g filter="url(#sh)">
+    <rect x="1028" y="150" width="110" height="500" rx="46" fill="#FFFFFF" stroke="#EBDFD2" stroke-width="2"/>
+  </g>
+
+  <!-- 1) 현재 색 (크게 + 진한 잉크 링) -->
+  <circle cx="1083" cy="206" r="27" fill="#F29CB4" stroke="#3B3A4E" stroke-width="3.5"/>
+
+  <line x1="1048" y1="252" x2="1118" y2="252" stroke="#EBDFD2" stroke-width="2"/>
+
+  <!-- 2) '색' 버튼 (2×2 팔레트 아이콘 → 우측 팔레트 패널 펼치기) -->
+  <g>
+    <rect x="1067" y="276" width="15" height="15" rx="3.5" fill="#FF7A59"/>
+    <rect x="1084" y="276" width="15" height="15" rx="3.5" fill="#FFC740"/>
+    <rect x="1067" y="293" width="15" height="15" rx="3.5" fill="#36C5C0"/>
+    <rect x="1084" y="293" width="15" height="15" rx="3.5" fill="#8A6CFF"/>
+  </g>
+  <text x="1083" y="328" font-size="15" font-weight="700" fill="#7A6E64" text-anchor="middle">색</text>
+
+  <line x1="1048" y1="348" x2="1118" y2="348" stroke="#EBDFD2" stroke-width="2"/>
+
+  <!-- 3) 브러시 굵기 (세로 3단, 가운데 선택) -->
+  <g fill="#3B3A4E">
+    <circle cx="1083" cy="378" r="6"/>
+    <circle cx="1083" cy="416" r="10"/>
+    <circle cx="1083" cy="462" r="15"/>
+  </g>
+  <circle cx="1083" cy="416" r="19" fill="none" stroke="#FF6FAF" stroke-width="3"/>
+  <text x="1083" y="500" font-size="15" font-weight="600" fill="#B6A89B" text-anchor="middle">굵기</text>
+
+  <line x1="1048" y1="520" x2="1118" y2="520" stroke="#EBDFD2" stroke-width="2"/>
+
+  <!-- 4) 지우개 -->
+  <g transform="translate(1083,560) rotate(-18)">
+    <rect x="-23" y="-17" width="46" height="34" rx="7" fill="#FFFFFF" stroke="#3B3A4E" stroke-width="3"/>
+    <path d="M -23 -10 a7 7 0 0 1 7 -7 h32 a7 7 0 0 1 7 7 v7 h-46 Z" fill="#FF9FB5" stroke="#3B3A4E" stroke-width="3" stroke-linejoin="round"/>
+  </g>
+  <text x="1083" y="604" font-size="15" font-weight="600" fill="#B6A89B" text-anchor="middle">지우개</text>
+</svg>

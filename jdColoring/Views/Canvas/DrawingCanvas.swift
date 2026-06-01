@@ -1,26 +1,12 @@
 import SwiftUI
-#if os(iOS)
-import PencilKit
-import UIKit
-#elseif os(macOS)
-import AppKit
-#endif
 
 /// 화면 이탈 시 즉시 저장(flush)을 트리거하기 위한 핸들.
 final class CanvasSaver {
     var flush: () -> Void = {}
 }
 
-/// macOS 폴백 캔버스의 스트로크(벡터). progressData에 JSON으로 직렬화.
-struct BrushStroke: Codable {
-    var pts: [CGPoint]
-    var r: Double, g: Double, b: Double
-    var w: Double
-    var erase: Bool
-}
-
-/// 플랫폼 드로잉 표면. iOS=PencilKit, macOS=Canvas 브러시 폴백.
-/// 같은 인터페이스: 초기 데이터 / 라인아트(썸네일 합성용) / 도구 / 저장 콜백.
+/// 채색 표면. iPad·Mac 공용 — 라인아트를 칸으로 분할해 브러시가 검은 선을
+/// 넘지 못하게 가두는 래스터 엔진(`RegionPaintEngine`)을 SwiftUI `Canvas`로 표시한다.
 struct DrawingCanvas: View {
     let initialData: Data?
     let lineart: PlatformImage?
@@ -30,16 +16,40 @@ struct DrawingCanvas: View {
     let saver: CanvasSaver
     var onPersist: (_ progressData: Data, _ thumbnail: Data) -> Void
 
+    @State private var engine = RegionPaintEngine()
+
     var body: some View {
-        #if os(iOS)
-        PencilCanvasRep(initialData: initialData, lineart: lineart,
-                        color: color, lineWidth: lineWidth, isEraser: isEraser,
-                        saver: saver, onPersist: onPersist)
-        #else
-        FallbackBrushCanvas(initialData: initialData, lineart: lineart,
-                            color: color, lineWidth: lineWidth, isEraser: isEraser,
-                            saver: saver, onPersist: onPersist)
-        #endif
+        GeometryReader { geo in
+            Canvas { ctx, size in
+                if let cg = engine.displayImage {
+                    ctx.draw(Image(decorative: cg, scale: 1),
+                             in: CGRect(origin: .zero, size: size))
+                }
+            }
+            .contentShape(Rectangle())
+            .gesture(
+                DragGesture(minimumDistance: 0)
+                    .onChanged { v in engine.strokeChanged(at: v.location, viewSize: geo.size) }
+                    .onEnded { _ in engine.strokeEnded() }
+            )
+            .onAppear {
+                engine.color = color
+                engine.brushPointWidth = lineWidth
+                engine.isEraser = isEraser
+                engine.configure(lineart: lineart, initialData: initialData, onPersist: onPersist)
+                saver.flush = { engine.flush() }
+            }
+            // 부모가 라인아트를 늦게 디코딩하면(onAppear 시 nil) 준비가 안 되므로,
+            // 라인아트가 채워지는 시점에 다시 구성한다.
+            .onChange(of: lineart == nil) { _, isNil in
+                if !isNil {
+                    engine.configure(lineart: lineart, initialData: initialData, onPersist: onPersist)
+                }
+            }
+            .onChange(of: color) { _, c in engine.color = c }
+            .onChange(of: lineWidth) { _, w in engine.brushPointWidth = w }
+            .onChange(of: isEraser) { _, e in engine.isEraser = e }
+        }
     }
 }
 
@@ -65,6 +75,9 @@ enum CanvasThumb {
 
         let renderer = ImageRenderer(content: content)
         renderer.scale = 2
+        // 배경이 흰색으로 항상 불투명 → 알파 채널 제거. JPEG 저장 시 ImageIO 경고를
+        // 막고, 디코딩 시 메모리가 2배로 드는 것을 피한다.
+        renderer.isOpaque = true
         #if os(iOS)
         return renderer.uiImage?.jpegData(compressionQuality: 0.85)
         #else
@@ -87,158 +100,3 @@ extension Image {
         #endif
     }
 }
-
-// MARK: - iOS: PencilKit
-
-#if os(iOS)
-struct PencilCanvasRep: UIViewRepresentable {
-    let initialData: Data?
-    let lineart: PlatformImage?
-    var color: Color
-    var lineWidth: CGFloat
-    var isEraser: Bool
-    let saver: CanvasSaver
-    var onPersist: (Data, Data) -> Void
-
-    func makeUIView(context: Context) -> PKCanvasView {
-        let cv = PKCanvasView()
-        cv.backgroundColor = .clear
-        cv.isOpaque = false
-        cv.drawingPolicy = .anyInput   // 펜 + 손가락 모두 허용
-        if let d = initialData, let drawing = try? PKDrawing(data: d) {
-            cv.drawing = drawing
-        }
-        cv.delegate = context.coordinator
-        context.coordinator.canvas = cv
-        context.coordinator.lineart = lineart
-        context.coordinator.onPersist = onPersist
-        saver.flush = { context.coordinator.save() }
-        apply(cv)
-        return cv
-    }
-
-    func updateUIView(_ cv: PKCanvasView, context: Context) {
-        context.coordinator.lineart = lineart
-        context.coordinator.onPersist = onPersist
-        apply(cv)
-    }
-
-    private func apply(_ cv: PKCanvasView) {
-        cv.tool = isEraser ? PKEraserTool(.bitmap)
-                           : PKInkingTool(.pen, color: UIColor(color), width: lineWidth)
-    }
-
-    func makeCoordinator() -> Coordinator { Coordinator() }
-
-    final class Coordinator: NSObject, PKCanvasViewDelegate {
-        weak var canvas: PKCanvasView?
-        var lineart: PlatformImage?
-        var onPersist: ((Data, Data) -> Void)?
-        private var pending: DispatchWorkItem?
-
-        func canvasViewDrawingDidChange(_ canvasView: PKCanvasView) {
-            pending?.cancel()
-            let work = DispatchWorkItem { [weak self] in self?.save() }
-            pending = work
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0, execute: work)
-        }
-
-        @MainActor func save() {
-            pending?.cancel()
-            guard let cv = canvas, let onPersist else { return }
-            let bounds = cv.bounds
-            guard bounds.width > 1, bounds.height > 1, !cv.drawing.strokes.isEmpty else { return }
-            let data = cv.drawing.dataRepresentation()
-            let drawImg = cv.drawing.image(from: bounds, scale: 1)
-            let base = Image(uiImage: drawImg).resizable()
-            guard let thumb = CanvasThumb.render(base: base, lineart: lineart, aspect: bounds.size) else { return }
-            onPersist(data, thumb)
-        }
-    }
-}
-#endif
-
-// MARK: - macOS: Canvas 브러시 폴백 (검증·Mac 사용용)
-
-#if os(macOS)
-struct FallbackBrushCanvas: View {
-    let initialData: Data?
-    let lineart: PlatformImage?
-    var color: Color
-    var lineWidth: CGFloat
-    var isEraser: Bool
-    let saver: CanvasSaver
-    var onPersist: (Data, Data) -> Void
-
-    @State private var strokes: [BrushStroke] = []
-    @State private var current: [CGPoint] = []
-    @State private var canvasSize: CGSize = .zero
-    @State private var pending: DispatchWorkItem?
-
-    var body: some View {
-        GeometryReader { geo in
-            Canvas { ctx, size in
-                draw(strokes, in: &ctx)
-                if !current.isEmpty {
-                    draw([stroke(from: current)], in: &ctx)
-                }
-            }
-            .contentShape(Rectangle())
-            .gesture(
-                DragGesture(minimumDistance: 0)
-                    .onChanged { v in current.append(v.location) }
-                    .onEnded { _ in
-                        if !current.isEmpty { strokes.append(stroke(from: current)); current = [] }
-                        scheduleSave()
-                    }
-            )
-            .onAppear {
-                canvasSize = geo.size
-                if let d = initialData, let s = try? JSONDecoder().decode([BrushStroke].self, from: d) {
-                    strokes = s
-                }
-                saver.flush = { save() }
-            }
-            .onChange(of: geo.size) { _, s in canvasSize = s }
-        }
-    }
-
-    private func stroke(from pts: [CGPoint]) -> BrushStroke {
-        let c = NSColor(color).usingColorSpace(.sRGB) ?? .black
-        return BrushStroke(pts: pts,
-                           r: Double(c.redComponent), g: Double(c.greenComponent), b: Double(c.blueComponent),
-                           w: Double(lineWidth), erase: isEraser)
-    }
-
-    private func draw(_ list: [BrushStroke], in ctx: inout GraphicsContext) {
-        for s in list {
-            guard s.pts.count > 0 else { continue }
-            var path = Path()
-            path.addLines(s.pts)
-            if s.pts.count == 1, let p = s.pts.first {
-                path.addEllipse(in: CGRect(x: p.x - s.w/2, y: p.y - s.w/2, width: s.w, height: s.w))
-            }
-            let paint = s.erase ? Color.white : Color(.sRGB, red: s.r, green: s.g, blue: s.b)
-            ctx.stroke(path, with: .color(paint),
-                       style: StrokeStyle(lineWidth: s.w, lineCap: .round, lineJoin: .round))
-        }
-    }
-
-    private func scheduleSave() {
-        pending?.cancel()
-        let work = DispatchWorkItem { save() }
-        pending = work
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0, execute: work)
-    }
-
-    @MainActor private func save() {
-        pending?.cancel()
-        guard !strokes.isEmpty, canvasSize.width > 1, canvasSize.height > 1 else { return }
-        guard let data = try? JSONEncoder().encode(strokes) else { return }
-        let snapshot = strokes
-        let base = Canvas { ctx, _ in self.draw(snapshot, in: &ctx) }
-        guard let thumb = CanvasThumb.render(base: base, lineart: lineart, aspect: canvasSize) else { return }
-        onPersist(data, thumb)
-    }
-}
-#endif
