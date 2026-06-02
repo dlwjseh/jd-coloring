@@ -8,12 +8,17 @@ struct GalleryView: View {
 
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var context
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     @Query(sort: \Template.createdAt) private var templates: [Template]
     @Query private var allArtworks: [Artwork]
 
-    /// 진입 stagger 트리거
+    /// 진입 연출 트리거(G1 §12): 프로필이 흩어진 뒤 카드가 밑에서 우수수 올라온다.
     @State private var appeared = false
+    /// 뒤로가기 연출(진입의 역): 타이틀 위로 + 카드·버튼 아래로 빠진 뒤 pop.
+    @State private var exiting = false
+    /// 빠짐→pop 동기화 작업(취소 가능 — dangling dismiss 방지).
+    @State private var exitTask: Task<Void, Never>?
     @State private var isUploadPresented = false
     @State private var pendingDelete: Template?
 
@@ -46,13 +51,21 @@ struct GalleryView: View {
             VStack(spacing: 0) {
                 topBar
                     .padding(.top, 30)
-                    .opacity(isUploadPresented ? 0 : 1)
+                    .opacity(isUploadPresented ? 0 : (appeared ? 1 : 0))    // 진입 시 위에서 내려오며 등장
+                    .offset(y: (appeared || reduceMotion) ? 0 : -30)
+                    .animation(.spring(response: 0.5, dampingFraction: 0.85), value: appeared)
+                    .opacity(exiting ? 0 : 1)                                // 뒤로가기 시 위로 빠짐
+                    .offset(y: (exiting && !reduceMotion) ? -40 : 0)
 
-                if templates.isEmpty {
-                    emptyState
-                } else {
-                    grid
+                Group {
+                    if templates.isEmpty {
+                        emptyState
+                    } else {
+                        grid
+                    }
                 }
+                .opacity(exiting ? 0 : 1)        // 뒤로가기 시 카드가 아래로 빠짐
+                .offset(y: (exiting && !reduceMotion) ? 80 : 0)
             }
 
             // 우하단 추가 버튼
@@ -63,7 +76,11 @@ struct GalleryView: View {
                     AddButton(caption: "도안 추가", action: presentUpload)
                         .padding(.trailing, 40)
                         .padding(.bottom, 32)
-                        .opacity(isUploadPresented ? 0 : 1)
+                        .opacity(isUploadPresented ? 0 : (appeared ? 1 : 0))   // 진입 시 밑에서 올라옴
+                        .offset(y: (appeared || reduceMotion) ? 0 : 90)
+                        .animation(.spring(response: 0.5, dampingFraction: 0.82).delay(0.12), value: appeared)
+                        .opacity(exiting ? 0 : 1)                              // 뒤로가기 시 아래로 빠짐
+                        .offset(y: (exiting && !reduceMotion) ? 120 : 0)
                 }
             }
 
@@ -79,6 +96,7 @@ struct GalleryView: View {
             appeared = false
             Task { @MainActor in appeared = true }
         }
+        .onDisappear { exitTask?.cancel() }   // 외부 요인 pop 시 늦은 dismiss 취소
         .navigationBarBackButtonHidden(true)
         #if os(iOS)
         .toolbar(.hidden, for: .navigationBar)
@@ -121,7 +139,7 @@ struct GalleryView: View {
     }
 
     private var backButton: some View {
-        Button(action: { dismiss() }) {
+        Button(action: goBack) {
             Image(systemName: "chevron.left")
                 .font(.system(size: 24, weight: .bold))
                 .foregroundStyle(Theme.ink)
@@ -237,6 +255,21 @@ struct GalleryView: View {
     }
 
     // MARK: - Actions
+
+    /// 프로필로 복귀(진입의 역): 갤러리 요소가 빠진 뒤 가로 슬라이드 없이 pop.
+    /// pop 후 프로필 화면이 흩어졌던 요소를 제자리로 되돌리며 등장(전환 대칭, §12).
+    private func goBack() {
+        guard !exiting else { return }              // 뒤로가기 연타 가드
+        let dur = reduceMotion ? 0.18 : 0.30
+        withAnimation(.easeIn(duration: dur)) { exiting = true }
+        exitTask = Task { @MainActor in
+            try? await Task.sleep(for: .seconds(dur))
+            guard !Task.isCancelled else { return }  // 도중 다른 내비게이션 → 늦은 dismiss 방지
+            var t = Transaction()
+            t.disablesAnimations = true
+            withTransaction(t) { dismiss() }
+        }
+    }
 
     private func presentUpload() { withAnimation(sheetAnimation) { isUploadPresented = true } }
     private func dismissUpload() { withAnimation(sheetAnimation) { isUploadPresented = false } }

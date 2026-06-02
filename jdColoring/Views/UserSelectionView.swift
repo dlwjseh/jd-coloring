@@ -6,10 +6,17 @@ struct UserSelectionView: View {
     @Binding var path: [Route]
 
     @Environment(\.modelContext) private var context
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Query(sort: \Profile.createdAt) private var profiles: [Profile]
 
     /// A1 진입 애니메이션 트리거
     @State private var appeared = false
+    /// 갤러리 진입 직전 프로필 흩어짐(G1, §12). 흩어진 뒤 갤러리로 넘어간다.
+    @State private var leaving = false
+    /// 전환 진행 중 가드(연타·재진입 방지). 복귀 시 onAppear에서 해제.
+    @State private var transitioning = false
+    /// 흩어짐→push 동기화 작업(취소 가능 — dangling 방지).
+    @State private var leaveTask: Task<Void, Never>?
 
     // 편집기(추가/수정) 상태
     @State private var isEditorPresented = false
@@ -25,6 +32,9 @@ struct UserSelectionView: View {
 
     private let editorAnimation: Animation = .spring(response: 0.5, dampingFraction: 0.82)
 
+    /// 프로필이 흩어져(좌·우로 밀려 사라짐) 보여야 하는 상태: 편집 진입 또는 갤러리 진입.
+    private var scattered: Bool { isEditorPresented || leaving }
+
     var body: some View {
         ZStack {
             Theme.bgGradient.ignoresSafeArea()
@@ -34,13 +44,15 @@ struct UserSelectionView: View {
             VStack(spacing: 0) {
                 header
                     .padding(.top, 60)
-                    .opacity(isEditorPresented ? 0 : 1)
+                    .opacity(scattered ? 0 : 1)
+                    .offset(y: (leaving && !reduceMotion) ? -260 : 0)   // G1: 갤러리 진입 시 위로 빠짐
                 Spacer(minLength: 0)
                 profileRow
                 Spacer(minLength: 0)
                 dragHint
                     .padding(.bottom, 44)
-                    .opacity(isEditorPresented ? 0 : 1)
+                    .opacity(scattered ? 0 : 1)
+                    .offset(y: (leaving && !reduceMotion) ? 140 : 0)
             }
 
             // 우하단 추가 버튼
@@ -51,7 +63,8 @@ struct UserSelectionView: View {
                     AddButton(action: presentAdd)
                         .padding(.trailing, 40)
                         .padding(.bottom, 32)
-                        .opacity(isEditorPresented ? 0 : 1)
+                        .opacity(scattered ? 0 : 1)
+                        .offset(y: (leaving && !reduceMotion) ? 260 : 0)   // G1: 아래로 화면 밖 빠짐
                 }
             }
 
@@ -76,11 +89,22 @@ struct UserSelectionView: View {
             }
         )
         .onAppear {
-            appeared = false
-            Task { @MainActor in
-                appeared = true
-                // 첫 실행(등록된 사용자 0명) → 곧바로 추가 화면
-                if profiles.isEmpty { presentAdd() }
+            transitioning = false       // 복귀 → 다시 진입 가능
+            if leaving {
+                // 갤러리에서 복귀(G1 §12): 흩어졌던 프로필·타이틀·버튼이 제자리로 되돌아온다
+                // (정방향 흩어짐의 역, 같은 spring 톤). A1은 재생하지 않는다.
+                let anim: Animation = reduceMotion
+                    ? .easeOut(duration: 0.18)
+                    : .spring(response: 0.5, dampingFraction: 0.85)
+                withAnimation(anim) { leaving = false }
+            } else {
+                // 최초 진입 → A1 순차 등장
+                appeared = false
+                Task { @MainActor in
+                    appeared = true
+                    // 첫 실행(등록된 사용자 0명) → 곧바로 추가 화면
+                    if profiles.isEmpty { presentAdd() }
+                }
             }
         }
         // 삭제 확인 다이얼로그
@@ -122,9 +146,9 @@ struct UserSelectionView: View {
                     ProfileCircleView(profile: profile, diameter: 190)
                         // A1: 오른쪽 바깥 → 제자리, index 기반 stagger
                         .staggeredEntrance(index: index, visible: appeared)
-                        // A2: 편집 진입 시 좌·우로 흩어짐
-                        .offset(x: isEditorPresented ? scatterOffset(index: index) : 0)
-                        .opacity(isEditorPresented ? 0 : 1)
+                        // A2(편집) / G1(갤러리 진입): 좌·우로 흩어지며 사라짐 (동작 줄이기 시 페이드만)
+                        .offset(x: (scattered && !reduceMotion) ? scatterOffset(index: index) : 0)
+                        .opacity(scattered ? 0 : 1)
                         .onTapGesture { selectProfile(profile) }
                         // iPad: 롱프레스 / Mac: 우클릭(컨트롤+클릭) → 수정·삭제
                         .contextMenu {
@@ -231,7 +255,20 @@ struct UserSelectionView: View {
     }
 
     private func selectProfile(_ profile: Profile) {
-        path.append(.gallery(profile))
+        // G1(§12): ① 프로필이 좌·우로 흩어져 사라진 뒤 → ② 갤러리 카드가 밑에서 올라온다.
+        // 화면 전환 자체는 애니메이션 없이(가로 슬라이드 방지) 넘긴다. 두 화면이 같은
+        // 크림 배경을 공유하므로 즉시 전환이 눈에 띄지 않고 흩어짐→카드 등장이 매끄럽게 이어진다.
+        guard !transitioning else { return }        // 연타/재진입 가드
+        transitioning = true
+        let dur = reduceMotion ? 0.18 : 0.30
+        withAnimation(.easeIn(duration: dur)) { leaving = true }
+        leaveTask = Task { @MainActor in
+            try? await Task.sleep(for: .seconds(dur))
+            guard !Task.isCancelled else { return }
+            var t = Transaction()
+            t.disablesAnimations = true
+            withTransaction(t) { path.append(.gallery(profile)) }
+        }
     }
 }
 

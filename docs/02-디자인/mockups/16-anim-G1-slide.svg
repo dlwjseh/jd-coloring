@@ -1,0 +1,112 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1240" height="700" viewBox="0 0 1240 700" font-family="-apple-system, 'SF Pro Rounded', system-ui, sans-serif">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFF7EF"/>
+      <stop offset="1" stop-color="#FDEFE2"/>
+    </linearGradient>
+    <filter id="soft" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="3" stdDeviation="5" flood-color="#C9A98C" flood-opacity="0.35"/>
+    </filter>
+    <marker id="ar" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto">
+      <path d="M0 0 L7 3 L0 6 Z" fill="#C9A98C"/>
+    </marker>
+  </defs>
+
+  <rect width="1240" height="700" fill="#FBF3EA"/>
+  <text x="40" y="46" font-size="26" font-weight="800" fill="#4A3B30">G1. 프로필 ↔ 도안 목록 전환 (흩어짐 + 밑에서 올라옴)</text>
+  <text x="40" y="74" font-size="15" font-weight="600" fill="#9A8676">화면 전환은 무애니(같은 배경 공유) · 연출은 양쪽 콘텐츠가 담당 · 정/역 대칭</text>
+
+  <!-- ===== Frame 1: 프로필 화면 빠짐 ===== -->
+  <g transform="translate(40,98)">
+    <rect width="360" height="320" rx="22" fill="url(#bg)" stroke="#EBD9C8" stroke-width="2"/>
+    <text x="180" y="32" font-size="14" font-weight="700" fill="#9A8676" text-anchor="middle">① 프로필 화면 — 요소 빠짐</text>
+
+    <!-- title flying up -->
+    <text x="180" y="74" font-size="16" font-weight="800" fill="#C9B3A1" text-anchor="middle" opacity="0.6">오늘은 누가 색칠할까요?</text>
+    <path d="M180 92 V64" stroke="#D98C6A" stroke-width="2.5" marker-end="url(#ar)"/>
+    <text x="214" y="86" font-size="11" fill="#D98C6A" font-weight="700">위로</text>
+
+    <!-- profiles scattering L/R -->
+    <circle cx="38" cy="175" r="30" fill="#F3B6C2" opacity="0.45"/>
+    <circle cx="120" cy="175" r="34" fill="#7FB2E6" opacity="0.8"/>
+    <circle cx="240" cy="175" r="34" fill="#9FD8A0" opacity="0.8"/>
+    <circle cx="322" cy="175" r="30" fill="#E6C66A" opacity="0.45"/>
+    <path d="M150 230 H40" stroke="#7E9B6B" stroke-width="2" marker-end="url(#ar)"/>
+    <path d="M210 230 H320" stroke="#7E9B6B" stroke-width="2" marker-end="url(#ar)"/>
+    <text x="180" y="248" font-size="11" fill="#7E9B6B" font-weight="700" text-anchor="middle">좌·우로 흩어짐</text>
+
+    <!-- add button flying down -->
+    <circle cx="300" cy="280" r="22" fill="#FF7A59" opacity="0.5"/>
+    <path d="M300 256 V286" stroke="#D98C6A" stroke-width="2.5" marker-end="url(#ar)"/>
+    <text x="266" y="276" font-size="11" fill="#D98C6A" font-weight="700" text-anchor="end">아래로</text>
+  </g>
+
+  <text x="420" y="262" font-size="13" fill="#9A8676" text-anchor="middle">무애니</text>
+  <path d="M408 270 H452" stroke="#C9A98C" stroke-width="3" marker-end="url(#ar)"/>
+  <text x="430" y="248" font-size="11" fill="#9A8676" text-anchor="middle">push</text>
+
+  <!-- ===== Frame 2: 갤러리 등장 ===== -->
+  <g transform="translate(470,98)">
+    <rect width="360" height="320" rx="22" fill="url(#bg)" stroke="#EBD9C8" stroke-width="2"/>
+    <text x="180" y="32" font-size="14" font-weight="700" fill="#9A8676" text-anchor="middle">② 갤러리 — 요소 등장</text>
+
+    <!-- title coming down from top -->
+    <text x="180" y="66" font-size="16" font-weight="800" fill="#4A3B30" text-anchor="middle">무엇을 색칠해볼까요?</text>
+    <path d="M180 44 V72" stroke="#3DA17A" stroke-width="2.5" marker-end="url(#ar)"/>
+    <text x="214" y="56" font-size="11" fill="#3DA17A" font-weight="700">내려옴</text>
+
+    <!-- cards rising from below (stagger) -->
+    <g>
+      <rect x="40" y="120" width="80" height="80" rx="14" fill="#FFF" stroke="#EBD9C8" stroke-width="2" filter="url(#soft)"/>
+      <rect x="140" y="132" width="80" height="80" rx="14" fill="#FFF" stroke="#EBD9C8" stroke-width="2" filter="url(#soft)" opacity="0.85"/>
+      <rect x="240" y="146" width="80" height="80" rx="14" fill="#FFF" stroke="#EBD9C8" stroke-width="2" filter="url(#soft)" opacity="0.7"/>
+    </g>
+    <path d="M80 250 V206" stroke="#3DA17A" stroke-width="2.5" marker-end="url(#ar)"/>
+    <path d="M180 262 V218" stroke="#3DA17A" stroke-width="2.5" marker-end="url(#ar)"/>
+    <path d="M280 274 V230" stroke="#3DA17A" stroke-width="2.5" marker-end="url(#ar)"/>
+    <text x="180" y="290" font-size="11" fill="#3DA17A" font-weight="700" text-anchor="middle">밑에서 우수수 (stagger)</text>
+
+    <!-- add button rising -->
+    <circle cx="300" cy="280" r="22" fill="#FF7A59"/>
+    <path d="M300 300 V286" stroke="#3DA17A" stroke-width="2.5" marker-end="url(#ar)"/>
+  </g>
+
+  <!-- ===== Reverse note ===== -->
+  <g transform="translate(870,98)">
+    <rect width="330" height="320" rx="22" fill="#FFFFFF" stroke="#EBD9C8" stroke-width="2"/>
+    <text x="22" y="34" font-size="15" font-weight="800" fill="#4A3B30">역방향 (대칭)</text>
+    <text x="22" y="64" font-size="12.5" fill="#5C5048">갤러리 → 프로필 '뒤로':</text>
+    <text x="22" y="88" font-size="12.5" fill="#5C5048">① 갤러리 빠짐 — 타이틀 위로,</text>
+    <text x="22" y="106" font-size="12.5" fill="#5C5048">   카드·버튼 아래로 (진입의 역)</text>
+    <text x="22" y="130" font-size="12.5" fill="#5C5048">② 프로필 복귀 — 흩어졌던 것이</text>
+    <text x="22" y="148" font-size="12.5" fill="#5C5048">   제자리로 (흩어짐의 역, 같은 spring)</text>
+    <text x="22" y="166" font-size="12.5" fill="#5C5048">   A1(오른쪽 슬라이드)는 미재생</text>
+
+    <line x1="22" y1="186" x2="308" y2="186" stroke="#EBD9C8" stroke-width="1.5"/>
+    <text x="22" y="210" font-size="13" font-weight="700" fill="#6B5A4B">타이밍</text>
+    <text x="22" y="232" font-size="12.5" fill="#5C5048">빠짐 easeIn 0.30s → push/pop →</text>
+    <text x="22" y="250" font-size="12.5" fill="#5C5048">등장 spring(0.5/0.85), 카드 0.04s stagger</text>
+
+    <text x="22" y="282" font-size="13" font-weight="700" fill="#6B5A4B">접근성</text>
+    <text x="22" y="304" font-size="12.5" fill="#5C5048">Reduce Motion: 이동·stagger 생략, 페이드만</text>
+  </g>
+
+  <!-- reverse arrow across bottom -->
+  <g transform="translate(40,442)">
+    <path d="M790 0 H6" stroke="#B7C7A8" stroke-width="2.5" stroke-dasharray="7 6" marker-end="url(#ar)"/>
+    <text x="400" y="-8" font-size="13" font-weight="700" fill="#7E9B6B" text-anchor="middle">뒤로가기 — 위 흐름의 정확한 역재생</text>
+  </g>
+
+  <!-- ===== Robustness panel ===== -->
+  <g transform="translate(40,470)">
+    <rect width="1160" height="190" rx="16" fill="#FFFFFF" stroke="#EBD9C8" stroke-width="2"/>
+    <text x="22" y="32" font-size="15" font-weight="800" fill="#4A3B30">구현 견고성 (개발평가자 검수 반영)</text>
+
+    <text x="22" y="62" font-size="12.5" fill="#5C5048">• 화면 전환은 Transaction.disablesAnimations로 무애니 push/pop — 가로 슬라이드 제거(연출은 콘텐츠가 담당)</text>
+    <text x="22" y="86" font-size="12.5" fill="#5C5048">• stagger는 타이머 금지 → .animation(...).delay(index*0.04), 14개에서 포화</text>
+    <text x="22" y="110" font-size="12.5" fill="#5C5048">• 전환 지연은 취소 가능한 Task.sleep(asyncAfter 금지) — duration 단일 상수로 통합</text>
+    <text x="22" y="134" font-size="12.5" fill="#5C5048">• 연타/재진입 가드: transitioning(프로필) · guard !exiting(갤러리) → 중복 push·dangling dismiss 차단</text>
+    <text x="22" y="158" font-size="12.5" fill="#5C5048">• onDisappear에서 전환 Task 취소 → 외부 pop 시 늦은 dismiss 방지</text>
+    <text x="22" y="182" font-size="12.5" fill="#5C5048">• Reduce Motion: 이동·stagger 생략(페이드만) + 지연 0.18s · 60fps 유지(lazy 렌더 + 가벼운 offset/opacity)</text>
+  </g>
+</svg>
