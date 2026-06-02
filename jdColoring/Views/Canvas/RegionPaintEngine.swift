@@ -41,13 +41,18 @@ final class RegionPaintEngine {
     private var brushRGB: (UInt8, UInt8, UInt8) = (0, 0, 0)
 
     // 색연필(§18): 반투명 쌓임 + 종이결.
-    // 한 획당 올리는 불투명도(0.78*255). 한 획만으로도 본색이 살아 있고, 같은 칸을
-    // 덧칠하면 source-over로 더 진해진다. (이전 0.4는 색이 너무 연했음 — 2026-06-02 튜닝)
-    private static let pencilAlpha: UInt32 = 200
-    // grain(0~255) → 올림 불투명도 a = (pencilAlpha*grain+127)/255 의 LUT.
-    // pencilAlpha가 상수라 1회 precompute → 핫패스(stamp)에서 픽셀당 곱셈·나눗셈 제거(무손실).
-    private static let pencilAlphaLUT: [UInt8] =
-        (0...255).map { UInt8((pencilAlpha * UInt32($0) + 127) / 255) }
+    // 첫 칠(처음 닿는 픽셀)이 올리는 불투명도(0.78*255). 한 획만으로도 본색이 살아 있다.
+    private static let pencilAlphaFirst: UInt32 = 200
+    // 덧칠(이미 칠해진 픽셀에 다시)이 올리는 불투명도(0.29*255). 첫 칠 이후엔 천천히 누적 —
+    // 봉우리 기준 첫 칠(78%) + 덧칠 약 9번이면 99%(본색)에 도달((1-0.29)^9·0.22 ≈ 0.01).
+    // (첫 칠은 그대로 두고 그 이후만 느리게, 2026-06-02 튜닝)
+    private static let pencilAlphaBuild: UInt32 = 74
+    // grain(0~255) → 올림 불투명도 a = (alpha*grain+127)/255 의 LUT.
+    // alpha가 상수라 1회 precompute → 핫패스(stamp)에서 픽셀당 곱셈·나눗셈 제거(무손실).
+    private static let pencilAlphaFirstLUT: [UInt8] =
+        (0...255).map { UInt8((pencilAlphaFirst * UInt32($0) + 127) / 255) }
+    private static let pencilAlphaBuildLUT: [UInt8] =
+        (0...255).map { UInt8((pencilAlphaBuild * UInt32($0) + 127) / 255) }
     private var grain: [UInt8] = []            // 종이결: 픽셀별 불투명도 배율(종이=좌표에 고정)
     // 색연필 덧칠(쌓임) 게이트 — 픽셀별 "마지막으로 칠한 누적 이동거리(px)". 0 = 아직 안 칠함.
     // 한 번 지나가며 생기는 인접 스탬프 겹침과 정지는 무시하고(균일·정지 시 안 진해짐),
@@ -316,10 +321,12 @@ final class RegionPaintEngine {
                     // 벗어났다 되돌아온 곳만(거리 게이트 통과) 덧칠해 진해진다.
                     let last = coverage[i]
                     if last != 0 && tv &- last < revisit { continue }
-                    coverage[i] = tv
-                    // 이번 픽셀의 올림 불투명도 = 한획 알파 × 종이결(0.55~1.0). LUT 조회(무손실).
+                    // 이번 픽셀의 올림 불투명도 = 알파 × 종이결(0.55~1.0). LUT 조회(무손실).
                     // 봉우리(grain=255)는 본색이 진하게, 골은 옅게 → 연필 결이 또렷.
-                    let a = UInt32(Self.pencilAlphaLUT[Int(grain[i])])
+                    // 첫 칠(last==0)은 진하게, 덧칠(last!=0)은 약하게 → 첫 획 후 천천히 누적.
+                    let a = UInt32(last == 0 ? Self.pencilAlphaFirstLUT[Int(grain[i])]
+                                             : Self.pencilAlphaBuildLUT[Int(grain[i])])
+                    coverage[i] = tv
                     if a == 0 { continue }
                     let inv = 255 - a
                     // premultipliedLast 버퍼에 정수 source-over.
@@ -347,21 +354,22 @@ final class RegionPaintEngine {
         }
     }
 
-    /// 종이결 마스크: 픽셀별 불투명도 배율(140~255 → 0.55~1.0). 종이=좌표에 고정이라
-    /// 칠을 움직여도 결이 떨리지 않는다. 두 주파수 해시를 섞어 백색잡음 티를 줄인다.
-    /// 대비를 키워(이전 185) 연필 결이 더 또렷하게 보이게 한다.(2026-06-02 튜닝)
+    /// 종이결 마스크: 픽셀별 불투명도 배율(100~255 → 0.39~1.0). 종이=좌표에 고정이라
+    /// 칠을 움직여도 결이 떨리지 않는다. 미세 결(per-pixel)에 거친 결(4px 덩어리)을 섞어
+    /// 연필이 종이 결에 걸리는 거칠거칠한 질감을 낸다. 골을 더 낮춰(이전 140) 흰 종이가
+    /// 더 비쳐 보이게 하고, 거친 octave로 잔점을 또렷하게 한다.(2026-06-02 튜닝)
     private static func makeGrain(width w: Int, height h: Int) -> [UInt8] {
         var g = [UInt8](repeating: 255, count: w * h)
-        let minByte: UInt32 = 140
-        let span: UInt32 = 256 - minByte           // 116
+        let minByte: UInt32 = 100
+        let span: UInt32 = 256 - minByte           // 156
         g.withUnsafeMutableBufferPointer { buf in
             for y in 0..<h {
                 let row = y * w
                 let yU = UInt32(truncatingIfNeeded: y)
-                let yHalf = UInt32(truncatingIfNeeded: y >> 1)
+                let yQuart = UInt32(truncatingIfNeeded: y >> 2)
                 for x in 0..<w {
-                    let h1 = hash2(UInt32(truncatingIfNeeded: x), yU)
-                    let h2 = hash2(UInt32(truncatingIfNeeded: x >> 1), yHalf)
+                    let h1 = hash2(UInt32(truncatingIfNeeded: x), yU)              // 미세 결
+                    let h2 = hash2(UInt32(truncatingIfNeeded: x >> 2), yQuart)     // 거친 결(4px 덩어리)
                     buf[row + x] = UInt8(minByte + ((h1 &+ h2) % span))
                 }
             }
