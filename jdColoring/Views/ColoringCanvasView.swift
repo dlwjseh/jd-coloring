@@ -150,26 +150,18 @@ struct ColoringCanvasView: View {
         .accessibilityLabel("색칠 초기화")
     }
 
-    /// 우측 세로 툴 레일: 현재색 · 색 · 굵기 · 지우개 (최근색은 펼침 패널로).
+    /// 우측 세로 툴 레일: 현재색(=색 고르기) · 도구 · 굵기 · 지우개 (최근색은 펼침 패널로).
     private var rightRail: some View {
         VStack(spacing: 16) {
-            Circle().fill(selectedColor)
-                .frame(width: 50, height: 50)
-                .overlay(Circle().stroke(Theme.ink, lineWidth: 3.5))
-                .accessibilityLabel("현재 색")
-
-            railDivider
+            // 현재색 동그라미 = 색 고르기 버튼. 탭하면 펼침 패널 등장(별도 '색' 버튼 폐지).
+            // 힌트 아이콘·활성 링 없이 현재색만 표시(디자인 §21).
             Button {
                 withAnimation(panelAnimation) { paletteOpen = true }
             } label: {
-                paletteIcon
-                    .padding(6)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 14)
-                            .stroke(paletteOpen ? Theme.coral : .clear, lineWidth: 2.5)
-                    )
-                    .frame(minWidth: 44, minHeight: 44)
-                    .contentShape(Rectangle())
+                Circle().fill(selectedColor)
+                    .frame(width: 50, height: 50)
+                    .overlay(Circle().stroke(Theme.ink, lineWidth: 3.5))
+                    .contentShape(Circle())
             }
             .buttonStyle(.plain)
             .accessibilityLabel("색 고르기")
@@ -214,18 +206,6 @@ struct ColoringCanvasView: View {
 
     private var railDivider: some View {
         Rectangle().fill(Theme.cardBorder).frame(height: 2).padding(.horizontal, 8)
-    }
-
-    private var paletteIcon: some View {
-        let cells: [Color] = [Theme.coral, Color(hex: 0xFFC740), Color(hex: 0x36C5C0), Color(hex: 0x8A6CFF)]
-        return VStack(spacing: 3) {
-            HStack(spacing: 3) { cell(cells[0]); cell(cells[1]) }
-            HStack(spacing: 3) { cell(cells[2]); cell(cells[3]) }
-        }
-        .frame(height: 34)
-    }
-    private func cell(_ c: Color) -> some View {
-        RoundedRectangle(cornerRadius: 3).fill(c).frame(width: 14, height: 14)
     }
 
     /// 도구 전환 — 브러쉬(단색) ↔ 색연필(질감). 디자인 §20-1. 세로 2칸, 활성은 코랄 강조.

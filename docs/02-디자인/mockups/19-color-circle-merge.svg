@@ -1,0 +1,138 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1180" height="760" viewBox="0 0 1180 760" font-family="'SF Pro Rounded','Helvetica Neue',sans-serif">
+  <defs>
+    <filter id="sh" x="-40%" y="-40%" width="180%" height="180%">
+      <feDropShadow dx="0" dy="7" stdDeviation="11" flood-color="#C9A88C" flood-opacity="0.35"/>
+    </filter>
+    <filter id="shp" x="-60%" y="-60%" width="220%" height="220%">
+      <feDropShadow dx="-6" dy="0" stdDeviation="14" flood-color="#C9A88C" flood-opacity="0.30"/>
+    </filter>
+  </defs>
+  <rect width="1180" height="760" fill="#FFFDFB"/>
+  <text x="590" y="42" font-size="24" font-weight="800" fill="#3B3A4E" text-anchor="middle">색 고르기 진입 통합 — 현재색 동그라미 = 색 고르기 버튼 · 별도 '색' 버튼 제거</text>
+
+  <!-- ============ BEFORE ============ -->
+  <text x="210" y="88" font-size="19" font-weight="700" fill="#9A8270" text-anchor="middle">BEFORE — 동그라미(표시) + '색' 버튼 따로</text>
+  <g filter="url(#sh)"><rect x="130" y="112" width="160" height="600" rx="44" fill="#FFFFFF" stroke="#EBDFD2" stroke-width="2"/></g>
+  <!-- 현재색 (표시 전용) -->
+  <circle cx="210" cy="156" r="25" fill="#F29CB4" stroke="#3B3A4E" stroke-width="3.5"/>
+  <line x1="158" y1="194" x2="262" y2="194" stroke="#EBDFD2" stroke-width="2"/>
+  <!-- '색' 버튼 (네모 2x2) -->
+  <g><rect x="195" y="214" width="13" height="13" rx="3" fill="#FF7A59"/><rect x="210" y="214" width="13" height="13" rx="3" fill="#FFC740"/><rect x="195" y="229" width="13" height="13" rx="3" fill="#36C5C0"/><rect x="210" y="229" width="13" height="13" rx="3" fill="#8A6CFF"/></g>
+  <rect x="180" y="206" width="60" height="44" rx="14" fill="none" stroke="#EBDFD2" stroke-width="1.6" stroke-dasharray="4 4"/>
+  <line x1="158" y1="262" x2="262" y2="262" stroke="#EBDFD2" stroke-width="2"/>
+  <!-- 도구 세로 2칸 -->
+  <rect x="185" y="278" width="50" height="44" rx="14" fill="#FFEDE6"/>
+  <g transform="translate(210,300) scale(1.3)" stroke="#FF7A59" stroke-width="2.0" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M 7 -11 l 5 5 l -12 12 l -5 -5 Z" fill="#FF7A59"/><path d="M -5 1 l 5 5"/><path d="M -5 1 c -5 4 -7 9 -8 13 c 4 -1 9 -3 13 -8" fill="#FF7A59"/>
+  </g>
+  <g transform="translate(210,352) rotate(45) scale(1.3)" stroke="#3B3A4E" stroke-width="2.0" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="-4" y="-15" width="8" height="20" rx="1.5"/><path d="M -4 5 L 0 12 L 4 5 Z" fill="#3B3A4E"/><line x1="-4" y1="-9" x2="4" y2="-9"/>
+  </g>
+  <line x1="158" y1="390" x2="262" y2="390" stroke="#EBDFD2" stroke-width="2"/>
+  <!-- 굵기 4단 -->
+  <g fill="#3B3A4E"><circle cx="210" cy="416" r="5"/><circle cx="210" cy="442" r="8"/><circle cx="210" cy="472" r="11"/><circle cx="210" cy="508" r="14"/></g>
+  <circle cx="210" cy="442" r="16" fill="none" stroke="#FF6FAF" stroke-width="2.5"/>
+  <line x1="158" y1="542" x2="262" y2="542" stroke="#EBDFD2" stroke-width="2"/>
+  <!-- 지우개 -->
+  <g transform="translate(210,582) rotate(-18)"><rect x="-19" y="-14" width="38" height="28" rx="6" fill="#FFFFFF" stroke="#3B3A4E" stroke-width="2.5"/><path d="M -19 -8 a6 6 0 0 1 6 -6 h26 a6 6 0 0 1 6 6 v6 h-38 Z" fill="#FF9FB5" stroke="#3B3A4E" stroke-width="2.5" stroke-linejoin="round"/></g>
+  <!-- 초기화 -->
+  <g filter="url(#sh)"><circle cx="210" cy="668" r="40" fill="#FFFFFF" stroke="#EBDFD2" stroke-width="2"/></g>
+  <g transform="translate(210,668)" fill="none" stroke="#6E6258" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="-6" y="-18" width="12" height="5" rx="2"/><line x1="-16" y1="-10.5" x2="16" y2="-10.5"/><path d="M -12 -5 L 12 -5 L 9.5 23 L -9.5 23 Z"/><line x1="-5" y1="2" x2="-6" y2="17"/><line x1="0" y1="2" x2="0" y2="17"/><line x1="5" y1="2" x2="6" y2="17"/>
+  </g>
+  <!-- BEFORE 콜아웃 -->
+  <text x="276" y="160" font-size="12.5" fill="#9A8270">← 현재색 원 (탭 안 됨)</text>
+  <text x="276" y="234" font-size="12.5" fill="#C0533B" font-weight="700">← '색' 버튼 (역할 중복)</text>
+
+  <!-- 화살표 -->
+  <g stroke="#FF7A59" stroke-width="3" fill="#FF7A59">
+    <line x1="330" y1="300" x2="430" y2="300"/>
+    <path d="M 430 300 l -16 -9 l 0 18 Z"/>
+  </g>
+  <text x="380" y="286" font-size="14" font-weight="700" fill="#FF7A59" text-anchor="middle">통합</text>
+  <text x="380" y="324" font-size="11.5" fill="#B6A89B" text-anchor="middle">1단 제거</text>
+
+  <!-- ============ AFTER ============ -->
+  <text x="560" y="88" font-size="19" font-weight="700" fill="#3FA86B" text-anchor="middle">AFTER — 동그라미가 곧 색 고르기 버튼</text>
+  <g filter="url(#sh)"><rect x="480" y="112" width="160" height="600" rx="44" fill="#FFFFFF" stroke="#EBDFD2" stroke-width="2"/></g>
+  <!-- 현재색 = 탭 타깃 (힌트/활성링 없음, 현재색만) -->
+  <circle cx="560" cy="176" r="25" fill="#F29CB4" stroke="#3B3A4E" stroke-width="3.5"/>
+  <!-- 탭 표시(설명용 오버레이 — 실제 UI엔 없음): 탭 링 + 손가락 -->
+  <g stroke="#FF7A59" stroke-width="2" fill="none" opacity="0.7"><circle cx="560" cy="176" r="34"/><circle cx="560" cy="176" r="41" opacity="0.5"/></g>
+  <g transform="translate(572,188)"><path d="M 0 0 L 0 22 L 6 17 L 11 27 L 16 24 L 11 15 L 19 15 Z" fill="#3B3A4E" stroke="#FFFFFF" stroke-width="1.6" stroke-linejoin="round"/></g>
+  <line x1="508" y1="224" x2="612" y2="224" stroke="#EBDFD2" stroke-width="2"/>
+  <!-- 도구 세로 2칸 -->
+  <rect x="535" y="248" width="50" height="44" rx="14" fill="#FFEDE6"/>
+  <g transform="translate(560,270) scale(1.4)" stroke="#FF7A59" stroke-width="2.0" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M 7 -11 l 5 5 l -12 12 l -5 -5 Z" fill="#FF7A59"/><path d="M -5 1 l 5 5"/><path d="M -5 1 c -5 4 -7 9 -8 13 c 4 -1 9 -3 13 -8" fill="#FF7A59"/>
+  </g>
+  <g transform="translate(560,326) rotate(45) scale(1.4)" stroke="#3B3A4E" stroke-width="2.0" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="-4" y="-15" width="8" height="20" rx="1.5"/><path d="M -4 5 L 0 12 L 4 5 Z" fill="#3B3A4E"/><line x1="-4" y1="-9" x2="4" y2="-9"/>
+  </g>
+  <line x1="508" y1="372" x2="612" y2="372" stroke="#EBDFD2" stroke-width="2"/>
+  <!-- 굵기 4단 -->
+  <g fill="#3B3A4E"><circle cx="560" cy="406" r="5"/><circle cx="560" cy="436" r="8"/><circle cx="560" cy="470" r="11"/><circle cx="560" cy="512" r="14"/></g>
+  <circle cx="560" cy="436" r="16" fill="none" stroke="#FF6FAF" stroke-width="2.5"/>
+  <line x1="508" y1="550" x2="612" y2="550" stroke="#EBDFD2" stroke-width="2"/>
+  <!-- 지우개 -->
+  <g transform="translate(560,594) rotate(-18)"><rect x="-19" y="-14" width="38" height="28" rx="6" fill="#FFFFFF" stroke="#3B3A4E" stroke-width="2.5"/><path d="M -19 -8 a6 6 0 0 1 6 -6 h26 a6 6 0 0 1 6 6 v6 h-38 Z" fill="#FF9FB5" stroke="#3B3A4E" stroke-width="2.5" stroke-linejoin="round"/></g>
+  <!-- 초기화 -->
+  <g filter="url(#sh)"><circle cx="560" cy="668" r="40" fill="#FFFFFF" stroke="#EBDFD2" stroke-width="2"/></g>
+  <g transform="translate(560,668)" fill="none" stroke="#6E6258" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="-6" y="-18" width="12" height="5" rx="2"/><line x1="-16" y1="-10.5" x2="16" y2="-10.5"/><path d="M -12 -5 L 12 -5 L 9.5 23 L -9.5 23 Z"/><line x1="-5" y1="2" x2="-6" y2="17"/><line x1="0" y1="2" x2="0" y2="17"/><line x1="5" y1="2" x2="6" y2="17"/>
+  </g>
+  <!-- AFTER 콜아웃 -->
+  <text x="624" y="150" font-size="12.5" fill="#3FA86B" font-weight="700">← 탭하면 색 고르기 펼침</text>
+  <text x="624" y="200" font-size="12" fill="#9A8270">힌트 아이콘·활성 링 없음 (현재색만)</text>
+
+  <!-- 탭 → 팔레트 패널 -->
+  <g stroke="#FF7A59" stroke-width="3" fill="#FF7A59">
+    <path d="M 600 176 C 660 176 660 300 706 300" fill="none"/>
+    <path d="M 706 300 l -16 -9 l 0 18 Z"/>
+  </g>
+  <text x="664" y="250" font-size="13" font-weight="700" fill="#FF7A59" text-anchor="middle">탭</text>
+
+  <!-- ============ 펼침 팔레트 패널 (탭 결과) ============ -->
+  <text x="930" y="88" font-size="19" font-weight="700" fill="#3B3A4E" text-anchor="middle">탭 결과 — 우측 슬라이드 팔레트 (동작 동일)</text>
+  <g filter="url(#shp)"><rect x="724" y="120" width="412" height="500" rx="28" fill="#FFFFFF" stroke="#EBDFD2" stroke-width="2"/></g>
+  <text x="754" y="166" font-size="20" font-weight="800" fill="#3B3A4E">색 고르기</text>
+  <!-- 최근색 줄 -->
+  <text x="754" y="200" font-size="13" font-weight="700" fill="#9A8270">최근 사용색</text>
+  <g>
+    <circle cx="766" cy="226" r="15" fill="#F29CB4" stroke="#3B3A4E" stroke-width="3"/>
+    <circle cx="806" cy="226" r="15" fill="#FFC740"/>
+    <circle cx="846" cy="226" r="15" fill="#36C5C0"/>
+    <circle cx="886" cy="226" r="15" fill="#8A6CFF"/>
+    <circle cx="926" cy="226" r="15" fill="#7BC86C"/>
+    <circle cx="966" cy="226" r="15" fill="#FF7A59"/>
+  </g>
+  <line x1="746" y1="256" x2="1114" y2="256" stroke="#EBDFD2" stroke-width="2"/>
+  <!-- 72색 그리드(축약 표현: 9열 x 6행 미리보기) -->
+  <g>
+    <!-- 행마다 톤 그룹 느낌으로 -->
+    <g>
+      <rect x="752" y="276" width="34" height="34" rx="7" fill="#FFE066"/><rect x="792" y="276" width="34" height="34" rx="7" fill="#FFD23F"/><rect x="832" y="276" width="34" height="34" rx="7" fill="#FFB23F"/><rect x="872" y="276" width="34" height="34" rx="7" fill="#FF8A3F"/><rect x="912" y="276" width="34" height="34" rx="7" fill="#FF6B3F"/><rect x="952" y="276" width="34" height="34" rx="7" fill="#F2503F"/><rect x="992" y="276" width="34" height="34" rx="7" fill="#E23B5A"/><rect x="1032" y="276" width="34" height="34" rx="7" fill="#F2789C"/><rect x="1072" y="276" width="34" height="34" rx="7" fill="#F29CB4"/>
+    </g>
+    <g>
+      <rect x="752" y="318" width="34" height="34" rx="7" fill="#F7B8D0"/><rect x="792" y="318" width="34" height="34" rx="7" fill="#E08FD0"/><rect x="832" y="318" width="34" height="34" rx="7" fill="#B477E0"/><rect x="872" y="318" width="34" height="34" rx="7" fill="#8A6CFF"/><rect x="912" y="318" width="34" height="34" rx="7" fill="#6A7BFF"/><rect x="952" y="318" width="34" height="34" rx="7" fill="#4F8FF0"/><rect x="992" y="318" width="34" height="34" rx="7" fill="#3FA8E0"/><rect x="1032" y="318" width="34" height="34" rx="7" fill="#36C5C0"/><rect x="1072" y="318" width="34" height="34" rx="7" fill="#3FC79A"/>
+    </g>
+    <g>
+      <rect x="752" y="360" width="34" height="34" rx="7" fill="#5FC86C"/><rect x="792" y="360" width="34" height="34" rx="7" fill="#7BC86C"/><rect x="832" y="360" width="34" height="34" rx="7" fill="#9FCB5C"/><rect x="872" y="360" width="34" height="34" rx="7" fill="#C7C24F"/><rect x="912" y="360" width="34" height="34" rx="7" fill="#C9A24F"/><rect x="952" y="360" width="34" height="34" rx="7" fill="#B08050"/><rect x="992" y="360" width="34" height="34" rx="7" fill="#8C6A4F"/><rect x="1032" y="360" width="34" height="34" rx="7" fill="#6E5A4C"/><rect x="1072" y="360" width="34" height="34" rx="7" fill="#A88C72"/>
+    </g>
+    <g>
+      <rect x="752" y="402" width="34" height="34" rx="7" fill="#FBE7C2"/><rect x="792" y="402" width="34" height="34" rx="7" fill="#EBD3AE"/><rect x="832" y="402" width="34" height="34" rx="7" fill="#D8BE9A"/><rect x="872" y="402" width="34" height="34" rx="7" fill="#BFA488"/><rect x="912" y="402" width="34" height="34" rx="7" fill="#9A8270"/><rect x="952" y="402" width="34" height="34" rx="7" fill="#6E6258"/><rect x="992" y="402" width="34" height="34" rx="7" fill="#3B3A4E"/><rect x="1032" y="402" width="34" height="34" rx="7" fill="#B8B2AC"/><rect x="1072" y="402" width="34" height="34" rx="7" fill="#FFFFFF" stroke="#D8CDBF" stroke-width="1.5"/>
+    </g>
+  </g>
+  <text x="930" y="476" font-size="13" fill="#B6A89B" text-anchor="middle">… 72색(8×9) 큐레이션 세트 — 색 선택 시 닫힘 + 최근색 반영</text>
+  <text x="930" y="504" font-size="13" fill="#9A8270" text-anchor="middle">패널은 캔버스 위 오버레이 (도안 크기 영향 없음) · 바깥 탭으로 닫힘</text>
+
+  <!-- 변경 요약 박스 -->
+  <g>
+    <rect x="746" y="528" width="368" height="76" rx="14" fill="#FBF6EF" stroke="#EBDFD2" stroke-width="1.5"/>
+    <text x="762" y="552" font-size="13.5" font-weight="700" fill="#3FA86B">변경 요약</text>
+    <text x="762" y="574" font-size="12.5" fill="#6E6258">· '색' 버튼(2×2 아이콘) + 인접 구분선 1단 제거</text>
+    <text x="762" y="593" font-size="12.5" fill="#6E6258">· 동그라미 탭 → 동일 슬라이드 패널 · accessibilityLabel "색 고르기"</text>
+  </g>
+
+  <text x="590" y="640" font-size="12.5" fill="#B6A89B" text-anchor="middle">＊ 동그라미 위 탭 링·손가락은 설명용 오버레이 — 실제 UI에는 표시되지 않음(현재색 원만 보임).</text>
+</svg>
