@@ -149,11 +149,11 @@ struct ColoringCanvasView: View {
             railDivider
             VStack(spacing: 10) {
                 ForEach(Array(Palette.brushWidths.enumerated()), id: \.offset) { _, w in
-                    Button { brushWidth = w; isEraser = false } label: {
+                    Button { brushWidth = w } label: {
                         Circle().fill(Theme.ink)
                             .frame(width: w * 0.7 + 6, height: w * 0.7 + 6)
                             .padding(7)
-                            .overlay(Circle().stroke(brushWidth == w && !isEraser ? Theme.coral : .clear, lineWidth: 3))
+                            .overlay(Circle().stroke(brushWidth == w ? Theme.coral : .clear, lineWidth: 3))
                     }
                     .buttonStyle(.plain)
                 }

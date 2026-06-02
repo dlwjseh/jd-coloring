@@ -20,8 +20,8 @@ enum Palette {
     /// 기본 선택 색 (PC929 Pink, 3행 2열).
     static let defaultColor = Color(hex: 0xF29CB4)
 
-    /// 브러시 굵기 단계 (가는 / 보통 / 굵은).
-    static let brushWidths: [CGFloat] = [6, 16, 30]
+    /// 브러시 굵기 단계 (4단계: 가는 → 굵은).
+    static let brushWidths: [CGFloat] = [6, 14, 22, 30]
 }
 
 /// 채색 도구 — 디자인 스펙 §18.
