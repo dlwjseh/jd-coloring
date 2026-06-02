@@ -158,24 +158,7 @@ struct GalleryView: View {
         return ScrollView {
             LazyVGrid(columns: columns, spacing: 44) {
                 ForEach(Array(templates.enumerated()), id: \.element.persistentModelID) { index, template in
-                    TemplateCellView(template: template,
-                                     artwork: lookup[template.persistentModelID])
-                        .gridEntrance(index: index, visible: appeared)
-                        .onTapGesture { openColoring(template) }
-                        .contextMenu {
-                            if lookup[template.persistentModelID] != nil {
-                                Button {
-                                    resetArtwork(template)
-                                } label: {
-                                    Label("내 색칠 초기화", systemImage: "arrow.counterclockwise")
-                                }
-                            }
-                            Button(role: .destructive) {
-                                pendingDelete = template
-                            } label: {
-                                Label("도안 삭제", systemImage: "trash")
-                            }
-                        }
+                    cell(template, artwork: lookup[template.persistentModelID], index: index)
                 }
             }
             .padding(.horizontal, 60)
@@ -183,6 +166,46 @@ struct GalleryView: View {
             .padding(.bottom, 150)
         }
         .scrollDisabled(isUploadPresented)
+    }
+
+    /// 도안 셀 + 탭(열기) + 롱프레스 컨텍스트 메뉴.
+    /// - 탭과 롱프레스가 같은 뷰에서 충돌해 롱프레스 확정이 지연되던 문제 →
+    ///   `Button`으로 탭을 분리해 제스처 조율을 시스템에 맡긴다.
+    /// - iOS는 `preview:`를 명시한다. 미지정 시 iOS가 그림자 블러까지 포함한 셀을
+    ///   오프스크린 스냅샷(메인 스레드 동기)하느라 롱프레스 후 메뉴가 수 초 늦게 떴다.
+    ///   캐시된 썸네일만 그리는 가벼운 프리뷰로 그 비용을 제거한다.
+    ///   (`preview:` 변형은 macOS 미지원이라 플랫폼 분기한다.)
+    @ViewBuilder
+    private func cell(_ template: Template, artwork: Artwork?, index: Int) -> some View {
+        let base = Button { openColoring(template) } label: {
+            TemplateCellView(template: template, artwork: artwork)
+        }
+        .buttonStyle(.plain)
+        .gridEntrance(index: index, visible: appeared)
+
+        #if os(iOS)
+        base.contextMenu { menuItems(for: template, hasArtwork: artwork != nil) } preview: {
+            TemplateMenuPreview(template: template, artwork: artwork)
+        }
+        #else
+        base.contextMenu { menuItems(for: template, hasArtwork: artwork != nil) }
+        #endif
+    }
+
+    @ViewBuilder
+    private func menuItems(for template: Template, hasArtwork: Bool) -> some View {
+        if hasArtwork {
+            Button {
+                resetArtwork(template)
+            } label: {
+                Label("내 색칠 초기화", systemImage: "arrow.counterclockwise")
+            }
+        }
+        Button(role: .destructive) {
+            pendingDelete = template
+        } label: {
+            Label("도안 삭제", systemImage: "trash")
+        }
     }
 
     private var emptyState: some View {

@@ -45,3 +45,25 @@ struct TemplateCellView: View {
         }
     }
 }
+
+/// 컨텍스트 메뉴(롱프레스) lift 프리뷰. 그림자/배지 없이 **캐시된 썸네일만** 그려
+/// iOS의 자동 스냅샷(오프스크린 그림자 렌더로 수 초 지연)을 피한다. (GalleryView)
+struct TemplateMenuPreview: View {
+    let template: Template
+    let artwork: Artwork?
+
+    private var displayData: Data { artwork?.progressThumbnail ?? template.thumbnailData }
+
+    var body: some View {
+        ZStack {
+            Color.white
+            if let image = ThumbnailCache.image(for: displayData) {
+                image
+                    .resizable()
+                    .scaledToFit()
+                    .padding(20)
+            }
+        }
+        .frame(width: 240, height: 240)
+    }
+}
