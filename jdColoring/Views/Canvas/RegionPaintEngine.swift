@@ -41,11 +41,21 @@ final class RegionPaintEngine {
     private var brushRGB: (UInt8, UInt8, UInt8) = (0, 0, 0)
 
     // 색연필(§18): 반투명 쌓임 + 종이결.
-    // 한 획당 올리는 불투명도(0.4*255). 같은 칸을 덧칠하면 source-over로 진해진다.
-    private let pencilAlpha: UInt32 = 102
+    // 한 획당 올리는 불투명도(0.78*255). 한 획만으로도 본색이 살아 있고, 같은 칸을
+    // 덧칠하면 source-over로 더 진해진다. (이전 0.4는 색이 너무 연했음 — 2026-06-02 튜닝)
+    private static let pencilAlpha: UInt32 = 200
+    // grain(0~255) → 올림 불투명도 a = (pencilAlpha*grain+127)/255 의 LUT.
+    // pencilAlpha가 상수라 1회 precompute → 핫패스(stamp)에서 픽셀당 곱셈·나눗셈 제거(무손실).
+    private static let pencilAlphaLUT: [UInt8] =
+        (0...255).map { UInt8((pencilAlpha * UInt32($0) + 127) / 255) }
     private var grain: [UInt8] = []            // 종이결: 픽셀별 불투명도 배율(종이=좌표에 고정)
-    private var coverage: [UInt32] = []        // 획 내 1회 반영 마스크(= strokeID면 이미 칠함)
-    private var strokeID: UInt32 = 0
+    // 색연필 덧칠(쌓임) 게이트 — 픽셀별 "마지막으로 칠한 누적 이동거리(px)". 0 = 아직 안 칠함.
+    // 한 번 지나가며 생기는 인접 스탬프 겹침과 정지는 무시하고(균일·정지 시 안 진해짐),
+    // 브러시가 한 지름 넘게 벗어났다 되돌아와 겹친 곳만 다시 칠해 진해진다.
+    private var coverage: [UInt32] = []
+    private var travel: UInt32 = 0             // 세션 단조 증가 누적 이동거리(px)
+    private var travelCarry: CGFloat = 0       // travel 정수화 잔여분
+    private let penDownJump: UInt32 = 4096      // 새 획 시작 시 점프(이전 획과 분리 → 항상 덧칠)
 
     // 스트로크 상태
     private var lockedLabel: Int32 = 0
@@ -171,7 +181,10 @@ final class RegionPaintEngine {
             lockedLabel = label(atX: Int(p.x), y: Int(p.y))
             if tool == .pencil && !isEraser {
                 ensurePencilBuffers()
-                strokeID &+= 1            // 새 획 → 이 획에서 칠한 픽셀을 1회만 반영
+                // 새 획: 이동거리를 크게 점프시켜 이전 획이 칠한 자리와 분리한다.
+                // → 이전 획 위에 다시 그으면 항상 덧칠로 진해지고, 버퍼 초기화 memset은 피한다.
+                travel = travel &+ penDownJump
+                travelCarry = 0
             }
             if lockedLabel != 0 { stamp(center: p, radius: radius) }
         }
@@ -220,8 +233,15 @@ final class RegionPaintEngine {
         let dist = (dx * dx + dy * dy).squareRoot()
         let step = max(1, radius / 2)
         let count = max(1, Int(dist / step))
+        let spacing = dist / CGFloat(count)
         for i in 0...count {
             let t = CGFloat(i) / CGFloat(count)
+            if i > 0 {                       // 색연필 덧칠 게이트용 누적 이동거리(정수화)
+                travelCarry += spacing
+                let whole = travelCarry.rounded(.down)
+                travel = travel &+ UInt32(whole)
+                travelCarry -= whole
+            }
             stamp(center: CGPoint(x: a.x + dx * t, y: a.y + dy * t), radius: radius)
         }
     }
@@ -229,7 +249,8 @@ final class RegionPaintEngine {
     /// 원형 스탬프: 잠긴 칸(lockedLabel)에 속한 픽셀만 칠한다.
     /// - 지우개: 알파 0으로 비움.
     /// - 마커: 불투명 단색 덮어쓰기.
-    /// - 색연필: 종이결로 변조한 반투명을 source-over로 누적(획 내 1회). 덧칠 시 진해짐.
+    /// - 색연필: 종이결로 변조한 반투명을 source-over로 누적. 한 지름 넘게 벗어났다
+    ///   되돌아와 겹친 곳은 덧칠로 진해진다(한 번 지나감·정지는 균일 유지).
     private func stamp(center: CGPoint, radius: CGFloat) {
         guard lockedLabel != 0, let px = pixels else { return }
         let (r, g, b) = brushRGB                 // L-2: 캐시된 색 사용
@@ -243,6 +264,10 @@ final class RegionPaintEngine {
 
         let pencil = (tool == .pencil) && !isEraser
         let rU = UInt32(r), gU = UInt32(g), bU = UInt32(b)
+        let tv = travel
+        // 덧칠 게이트 거리: 한 지름(2r)+여유. 이만큼 벗어났다 와야 다시 쌓인다.
+        // 한 번 지나갈 때 인접 스탬프가 같은 픽셀을 덮는 폭(최대 2r)보다 커야 균일 유지.
+        let revisit = UInt32(radius * 2) + 3
 
         for y in minY...maxY {
             let dy = y - cy
@@ -256,11 +281,14 @@ final class RegionPaintEngine {
                 if isEraser {
                     px[o] = 0; px[o + 1] = 0; px[o + 2] = 0; px[o + 3] = 0
                 } else if pencil {
-                    // 획 내 1회만: 이미 이번 획에서 칠한 픽셀이면 건너뛴다(균일, 얼룩 방지).
-                    if coverage[i] == strokeID { continue }
-                    coverage[i] = strokeID
-                    // 이번 픽셀의 올림 불투명도 = 한획 알파 × 종이결(0.72~1.0).
-                    let a = (pencilAlpha * UInt32(grain[i]) + 127) / 255
+                    // 막 지나간 자리(또는 정지)는 다시 안 칠함 → 균일. 한 지름 넘게
+                    // 벗어났다 되돌아온 곳만(거리 게이트 통과) 덧칠해 진해진다.
+                    let last = coverage[i]
+                    if last != 0 && tv &- last < revisit { continue }
+                    coverage[i] = tv
+                    // 이번 픽셀의 올림 불투명도 = 한획 알파 × 종이결(0.55~1.0). LUT 조회(무손실).
+                    // 봉우리(grain=255)는 본색이 진하게, 골은 옅게 → 연필 결이 또렷.
+                    let a = UInt32(Self.pencilAlphaLUT[Int(grain[i])])
                     if a == 0 { continue }
                     let inv = 255 - a
                     // premultipliedLast 버퍼에 정수 source-over.
@@ -284,17 +312,17 @@ final class RegionPaintEngine {
         guard n > 0 else { return }
         if grain.count != n { grain = Self.makeGrain(width: width, height: height) }   // 폴백
         if coverage.count != n {
-            coverage = [UInt32](repeating: 0, count: n)   // 0 = 아직 어떤 획도 안 칠함
-            strokeID = 0
+            coverage = [UInt32](repeating: 0, count: n)   // 0 = 아직 안 칠함
         }
     }
 
-    /// 종이결 마스크: 픽셀별 불투명도 배율(185~255 → 0.72~1.0). 종이=좌표에 고정이라
+    /// 종이결 마스크: 픽셀별 불투명도 배율(140~255 → 0.55~1.0). 종이=좌표에 고정이라
     /// 칠을 움직여도 결이 떨리지 않는다. 두 주파수 해시를 섞어 백색잡음 티를 줄인다.
+    /// 대비를 키워(이전 185) 연필 결이 더 또렷하게 보이게 한다.(2026-06-02 튜닝)
     private static func makeGrain(width w: Int, height h: Int) -> [UInt8] {
         var g = [UInt8](repeating: 255, count: w * h)
-        let minByte: UInt32 = 185
-        let span: UInt32 = 256 - minByte           // 71
+        let minByte: UInt32 = 140
+        let span: UInt32 = 256 - minByte           // 116
         g.withUnsafeMutableBufferPointer { buf in
             for y in 0..<h {
                 let row = y * w
