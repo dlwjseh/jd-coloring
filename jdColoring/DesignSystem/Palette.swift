@@ -23,3 +23,10 @@ enum Palette {
     /// 브러시 굵기 단계 (가는 / 보통 / 굵은).
     static let brushWidths: [CGFloat] = [6, 16, 30]
 }
+
+/// 채색 도구 — 디자인 스펙 §18.
+/// - `marker`: 기존 단색 채움(칸을 불투명 단색으로). 기본값.
+/// - `pencil`: 색연필 — 반투명 쌓임(덧칠할수록 진해짐) + 종이결. 은은하게.
+enum BrushTool: CaseIterable {
+    case marker, pencil
+}

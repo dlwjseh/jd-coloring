@@ -14,6 +14,7 @@ struct ColoringCanvasView: View {
     @State private var selectedColor: Color = Palette.defaultColor
     @State private var brushWidth: CGFloat = Palette.brushWidths[1]
     @State private var isEraser = false
+    @State private var tool: BrushTool = .marker
     @State private var recentColors: [Color] = []
     @State private var paletteOpen = false
     @State private var lineImage: PlatformImage?
@@ -54,6 +55,7 @@ struct ColoringCanvasView: View {
                             color: selectedColor,
                             lineWidth: brushWidth,
                             isEraser: isEraser,
+                            tool: tool,
                             saver: saver,
                             onPersist: persist
                         )
@@ -142,6 +144,9 @@ struct ColoringCanvasView: View {
             .buttonStyle(.plain)
 
             railDivider
+            toolToggle
+
+            railDivider
             VStack(spacing: 10) {
                 ForEach(Array(Palette.brushWidths.enumerated()), id: \.offset) { _, w in
                     Button { brushWidth = w; isEraser = false } label: {
@@ -190,6 +195,37 @@ struct ColoringCanvasView: View {
     }
     private func cell(_ c: Color) -> some View {
         RoundedRectangle(cornerRadius: 3).fill(c).frame(width: 14, height: 14)
+    }
+
+    /// 도구 전환 — 마커(단색) ↔ 색연필(질감). 디자인 §18-1. 활성 도구는 코랄 강조.
+    private var toolToggle: some View {
+        VStack(spacing: 5) {
+            HStack(spacing: 6) {
+                toolButton(.marker, symbol: "highlighter")
+                toolButton(.pencil, symbol: "pencil")
+            }
+            Text("도구").font(Theme.rounded(13, weight: .semibold)).foregroundStyle(Theme.subText)
+        }
+    }
+
+    private func toolButton(_ t: BrushTool, symbol: String) -> some View {
+        let active = tool == t && !isEraser
+        return Button {
+            tool = t
+            isEraser = false
+        } label: {
+            Image(systemName: symbol)
+                .font(.system(size: 17, weight: .semibold))
+                .foregroundStyle(active ? Theme.coral : Theme.ink)
+                .frame(width: 28, height: 38)
+                .background(RoundedRectangle(cornerRadius: 10).fill(active ? Theme.coral.opacity(0.12) : .clear))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 10)
+                        .stroke(active ? Theme.coral : Theme.cardBorder, lineWidth: active ? 2.5 : 1.5)
+                )
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(t == .marker ? "마커" : "색연필")
     }
 
     /// '색' → 우측에서 슬라이드되는 팔레트 패널(최근색 + 72색). 캔버스 위 오버레이.
@@ -260,6 +296,7 @@ private struct CanvasArea: View, Equatable {
     var color: Color
     var lineWidth: CGFloat
     var isEraser: Bool
+    var tool: BrushTool
     let saver: CanvasSaver
     var onPersist: (Data, Data) -> Void
 
@@ -272,6 +309,7 @@ private struct CanvasArea: View, Equatable {
                 color: color,
                 lineWidth: lineWidth,
                 isEraser: isEraser,
+                tool: tool,
                 saver: saver,
                 onPersist: onPersist
             )
@@ -293,6 +331,7 @@ private struct CanvasArea: View, Equatable {
         a.color == b.color &&
         a.lineWidth == b.lineWidth &&
         a.isEraser == b.isEraser &&
+        a.tool == b.tool &&
         a.aspect == b.aspect &&
         a.lineart === b.lineart
     }

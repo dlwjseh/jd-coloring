@@ -13,6 +13,7 @@ struct DrawingCanvas: View {
     var color: Color
     var lineWidth: CGFloat
     var isEraser: Bool
+    var tool: BrushTool
     let saver: CanvasSaver
     var onPersist: (_ progressData: Data, _ thumbnail: Data) -> Void
 
@@ -36,6 +37,7 @@ struct DrawingCanvas: View {
                 engine.color = color
                 engine.brushPointWidth = lineWidth
                 engine.isEraser = isEraser
+                engine.tool = tool
                 engine.configure(lineart: lineart, initialData: initialData, onPersist: onPersist)
                 saver.flush = { engine.flush() }
             }
@@ -49,6 +51,7 @@ struct DrawingCanvas: View {
             .onChange(of: color) { _, c in engine.color = c }
             .onChange(of: lineWidth) { _, w in engine.brushPointWidth = w }
             .onChange(of: isEraser) { _, e in engine.isEraser = e }
+            .onChange(of: tool) { _, t in engine.tool = t }
         }
     }
 }

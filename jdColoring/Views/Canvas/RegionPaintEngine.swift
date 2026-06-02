@@ -37,7 +37,15 @@ final class RegionPaintEngine {
     }
     var brushPointWidth: CGFloat = 16          // 뷰 좌표(point) 기준 굵기
     var isEraser = false
+    var tool: BrushTool = .marker
     private var brushRGB: (UInt8, UInt8, UInt8) = (0, 0, 0)
+
+    // 색연필(§18): 반투명 쌓임 + 종이결.
+    // 한 획당 올리는 불투명도(0.4*255). 같은 칸을 덧칠하면 source-over로 진해진다.
+    private let pencilAlpha: UInt32 = 102
+    private var grain: [UInt8] = []            // 종이결: 픽셀별 불투명도 배율(종이=좌표에 고정)
+    private var coverage: [UInt32] = []        // 획 내 1회 반영 마스크(= strokeID면 이미 칠함)
+    private var strokeID: UInt32 = 0
 
     // 스트로크 상태
     private var lockedLabel: Int32 = 0
@@ -95,12 +103,15 @@ final class RegionPaintEngine {
         if let initialData { loadPaint(initialData) }
         refreshDisplay()
 
-        // 라벨링은 비용이 크므로 백그라운드에서.
+        // 라벨링은 비용이 크므로 백그라운드에서. 종이결(grain)도 좌표 고정이라
+        // 도구와 무관하게 여기서 같이 만들어 둔다(색연필 첫 터치의 메인 hitch 제거).
         DispatchQueue.global(qos: .userInitiated).async { [weak self] in
             let labels = Self.buildLabels(from: cg, width: w, height: h)
+            let grain = Self.makeGrain(width: w, height: h)
             DispatchQueue.main.async {
                 guard let self else { return }
                 self.labels = labels
+                self.grain = grain
                 self.ready = true
                 self.replayPendingEvents()   // 준비 전 들어온 입력 재생
             }
@@ -156,8 +167,12 @@ final class RegionPaintEngine {
         if let last = lastImagePoint {
             stampLine(from: last, to: p, radius: radius)
         } else {
-            // 다운: 시작 칸 라벨 잠금
+            // 다운: 시작 칸 라벨 잠금 + (색연필) 새 획 시작
             lockedLabel = label(atX: Int(p.x), y: Int(p.y))
+            if tool == .pencil && !isEraser {
+                ensurePencilBuffers()
+                strokeID &+= 1            // 새 획 → 이 획에서 칠한 픽셀을 1회만 반영
+            }
             if lockedLabel != 0 { stamp(center: p, radius: radius) }
         }
         lastImagePoint = p
@@ -212,6 +227,9 @@ final class RegionPaintEngine {
     }
 
     /// 원형 스탬프: 잠긴 칸(lockedLabel)에 속한 픽셀만 칠한다.
+    /// - 지우개: 알파 0으로 비움.
+    /// - 마커: 불투명 단색 덮어쓰기.
+    /// - 색연필: 종이결로 변조한 반투명을 source-over로 누적(획 내 1회). 덧칠 시 진해짐.
     private func stamp(center: CGPoint, radius: CGFloat) {
         guard lockedLabel != 0, let px = pixels else { return }
         let (r, g, b) = brushRGB                 // L-2: 캐시된 색 사용
@@ -223,21 +241,79 @@ final class RegionPaintEngine {
         let minY = max(0, cy - rad), maxY = min(height - 1, cy + rad)
         guard minX <= maxX, minY <= maxY else { return }
 
+        let pencil = (tool == .pencil) && !isEraser
+        let rU = UInt32(r), gU = UInt32(g), bU = UInt32(b)
+
         for y in minY...maxY {
             let dy = y - cy
             let row = y * width
             for x in minX...maxX {
                 let dx = x - cx
                 if dx * dx + dy * dy > r2 { continue }
-                if labels[row + x] != lockedLabel { continue }   // 칸 밖 → 무시
-                let o = (row + x) * 4
+                let i = row + x
+                if labels[i] != lockedLabel { continue }   // 칸 밖 → 무시
+                let o = i * 4
                 if isEraser {
                     px[o] = 0; px[o + 1] = 0; px[o + 2] = 0; px[o + 3] = 0
+                } else if pencil {
+                    // 획 내 1회만: 이미 이번 획에서 칠한 픽셀이면 건너뛴다(균일, 얼룩 방지).
+                    if coverage[i] == strokeID { continue }
+                    coverage[i] = strokeID
+                    // 이번 픽셀의 올림 불투명도 = 한획 알파 × 종이결(0.72~1.0).
+                    let a = (pencilAlpha * UInt32(grain[i]) + 127) / 255
+                    if a == 0 { continue }
+                    let inv = 255 - a
+                    // premultipliedLast 버퍼에 정수 source-over.
+                    // src RGB는 straight(rU)지만 분자에서 alpha(a)와 곱해져 premult로 변환됨
+                    // → 별도 premultiply 보정을 추가하면 색이 어두워지니 금지. a+inv=255라 결과 ≤255.
+                    px[o]     = UInt8((rU * a + UInt32(px[o])     * inv + 127) / 255)
+                    px[o + 1] = UInt8((gU * a + UInt32(px[o + 1]) * inv + 127) / 255)
+                    px[o + 2] = UInt8((bU * a + UInt32(px[o + 2]) * inv + 127) / 255)
+                    px[o + 3] = UInt8((a * 255 + UInt32(px[o + 3]) * inv + 127) / 255)
                 } else {
                     px[o] = r; px[o + 1] = g; px[o + 2] = b; px[o + 3] = 255
                 }
             }
         }
+    }
+
+    /// 색연필 버퍼(커버리지) 지연 생성. 색연필 첫 획에서 호출. 화면당 1회 구축.
+    /// grain은 보통 configure 백그라운드에서 이미 만들어져 있고, 여기선 안전망(폴백)으로만 생성.
+    private func ensurePencilBuffers() {
+        let n = width * height
+        guard n > 0 else { return }
+        if grain.count != n { grain = Self.makeGrain(width: width, height: height) }   // 폴백
+        if coverage.count != n {
+            coverage = [UInt32](repeating: 0, count: n)   // 0 = 아직 어떤 획도 안 칠함
+            strokeID = 0
+        }
+    }
+
+    /// 종이결 마스크: 픽셀별 불투명도 배율(185~255 → 0.72~1.0). 종이=좌표에 고정이라
+    /// 칠을 움직여도 결이 떨리지 않는다. 두 주파수 해시를 섞어 백색잡음 티를 줄인다.
+    private static func makeGrain(width w: Int, height h: Int) -> [UInt8] {
+        var g = [UInt8](repeating: 255, count: w * h)
+        let minByte: UInt32 = 185
+        let span: UInt32 = 256 - minByte           // 71
+        g.withUnsafeMutableBufferPointer { buf in
+            for y in 0..<h {
+                let row = y * w
+                let yU = UInt32(truncatingIfNeeded: y)
+                let yHalf = UInt32(truncatingIfNeeded: y >> 1)
+                for x in 0..<w {
+                    let h1 = hash2(UInt32(truncatingIfNeeded: x), yU)
+                    let h2 = hash2(UInt32(truncatingIfNeeded: x >> 1), yHalf)
+                    buf[row + x] = UInt8(minByte + ((h1 &+ h2) % span))
+                }
+            }
+        }
+        return g
+    }
+
+    private static func hash2(_ x: UInt32, _ y: UInt32) -> UInt32 {
+        var h = x &* 0x27d4_eb2d &+ y &* 0x1656_67b1
+        h ^= h >> 15; h = h &* 0x2c1b_3c6d; h ^= h >> 12
+        return h
     }
 
     private func refreshDisplay() {
