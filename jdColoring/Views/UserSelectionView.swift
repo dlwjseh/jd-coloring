@@ -141,28 +141,41 @@ struct UserSelectionView: View {
 
     private var profileRow: some View {
         ScrollView(.horizontal, showsIndicators: false) {
-            LazyHStack(spacing: 64) {
+            LazyHStack(spacing: 48) {
                 ForEach(Array(profiles.enumerated()), id: \.element.persistentModelID) { index, profile in
-                    ProfileCircleView(profile: profile, diameter: 190)
-                        // A1: 오른쪽 바깥 → 제자리, index 기반 stagger
-                        .staggeredEntrance(index: index, visible: appeared)
-                        // A2(편집) / G1(갤러리 진입): 좌·우로 흩어지며 사라짐 (동작 줄이기 시 페이드만)
-                        .offset(x: (scattered && !reduceMotion) ? scatterOffset(index: index) : 0)
-                        .opacity(scattered ? 0 : 1)
-                        .onTapGesture { selectProfile(profile) }
-                        // iPad: 롱프레스 / Mac: 우클릭(컨트롤+클릭) → 수정·삭제
-                        .contextMenu {
-                            Button {
-                                presentEdit(profile)
-                            } label: {
-                                Label("수정", systemImage: "pencil")
+                    let diameter: CGFloat = 190
+                    VStack(spacing: 4) {
+                        ProfileAvatar(profile: profile, diameter: diameter)
+                            // 컨텍스트 메뉴는 아바타(원)에만 붙인다 — 누름/해제 시 프리뷰가 이름 없이 원으로.
+                            // 패딩 없이는 기본 스냅샷이 뷰 bounds로 잘려 링(stroke 바깥 절반)이 잘린다.
+                            // 패딩으로 링·여백을 담고, contextMenuPreview 형태를 원으로 맞춘다.
+                            .padding(8)
+                            .profilePreviewShape()
+                            .onTapGesture { selectProfile(profile) }
+                            // iPad: 롱프레스 / Mac: 우클릭(컨트롤+클릭) → 수정·삭제
+                            .contextMenu {
+                                Button {
+                                    presentEdit(profile)
+                                } label: {
+                                    Label("수정", systemImage: "pencil")
+                                }
+                                Button(role: .destructive) {
+                                    pendingDelete = profile
+                                } label: {
+                                    Label("삭제", systemImage: "trash")
+                                }
                             }
-                            Button(role: .destructive) {
-                                pendingDelete = profile
-                            } label: {
-                                Label("삭제", systemImage: "trash")
-                            }
-                        }
+
+                        Text(profile.name)
+                            .font(Theme.rounded(diameter * 0.18, weight: .bold))
+                            .foregroundStyle(Theme.ink)
+                            .lineLimit(1)
+                    }
+                    // A1: 오른쪽 바깥 → 제자리, index 기반 stagger
+                    .staggeredEntrance(index: index, visible: appeared)
+                    // A2(편집) / G1(갤러리 진입): 좌·우로 흩어지며 사라짐 (동작 줄이기 시 페이드만)
+                    .offset(x: (scattered && !reduceMotion) ? scatterOffset(index: index) : 0)
+                    .opacity(scattered ? 0 : 1)
                 }
             }
             .padding(.horizontal, 60)
@@ -173,6 +186,7 @@ struct UserSelectionView: View {
         }
         .scrollDisabled(isEditorPresented)
     }
+
 
     private var dragHint: some View {
         Text("‹   좌우로 드래그해서 더 보기   ›")
@@ -269,6 +283,19 @@ struct UserSelectionView: View {
             t.disablesAnimations = true
             withTransaction(t) { path.append(.gallery(profile)) }
         }
+    }
+}
+
+private extension View {
+    /// 컨텍스트 메뉴 프리뷰(누름/열림/해제) 하이라이트 형태를 원형으로.
+    /// `.contextMenuPreview`는 macOS 미지원 → iOS에서만 적용(맥은 여백만으로 충분).
+    @ViewBuilder
+    func profilePreviewShape() -> some View {
+        #if os(iOS)
+        contentShape(.contextMenuPreview, Circle())
+        #else
+        self
+        #endif
     }
 }
 
