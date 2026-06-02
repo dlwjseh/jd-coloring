@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1180" height="760" viewBox="0 0 1180 760" font-family="'SF Pro Rounded','Helvetica Neue',sans-serif">
+  <defs>
+    <filter id="sh" x="-40%" y="-40%" width="180%" height="180%">
+      <feDropShadow dx="0" dy="7" stdDeviation="11" flood-color="#C9A88C" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+  <rect width="1180" height="760" fill="#FFFDFB"/>
+  <text x="590" y="44" font-size="24" font-weight="800" fill="#3B3A4E" text-anchor="middle">도구 레일 정비 — 도구 세로화 · 텍스트 라벨 전체 제거 · 마커→브러쉬</text>
+
+  <!-- ============ BEFORE ============ -->
+  <text x="300" y="92" font-size="20" font-weight="700" fill="#9A8270" text-anchor="middle">BEFORE — 도구 가로 2칸 + 칸마다 라벨</text>
+  <g filter="url(#sh)"><rect x="220" y="116" width="160" height="600" rx="44" fill="#FFFFFF" stroke="#EBDFD2" stroke-width="2"/></g>
+  <!-- 현재색 -->
+  <circle cx="300" cy="162" r="25" fill="#F29CB4" stroke="#3B3A4E" stroke-width="3.5"/>
+  <line x1="248" y1="200" x2="352" y2="200" stroke="#EBDFD2" stroke-width="2"/>
+  <!-- 색 + 라벨 -->
+  <g><rect x="285" y="216" width="13" height="13" rx="3" fill="#FF7A59"/><rect x="300" y="216" width="13" height="13" rx="3" fill="#FFC740"/><rect x="285" y="231" width="13" height="13" rx="3" fill="#36C5C0"/><rect x="300" y="231" width="13" height="13" rx="3" fill="#8A6CFF"/></g>
+  <text x="300" y="262" font-size="15" font-weight="700" fill="#7A6E64" text-anchor="middle">색</text>
+  <line x1="248" y1="278" x2="352" y2="278" stroke="#EBDFD2" stroke-width="2"/>
+  <!-- 도구 가로 2칸 + 라벨 -->
+  <rect x="266" y="292" width="30" height="40" rx="10" fill="#FFFFFF" stroke="#EBDFD2" stroke-width="1.8"/>
+  <rect x="304" y="292" width="30" height="40" rx="10" fill="#FFF1EC" stroke="#FF7A59" stroke-width="2.5"/>
+  <text x="300" y="350" font-size="15" font-weight="700" fill="#7A6E64" text-anchor="middle">도구</text>
+  <line x1="248" y1="366" x2="352" y2="366" stroke="#EBDFD2" stroke-width="2"/>
+  <!-- 굵기 4단 + 라벨 -->
+  <g fill="#3B3A4E"><circle cx="300" cy="390" r="5"/><circle cx="300" cy="414" r="8"/><circle cx="300" cy="442" r="11"/><circle cx="300" cy="476" r="14"/></g>
+  <text x="300" y="506" font-size="15" font-weight="700" fill="#7A6E64" text-anchor="middle">굵기</text>
+  <line x1="248" y1="522" x2="352" y2="522" stroke="#EBDFD2" stroke-width="2"/>
+  <!-- 지우개 + 라벨 -->
+  <g transform="translate(300,556) rotate(-18)"><rect x="-19" y="-14" width="38" height="28" rx="6" fill="#FFFFFF" stroke="#3B3A4E" stroke-width="2.5"/><path d="M -19 -8 a6 6 0 0 1 6 -6 h26 a6 6 0 0 1 6 6 v6 h-38 Z" fill="#FF9FB5" stroke="#3B3A4E" stroke-width="2.5" stroke-linejoin="round"/></g>
+  <text x="300" y="600" font-size="15" font-weight="700" fill="#7A6E64" text-anchor="middle">지우개</text>
+  <!-- 초기화 버튼 + 라벨 -->
+  <g filter="url(#sh)"><circle cx="300" cy="672" r="40" fill="#FFFFFF" stroke="#EBDFD2" stroke-width="2"/></g>
+  <g transform="translate(300,672)" fill="none" stroke="#6E6258" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="-6" y="-18" width="12" height="5" rx="2"/><line x1="-16" y1="-10.5" x2="16" y2="-10.5"/><path d="M -12 -5 L 12 -5 L 9.5 23 L -9.5 23 Z"/><line x1="-5" y1="2" x2="-6" y2="17"/><line x1="0" y1="2" x2="0" y2="17"/><line x1="5" y1="2" x2="6" y2="17"/>
+  </g>
+  <text x="300" y="736" font-size="14" font-weight="600" fill="#B6A89B" text-anchor="middle">초기화</text>
+
+  <!-- 화살표 -->
+  <g stroke="#FF7A59" stroke-width="3" fill="#FF7A59">
+    <line x1="450" y1="400" x2="700" y2="400"/>
+    <path d="M 700 400 l -16 -9 l 0 18 Z"/>
+  </g>
+  <text x="575" y="386" font-size="15" font-weight="700" fill="#FF7A59" text-anchor="middle">정비</text>
+
+  <!-- ============ AFTER ============ -->
+  <text x="880" y="92" font-size="20" font-weight="700" fill="#3FA86B" text-anchor="middle">AFTER — 도구 세로 2칸 · 라벨 전부 제거 · 브러쉬</text>
+  <g filter="url(#sh)"><rect x="800" y="116" width="160" height="600" rx="44" fill="#FFFFFF" stroke="#EBDFD2" stroke-width="2"/></g>
+  <!-- 현재색 (라벨 없음) -->
+  <circle cx="880" cy="158" r="25" fill="#F29CB4" stroke="#3B3A4E" stroke-width="3.5"/>
+  <line x1="828" y1="196" x2="932" y2="196" stroke="#EBDFD2" stroke-width="2"/>
+  <!-- 색 (라벨 없음) -->
+  <g><rect x="865" y="214" width="13" height="13" rx="3" fill="#FF7A59"/><rect x="880" y="214" width="13" height="13" rx="3" fill="#FFC740"/><rect x="865" y="229" width="13" height="13" rx="3" fill="#36C5C0"/><rect x="880" y="229" width="13" height="13" rx="3" fill="#8A6CFF"/></g>
+  <line x1="828" y1="258" x2="932" y2="258" stroke="#EBDFD2" stroke-width="2"/>
+  <!-- 도구 세로 2칸: 외곽선 없음 + 큰 아이콘. 브러쉬(활성, 코랄+옅은틴트) 위 / 색연필(비활성, 잉크) 아래 -->
+  <!-- 브러쉬: 활성 — 테두리 없이 옅은 코랄 틴트 배경 -->
+  <rect x="855" y="274" width="50" height="44" rx="14" fill="#FFEDE6"/>
+  <g transform="translate(880,296) scale(1.4)" stroke="#FF7A59" stroke-width="2.0" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M 7 -11 l 5 5 l -12 12 l -5 -5 Z" fill="#FF7A59"/>
+    <path d="M -5 1 l 5 5"/>
+    <path d="M -5 1 c -5 4 -7 9 -8 13 c 4 -1 9 -3 13 -8" fill="#FF7A59"/>
+  </g>
+  <!-- 색연필: 비활성 — 배경/테두리 없음, 잉크 글리프 -->
+  <g transform="translate(880,348) rotate(45) scale(1.4)" stroke="#3B3A4E" stroke-width="2.0" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="-4" y="-15" width="8" height="20" rx="1.5"/>
+    <path d="M -4 5 L 0 12 L 4 5 Z" fill="#3B3A4E"/>
+    <line x1="-4" y1="-9" x2="4" y2="-9"/>
+  </g>
+  <line x1="828" y1="386" x2="932" y2="386" stroke="#EBDFD2" stroke-width="2"/>
+  <!-- 굵기 4단 (라벨 없음) -->
+  <g fill="#3B3A4E"><circle cx="880" cy="412" r="5"/><circle cx="880" cy="438" r="8"/><circle cx="880" cy="468" r="11"/><circle cx="880" cy="504" r="14"/></g>
+  <circle cx="880" cy="438" r="16" fill="none" stroke="#FF6FAF" stroke-width="2.5"/>
+  <line x1="828" y1="538" x2="932" y2="538" stroke="#EBDFD2" stroke-width="2"/>
+  <!-- 지우개 (라벨 없음) -->
+  <g transform="translate(880,576) rotate(-18)"><rect x="-19" y="-14" width="38" height="28" rx="6" fill="#FFFFFF" stroke="#3B3A4E" stroke-width="2.5"/><path d="M -19 -8 a6 6 0 0 1 6 -6 h26 a6 6 0 0 1 6 6 v6 h-38 Z" fill="#FF9FB5" stroke="#3B3A4E" stroke-width="2.5" stroke-linejoin="round"/></g>
+  <!-- 초기화 (라벨 없음) -->
+  <g filter="url(#sh)"><circle cx="880" cy="672" r="40" fill="#FFFFFF" stroke="#EBDFD2" stroke-width="2"/></g>
+  <g transform="translate(880,672)" fill="none" stroke="#6E6258" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="-6" y="-18" width="12" height="5" rx="2"/><line x1="-16" y1="-10.5" x2="16" y2="-10.5"/><path d="M -12 -5 L 12 -5 L 9.5 23 L -9.5 23 Z"/><line x1="-5" y1="2" x2="-6" y2="17"/><line x1="0" y1="2" x2="0" y2="17"/><line x1="5" y1="2" x2="6" y2="17"/>
+  </g>
+
+  <!-- 콜아웃 -->
+  <g font-size="13" fill="#9A8270">
+    <text x="1000" y="300" >← 브러쉬 (paintbrush.pointed, 활성) · 외곽선 제거 + 28pt</text>
+    <text x="1000" y="352" >← 색연필 (pencil) · 외곽선 제거 + 28pt</text>
+    <text x="1000" y="440" >← 굵기 4단 [6,14,22,30]</text>
+    <text x="1000" y="676" >← 휴지통(초기화), 라벨 제거</text>
+  </g>
+  <text x="590" y="752" font-size="13" fill="#B6A89B" text-anchor="middle">＊ 화면 텍스트만 제거 — 접근성 라벨(VoiceOver)·터치타깃 44pt+는 유지. 영역 구분은 구분선으로.</text>
+</svg>

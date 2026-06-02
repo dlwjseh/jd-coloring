@@ -138,16 +138,13 @@ struct ColoringCanvasView: View {
     /// 크림/카드 톤(위험색 아님), 탭 시 확인 다이얼로그.
     private var resetButton: some View {
         Button { showResetConfirm = true } label: {
-            VStack(spacing: 4) {
-                Image(systemName: "trash")
-                    .font(.system(size: 26))
-                    .foregroundStyle(Color(hex: 0x6E6258))
-                    .frame(width: 96, height: 96)
-                    .background(Circle().fill(Theme.card))
-                    .overlay(Circle().stroke(Theme.cardBorder, lineWidth: 2))
-                    .shadow(color: Theme.softShadow, radius: 11, x: 0, y: 7)
-                Text("초기화").font(Theme.rounded(13, weight: .semibold)).foregroundStyle(Theme.subText)
-            }
+            Image(systemName: "trash")
+                .font(.system(size: 26))
+                .foregroundStyle(Color(hex: 0x6E6258))
+                .frame(width: 96, height: 96)
+                .background(Circle().fill(Theme.card))
+                .overlay(Circle().stroke(Theme.cardBorder, lineWidth: 2))
+                .shadow(color: Theme.softShadow, radius: 11, x: 0, y: 7)
         }
         .buttonStyle(.plain)
         .accessibilityLabel("색칠 초기화")
@@ -159,53 +156,53 @@ struct ColoringCanvasView: View {
             Circle().fill(selectedColor)
                 .frame(width: 50, height: 50)
                 .overlay(Circle().stroke(Theme.ink, lineWidth: 3.5))
+                .accessibilityLabel("현재 색")
 
             railDivider
             Button {
                 withAnimation(panelAnimation) { paletteOpen = true }
             } label: {
-                VStack(spacing: 6) {
-                    paletteIcon
-                    Text("색").font(Theme.rounded(14, weight: .bold))
-                        .foregroundStyle(paletteOpen ? Theme.coral : Color(hex: 0x7A6E64))
-                }
-                .padding(6)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 14)
-                        .stroke(paletteOpen ? Theme.coral : .clear, lineWidth: 2.5)
-                )
+                paletteIcon
+                    .padding(6)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 14)
+                            .stroke(paletteOpen ? Theme.coral : .clear, lineWidth: 2.5)
+                    )
+                    .frame(minWidth: 44, minHeight: 44)
+                    .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
+            .accessibilityLabel("색 고르기")
 
             railDivider
             toolToggle
 
             railDivider
             VStack(spacing: 10) {
-                ForEach(Array(Palette.brushWidths.enumerated()), id: \.offset) { _, w in
+                ForEach(Array(Palette.brushWidths.enumerated()), id: \.offset) { idx, w in
                     Button { brushWidth = w } label: {
                         Circle().fill(Theme.ink)
                             .frame(width: w * 0.7 + 6, height: w * 0.7 + 6)
                             .padding(7)
                             .overlay(Circle().stroke(brushWidth == w ? Theme.coral : .clear, lineWidth: 3))
+                            .frame(minWidth: 44, minHeight: 44)   // 라벨 없이도 터치 타깃 44pt+ 보장
+                            .contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)
+                    .accessibilityLabel("브러쉬 굵기 \(idx + 1)")
                 }
-                Text("굵기").font(Theme.rounded(13, weight: .semibold)).foregroundStyle(Theme.subText)
             }
 
             railDivider
             Button { isEraser.toggle() } label: {
-                VStack(spacing: 4) {
-                    Image(systemName: "eraser.fill")
-                        .font(.system(size: 22))
-                        .foregroundStyle(isEraser ? Theme.coral : Theme.ink)
-                        .frame(width: 50, height: 44)
-                        .background(RoundedRectangle(cornerRadius: 14).fill(isEraser ? Theme.coral.opacity(0.15) : .clear))
-                    Text("지우개").font(Theme.rounded(13, weight: .semibold)).foregroundStyle(Theme.subText)
-                }
+                Image(systemName: "eraser.fill")
+                    .font(.system(size: 22))
+                    .foregroundStyle(isEraser ? Theme.coral : Theme.ink)
+                    .frame(width: 50, height: 44)
+                    .background(RoundedRectangle(cornerRadius: 14).fill(isEraser ? Theme.coral.opacity(0.15) : .clear))
             }
             .buttonStyle(.plain)
+            .accessibilityLabel("지우개")
         }
         .padding(.vertical, 22)
         .padding(.horizontal, 14)
@@ -231,14 +228,12 @@ struct ColoringCanvasView: View {
         RoundedRectangle(cornerRadius: 3).fill(c).frame(width: 14, height: 14)
     }
 
-    /// 도구 전환 — 마커(단색) ↔ 색연필(질감). 디자인 §18-1. 활성 도구는 코랄 강조.
+    /// 도구 전환 — 브러쉬(단색) ↔ 색연필(질감). 디자인 §20-1. 세로 2칸, 활성은 코랄 강조.
+    /// 라벨은 제거(아이콘만) — 접근성 라벨로 식별.
     private var toolToggle: some View {
-        VStack(spacing: 5) {
-            HStack(spacing: 6) {
-                toolButton(.marker, symbol: "highlighter")
-                toolButton(.pencil, symbol: "pencil")
-            }
-            Text("도구").font(Theme.rounded(13, weight: .semibold)).foregroundStyle(Theme.subText)
+        VStack(spacing: 8) {
+            toolButton(.marker, symbol: "paintbrush.pointed")
+            toolButton(.pencil, symbol: "pencil")
         }
     }
 
@@ -249,17 +244,14 @@ struct ColoringCanvasView: View {
             isEraser = false
         } label: {
             Image(systemName: symbol)
-                .font(.system(size: 17, weight: .semibold))
+                .font(.system(size: 28, weight: .semibold))
                 .foregroundStyle(active ? Theme.coral : Theme.ink)
-                .frame(width: 28, height: 38)
-                .background(RoundedRectangle(cornerRadius: 10).fill(active ? Theme.coral.opacity(0.12) : .clear))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 10)
-                        .stroke(active ? Theme.coral : Theme.cardBorder, lineWidth: active ? 2.5 : 1.5)
-                )
+                .frame(width: 50, height: 44)
+                .background(RoundedRectangle(cornerRadius: 14).fill(active ? Theme.coral.opacity(0.12) : .clear))
+                .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .accessibilityLabel(t == .marker ? "마커" : "색연필")
+        .accessibilityLabel(t == .marker ? "브러쉬" : "색연필")
     }
 
     /// '색' → 우측에서 슬라이드되는 팔레트 패널(최근색 + 72색). 캔버스 위 오버레이.
