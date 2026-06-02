@@ -1,8 +1,10 @@
 import SwiftUI
 
-/// 화면 이탈 시 즉시 저장(flush)을 트리거하기 위한 핸들.
+/// 캔버스 엔진에 대한 명령 핸들(부모 → 엔진). 화면 이탈 시 즉시 저장(flush),
+/// 색칠 초기화(reset)를 부모가 **동기로** 트리거하기 위해 사용한다.
 final class CanvasSaver {
     var flush: () -> Void = {}
+    var reset: () -> Void = {}
 }
 
 /// 채색 표면. iPad·Mac 공용 — 라인아트를 칸으로 분할해 브러시가 검은 선을
@@ -40,6 +42,7 @@ struct DrawingCanvas: View {
                 engine.tool = tool
                 engine.configure(lineart: lineart, initialData: initialData, onPersist: onPersist)
                 saver.flush = { engine.flush() }
+                saver.reset = { engine.clear() }
             }
             // 부모가 라인아트를 늦게 디코딩하면(onAppear 시 nil) 준비가 안 되므로,
             // 라인아트가 채워지는 시점에 다시 구성한다.

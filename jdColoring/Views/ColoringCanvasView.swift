@@ -21,6 +21,7 @@ struct ColoringCanvasView: View {
     @State private var saver = CanvasSaver()
     @State private var showSaved = false
     @State private var saveFlashToken = 0
+    @State private var showResetConfirm = false
 
     private let panelAnimation: Animation = .spring(response: 0.42, dampingFraction: 0.86)
 
@@ -62,7 +63,7 @@ struct ColoringCanvasView: View {
                         .equatable()
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    rightRail
+                    rightColumn
                 }
                 .padding(.horizontal, 28)
                 .padding(.bottom, 22)
@@ -74,6 +75,12 @@ struct ColoringCanvasView: View {
             if lineImage == nil { lineImage = PlatformImage(data: template.imageData) }
         }
         .onDisappear { saver.flush() }
+        .alert("‘\(template.name)’의 색칠을 모두 지울까요?", isPresented: $showResetConfirm) {
+            Button("취소", role: .cancel) {}
+            Button("초기화", role: .destructive) { performReset() }
+        } message: {
+            Text("지운 색칠은 되돌릴 수 없어요")
+        }
         .navigationBarBackButtonHidden(true)
         #if os(iOS)
         .toolbar(.hidden, for: .navigationBar)
@@ -117,6 +124,33 @@ struct ColoringCanvasView: View {
         .padding(.horizontal, 18)
         .padding(.vertical, 9)
         .background(Capsule().fill(Color(hex: 0xE0F6E9)))
+    }
+
+    /// 우측 열: 툴 레일 + 그 아래 색칠 초기화(휴지통) 버튼.
+    private var rightColumn: some View {
+        VStack(spacing: 16) {
+            rightRail
+            resetButton
+        }
+    }
+
+    /// 색칠 초기화 — 레일 아래 원형 휴지통 버튼(지름 = 레일 폭 96). 디자인 §19-1.
+    /// 크림/카드 톤(위험색 아님), 탭 시 확인 다이얼로그.
+    private var resetButton: some View {
+        Button { showResetConfirm = true } label: {
+            VStack(spacing: 4) {
+                Image(systemName: "trash")
+                    .font(.system(size: 26))
+                    .foregroundStyle(Color(hex: 0x6E6258))
+                    .frame(width: 96, height: 96)
+                    .background(Circle().fill(Theme.card))
+                    .overlay(Circle().stroke(Theme.cardBorder, lineWidth: 2))
+                    .shadow(color: Theme.softShadow, radius: 11, x: 0, y: 7)
+                Text("초기화").font(Theme.rounded(13, weight: .semibold)).foregroundStyle(Theme.subText)
+            }
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("색칠 초기화")
     }
 
     /// 우측 세로 툴 레일: 현재색 · 색 · 굵기 · 지우개 (최근색은 펼침 패널로).
@@ -256,6 +290,21 @@ struct ColoringCanvasView: View {
         recentColors.removeAll { $0 == color }
         recentColors.insert(color, at: 0)
         if recentColors.count > 6 { recentColors = Array(recentColors.prefix(6)) }
+    }
+
+    /// 색칠 초기화 확정: 엔진 버퍼 비우기 + 작업물(Artwork) 삭제.
+    /// 색/도구/굵기/지우개 상태는 건드리지 않음. 사용자는 캔버스에 그대로 머문다.
+    ///
+    /// 순서가 중요: `saver.reset()`은 엔진 `clear()`를 **동기로** 호출해
+    /// 예약 저장 취소·`savingEnabled=false`·세대 증가를 먼저 확정한다. 그래야
+    /// 이어지는 delete 이후 떠 있던 디바운스 저장/flush가 빈 버퍼를 되살리지 못한다.
+    /// (SwiftUI onChange 토큰은 다음 업데이트로 지연돼 이 순서를 보장 못 하므로 직접 핸들 호출.)
+    private func performReset() {
+        saver.reset()                    // 동기: 엔진 clear + 저장 가드 활성화
+        if let art = existing {
+            context.delete(art)
+            try? context.save()
+        }
     }
 
     private func persist(_ data: Data, _ thumb: Data) {

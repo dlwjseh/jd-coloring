@@ -79,6 +79,11 @@ final class RegionPaintEngine {
     private var isEncoding = false             // PNG 인코딩 진행 중(중복 저장 직렬화, C)
     private var resaveRequested = false        // 인코딩 중 들어온 저장 요청 → 끝나고 1회 재실행
     private var configured = false
+    // 초기화(clear) 가드: 비운 직후 빈 버퍼가 다시 저장돼 작업물이 되살아나는 것을 막는다.
+    // savingEnabled=false면 새로 칠하기 전까지 저장 안 함. clearGeneration은 clear 시점에
+    // 증가시켜, clear 이전에 시작된 백그라운드 인코딩 결과(옛 색칠)를 폐기한다.
+    private var savingEnabled = true
+    private var clearGeneration = 0
 
     deinit {
         #if os(iOS)
@@ -188,6 +193,8 @@ final class RegionPaintEngine {
             }
             if lockedLabel != 0 { stamp(center: p, radius: radius) }
         }
+        // 실제로 칠해지는 칸에 닿았을 때만 저장 재개(초기화 후 빈 채로 나가면 저장 안 함).
+        if lockedLabel != 0 { savingEnabled = true }
         lastImagePoint = p
         scheduleDisplayRefresh()
     }
@@ -209,6 +216,30 @@ final class RegionPaintEngine {
 
     /// 화면 이탈 등에서 즉시 저장.
     @MainActor func flush() { saveNow() }
+
+    /// 색칠 초기화: 색칠 버퍼를 비우고 진행 중/예약된 저장을 무효화한다.
+    /// (작업물 Artwork 삭제는 뷰 쪽 책임. 여기선 엔진 버퍼만 비운다.)
+    @MainActor func clear() {
+        // 예약 저장 취소 + 인코딩 세대 증가 → 진행 중 백그라운드 저장 결과(옛 색칠) 폐기.
+        saveTask?.cancel(); saveTask = nil
+        resaveRequested = false
+        clearGeneration &+= 1
+        savingEnabled = false            // 새로 칠하기 전까지 빈 버퍼를 저장하지 않음
+        // 스트로크 상태 리셋(혹시 드래그 중이었다면 끊는다)
+        lastImagePoint = nil
+        lockedLabel = 0
+        // 색칠 버퍼 비우기(투명). 픽셀 포인터는 그대로 유효.
+        if let ctx = paintCtx {
+            ctx.clear(CGRect(x: 0, y: 0, width: width, height: height))
+        }
+        // 색연필 쌓임 상태도 초기화(덧칠이 처음부터 다시 옅게 시작).
+        if !coverage.isEmpty {
+            coverage.withUnsafeMutableBufferPointer { b in
+                b.baseAddress?.update(repeating: 0, count: b.count)
+            }
+        }
+        refreshDisplay()
+    }
 
     // MARK: - 칠하기
 
@@ -387,6 +418,7 @@ final class RegionPaintEngine {
     // MARK: - 저장
 
     private func scheduleSave() {
+        guard savingEnabled else { return }      // 초기화 직후 빈 버퍼 저장 방지
         saveTask?.cancel()
         saveTask = Task { @MainActor [weak self] in
             try? await Task.sleep(nanoseconds: 1_000_000_000)
@@ -397,6 +429,7 @@ final class RegionPaintEngine {
 
     @MainActor private func saveNow() {
         saveTask?.cancel()
+        guard savingEnabled else { return }      // 초기화 후 미채색 상태면 저장하지 않음(flush 포함)
         // C: 인코딩이 진행 중이면 중복 실행하지 않고, 끝난 뒤 1회만 다시 저장하도록 표시.
         guard !isEncoding else { resaveRequested = true; return }
         // 스냅샷 + 썸네일 합성은 메인에서(ImageRenderer는 메인 전용).
@@ -406,11 +439,14 @@ final class RegionPaintEngine {
         guard let thumb = CanvasThumb.render(base: base, lineart: lineart, aspect: aspect) else { return }
         // L-3: 무거운 PNG 인코딩은 백그라운드, 완료 후 메인에서 저장.
         isEncoding = true
+        let gen = clearGeneration                 // 이 저장이 시작된 시점의 세대
         DispatchQueue.global(qos: .utility).async { [weak self] in
             let data = self?.pngData(from: cg)
             DispatchQueue.main.async { [weak self] in
                 guard let self else { return }
                 self.isEncoding = false
+                // clear가 끼어들었으면(세대 변경) 옛 색칠 결과이므로 폐기 → 작업물 부활 방지.
+                guard self.clearGeneration == gen else { self.resaveRequested = false; return }
                 if let data, let onPersist = self.onPersist { onPersist(data, thumb) }
                 if self.resaveRequested {            // 진행 중 들어온 요청 처리
                     self.resaveRequested = false
