@@ -2,6 +2,8 @@ import SwiftUI
 
 /// 캔버스 엔진에 대한 명령 핸들(부모 → 엔진). 화면 이탈 시 즉시 저장(flush),
 /// 색칠 초기화(reset)를 부모가 **동기로** 트리거하기 위해 사용한다.
+/// ⚠️ flush·reset 클로저는 DrawingCanvas.onAppear에서 채워진다.
+/// 캔버스가 화면에 나타난 뒤에만 호출해야 하며, 그 이전엔 no-op이다.
 final class CanvasSaver {
     var flush: () -> Void = {}
     var reset: () -> Void = {}
@@ -44,6 +46,11 @@ struct DrawingCanvas: View {
                 saver.flush = { engine.flush() }
                 saver.reset = { engine.clear() }
             }
+            .onDisappear {
+                // CADisplayLink는 메인 스레드에서만 안전하게 invalidate 가능.
+                // deinit이 어느 스레드에서 불릴지 보장이 없어 여기서 명시 정리.
+                engine.stopDisplayLink()
+            }
             // 부모가 라인아트를 늦게 디코딩하면(onAppear 시 nil) 준비가 안 되므로,
             // 라인아트가 채워지는 시점에 다시 구성한다.
             .onChange(of: lineart == nil) { _, isNil in
@@ -84,25 +91,12 @@ enum CanvasThumb {
         // 배경이 흰색으로 항상 불투명 → 알파 채널 제거. JPEG 저장 시 ImageIO 경고를
         // 막고, 디코딩 시 메모리가 2배로 드는 것을 피한다.
         renderer.isOpaque = true
-        #if os(iOS)
         return renderer.uiImage?.jpegData(compressionQuality: 0.85)
-        #else
-        guard let ns = renderer.nsImage, let tiff = ns.tiffRepresentation,
-              let rep = NSBitmapImageRep(data: tiff) else { return nil }
-        return rep.representation(using: .jpeg, properties: [.compressionFactor: 0.85])
-        #endif
     }
 }
 
 extension Image {
-    /// PlatformImage → SwiftUI Image
     init?(platform image: PlatformImage) {
-        #if os(iOS)
         self = Image(uiImage: image)
-        #elseif os(macOS)
-        self = Image(nsImage: image)
-        #else
-        return nil
-        #endif
     }
 }

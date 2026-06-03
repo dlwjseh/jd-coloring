@@ -1,12 +1,8 @@
 import SwiftUI
 import CoreGraphics
 import ImageIO
-import UniformTypeIdentifiers
-#if canImport(UIKit)
 import UIKit
-#elseif canImport(AppKit)
-import AppKit
-#endif
+import UniformTypeIdentifiers
 
 /// 라인아트를 "칸(영역)"으로 분할하고, 브러시가 시작한 칸 안에서만 색이 칠해지도록
 /// 가두는 래스터 채색 엔진.
@@ -68,10 +64,8 @@ final class RegionPaintEngine {
 
     // 표시 갱신 throttle (H-1): 샘플마다가 아니라 디스플레이 프레임당 1회만 makeImage.
     private var needsDisplayRefresh = false
-    #if os(iOS)
     private var displayLink: CADisplayLink?
     private var linkProxy: DisplayLinkProxy?
-    #endif
 
     // 라벨링 완료 전 들어온 입력 버퍼 (H-3): 준비되면 재생.
     private enum PendingEvent { case changed(CGPoint, CGSize); case ended }
@@ -90,10 +84,18 @@ final class RegionPaintEngine {
     private var savingEnabled = true
     private var clearGeneration = 0
 
-    deinit {
-        #if os(iOS)
+    /// CADisplayLink를 메인 스레드에서 안전하게 정리한다.
+    /// DrawingCanvas.onDisappear에서 호출. deinit은 어느 스레드에서나 불릴 수 있어
+    /// CADisplayLink.invalidate()를 deinit에 두면 안전을 보장할 수 없다.
+    func stopDisplayLink() {
         displayLink?.invalidate()
-        #endif
+        displayLink = nil
+        linkProxy = nil
+    }
+
+    deinit {
+        // invalidate는 stopDisplayLink()가 담당. deinit에서 link 참조만 해제.
+        displayLink = nil
     }
 
     // MARK: - 구성
@@ -389,18 +391,11 @@ final class RegionPaintEngine {
 
     // MARK: - 표시 갱신 throttle (H-1)
 
-    /// 한 프레임에 여러 샘플이 들어와도 makeImage는 디스플레이 주기당 1회만 돌도록 합친다.
-    /// iOS는 CADisplayLink로 프레임 정렬, macOS(보조)는 즉시 갱신.
     private func scheduleDisplayRefresh() {
-        #if os(iOS)
         needsDisplayRefresh = true
         startDisplayLinkIfNeeded()
-        #else
-        refreshDisplay()
-        #endif
     }
 
-    #if os(iOS)
     private func startDisplayLinkIfNeeded() {
         if let link = displayLink {
             link.isPaused = false
@@ -421,7 +416,6 @@ final class RegionPaintEngine {
             displayLink?.isPaused = true   // 유휴 시 일시정지(전력 절약)
         }
     }
-    #endif
 
     // MARK: - 저장
 
@@ -555,37 +549,22 @@ final class RegionPaintEngine {
     }
 }
 
-// MARK: - 플랫폼 헬퍼
+// MARK: - 헬퍼
 
-#if os(iOS)
 /// CADisplayLink는 @objc 셀렉터(NSObject)가 필요해 얇은 프록시로 감싼다.
 private final class DisplayLinkProxy: NSObject {
     private let onTick: () -> Void
     init(onTick: @escaping () -> Void) { self.onTick = onTick }
     @objc func tick() { onTick() }
 }
-#endif
 
 private func cgImage(from image: PlatformImage) -> CGImage? {
-    #if canImport(UIKit)
-    return image.cgImage
-    #elseif canImport(AppKit)
-    return image.cgImage(forProposedRect: nil, context: nil, hints: nil)
-    #else
-    return nil
-    #endif
+    image.cgImage
 }
 
 private func rgbComponents(of color: Color) -> (UInt8, UInt8, UInt8) {
-    #if canImport(UIKit)
     var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
     UIColor(color).getRed(&r, green: &g, blue: &b, alpha: &a)
-    #elseif canImport(AppKit)
-    let c = NSColor(color).usingColorSpace(.sRGB) ?? .black
-    let r = c.redComponent, g = c.greenComponent, b = c.blueComponent
-    #else
-    let r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0
-    #endif
     func u(_ v: CGFloat) -> UInt8 { UInt8(max(0, min(1, v)) * 255) }
     return (u(r), u(g), u(b))
 }
