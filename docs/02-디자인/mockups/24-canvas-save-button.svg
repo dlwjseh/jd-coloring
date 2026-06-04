@@ -1,0 +1,231 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1180" height="744" viewBox="0 0 1180 744" font-family="'SF Pro Rounded','Helvetica Neue',sans-serif">
+  <defs>
+    <filter id="sh" x="-40%" y="-40%" width="180%" height="180%">
+      <feDropShadow dx="0" dy="6" stdDeviation="10" flood-color="#C9A88C" flood-opacity="0.30"/>
+    </filter>
+    <filter id="sh2" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="3" stdDeviation="6" flood-color="#3B3A4E" flood-opacity="0.10"/>
+    </filter>
+    <filter id="shg" x="-40%" y="-40%" width="180%" height="180%">
+      <feDropShadow dx="0" dy="6" stdDeviation="10" flood-color="#3FA86B" flood-opacity="0.22"/>
+    </filter>
+  </defs>
+
+  <rect width="1180" height="744" fill="#FFFDFB"/>
+  <circle cx="90" cy="680" r="100" fill="#5FD08A" opacity="0.06"/>
+  <circle cx="1100" cy="80"  r="70"  fill="#36C5C0" opacity="0.05"/>
+
+  <!-- Header -->
+  <text x="40" y="34" font-size="19" font-weight="700" fill="#3B3A4E">저장 버튼 — 아이콘 옵션 3가지 + 초록 색감 제안</text>
+  <text x="40" y="54" font-size="12" fill="#9A8F86">초록 = 저장됨 토스트와 동일 언어 (#3FA86B / #E6F7EE) · 휴지통(회색·위험)과 명확히 구분</text>
+
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <!-- LEFT: 레이아웃 맥락 — 추천 옵션 적용 (체크마크)               -->
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <rect x="30" y="66" width="310" height="666" rx="22" fill="#FFF4EC" stroke="#EBDFD2" stroke-width="1"/>
+  <text x="185" y="89" text-anchor="middle" font-size="11" font-weight="600" fill="#9A8F86">레이아웃 맥락 (추천 적용)</text>
+
+  <!-- Top bar (slim) -->
+  <circle cx="66" cy="114" r="21" fill="white" stroke="#EBDFD2" stroke-width="1.5" filter="url(#sh2)"/>
+  <text x="66" y="121" text-anchor="middle" font-size="15" fill="#3B3A4E">‹</text>
+  <text x="97" y="121" font-size="13" font-weight="700" fill="#3B3A4E">봄꽃 도안</text>
+
+  <!-- Canvas -->
+  <g filter="url(#sh)">
+    <rect x="46" y="138" width="220" height="558" rx="20" fill="#FFFFFF" stroke="#EBDFD2" stroke-width="2"/>
+  </g>
+  <!-- Flower (small) -->
+  <g transform="translate(156,417)">
+    <circle cx="0" cy="-28" r="21" fill="#F7C8D8"/>
+    <circle cx="26" cy="-2" r="21" fill="#F7C8D8"/>
+    <circle cx="-26" cy="-2" r="21" fill="#F7C8D8"/>
+    <circle cx="16" cy="27" r="21" fill="#F7C8D8"/>
+    <circle cx="-16" cy="27" r="21" fill="#F7C8D8"/>
+    <circle cx="0" cy="0" r="16" fill="#FBD774"/>
+    <g fill="none" stroke="#3B3A4E" stroke-width="3" stroke-linejoin="round">
+      <circle cx="0" cy="-28" r="21"/><circle cx="26" cy="-2" r="21"/>
+      <circle cx="-26" cy="-2" r="21"/><circle cx="16" cy="27" r="21"/>
+      <circle cx="-16" cy="27" r="21"/><circle cx="0" cy="0" r="16"/>
+    </g>
+  </g>
+
+  <!-- Right column (cx=298) -->
+  <!-- alignment guides (top) -->
+  <line x1="278" y1="138" x2="278" y2="180" stroke="#D9B89C" stroke-width="1.2" stroke-dasharray="3 4"/>
+  <line x1="318" y1="138" x2="318" y2="180" stroke="#D9B89C" stroke-width="1.2" stroke-dasharray="3 4"/>
+
+  <!-- ★ 저장 원형 버튼 (초록) — 추천 체크마크 적용 -->
+  <g filter="url(#shg)">
+    <circle cx="298" cy="200" r="36" fill="#E6F7EE" stroke="#A8DFBF" stroke-width="2"/>
+  </g>
+  <!-- Checkmark icon -->
+  <polyline points="284,200 294,211 313,190" fill="none" stroke="#3FA86B" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- guides rail -->
+  <line x1="278" y1="236" x2="278" y2="256" stroke="#D9B89C" stroke-width="1.2" stroke-dasharray="3 4"/>
+  <line x1="318" y1="236" x2="318" y2="256" stroke="#D9B89C" stroke-width="1.2" stroke-dasharray="3 4"/>
+
+  <!-- Tool rail -->
+  <g filter="url(#sh)">
+    <rect x="278" y="256" width="40" height="276" rx="20" fill="#FFFFFF" stroke="#EBDFD2" stroke-width="2"/>
+  </g>
+  <circle cx="298" cy="280" r="11" fill="#FF7A59" stroke="#3B3A4E" stroke-width="2"/>
+  <line x1="284" y1="302" x2="312" y2="302" stroke="#EBDFD2" stroke-width="1.5"/>
+  <!-- brush -->
+  <rect x="284" y="310" width="28" height="22" rx="6" fill="#FFF1EC"/>
+  <line x1="291" y1="325" x2="302" y2="315" stroke="#FF7A59" stroke-width="2" stroke-linecap="round"/>
+  <!-- pencil -->
+  <rect x="284" y="336" width="28" height="22" rx="6" fill="white"/>
+  <line x1="291" y1="351" x2="302" y2="341" stroke="#3B3A4E" stroke-width="2" stroke-linecap="round"/>
+  <line x1="284" y1="368" x2="312" y2="368" stroke="#EBDFD2" stroke-width="1.5"/>
+  <circle cx="298" cy="381" r="3" fill="#3B3A4E"/>
+  <circle cx="298" cy="396" r="5" fill="#3B3A4E"/>
+  <circle cx="298" cy="413" r="7" fill="#3B3A4E"/>
+  <line x1="284" y1="432" x2="312" y2="432" stroke="#EBDFD2" stroke-width="1.5"/>
+  <!-- eraser -->
+  <g transform="translate(298,454) rotate(-15)">
+    <rect x="-12" y="-8" width="24" height="16" rx="4" fill="#FFFFFF" stroke="#3B3A4E" stroke-width="1.5"/>
+    <path d="M -12,-3 a4,4 0 0 1 4,-5 h16 a4,4 0 0 1 4,5 v4 h-24 Z" fill="#FF9FB5" stroke="#3B3A4E" stroke-width="1.2" stroke-linejoin="round"/>
+  </g>
+
+  <!-- guides trash -->
+  <line x1="278" y1="532" x2="278" y2="560" stroke="#D9B89C" stroke-width="1.2" stroke-dasharray="3 4"/>
+  <line x1="318" y1="532" x2="318" y2="560" stroke="#D9B89C" stroke-width="1.2" stroke-dasharray="3 4"/>
+
+  <!-- Trash (기존) -->
+  <g filter="url(#sh)">
+    <circle cx="298" cy="598" r="36" fill="#FFFFFF" stroke="#EBDFD2" stroke-width="2"/>
+  </g>
+  <g transform="translate(298,598)" fill="none" stroke="#6E6258" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="-4" y="-14" width="8" height="4" rx="1.5"/>
+    <line x1="-11" y1="-8" x2="11" y2="-8"/>
+    <path d="M -8,-3 L 8,-3 L 6.5,14 L -6.5,14 Z"/>
+    <line x1="-3" y1="1" x2="-3.5" y2="11"/>
+    <line x1="0" y1="1" x2="0" y2="11"/>
+    <line x1="3" y1="1" x2="3.5" y2="11"/>
+  </g>
+
+  <!-- Labels -->
+  <text x="298" y="246" text-anchor="middle" font-size="10" font-weight="600" fill="#3FA86B">저장</text>
+  <text x="298" y="648" text-anchor="middle" font-size="10" font-weight="600" fill="#B6A89B">초기화</text>
+
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <!-- RIGHT: 아이콘 3가지 옵션 비교                                 -->
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+
+  <!-- Option A: checkmark.circle — RECOMMENDED -->
+  <rect x="360" y="66" width="256" height="560" rx="20" fill="#F0FAF4" stroke="#A8DFBF" stroke-width="2"/>
+  <!-- Recommended badge -->
+  <rect x="412" y="76" width="152" height="26" rx="13" fill="#3FA86B"/>
+  <text x="488" y="93" text-anchor="middle" font-size="12" font-weight="700" fill="white">✓ 추천</text>
+
+  <text x="488" y="128" text-anchor="middle" font-size="15" font-weight="700" fill="#3B3A4E">체크마크</text>
+  <text x="488" y="147" text-anchor="middle" font-size="11" fill="#9A8F86">checkmark.circle</text>
+
+  <!-- Large demo button -->
+  <g filter="url(#shg)">
+    <circle cx="488" cy="244" r="64" fill="#E6F7EE" stroke="#A8DFBF" stroke-width="2.5"/>
+  </g>
+  <polyline points="461,244 480,264 516,222" fill="none" stroke="#3FA86B" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Medium demo -->
+  <g filter="url(#shg)">
+    <circle cx="488" cy="370" r="44" fill="#E6F7EE" stroke="#A8DFBF" stroke-width="2"/>
+  </g>
+  <polyline points="470,370 482,383 507,354" fill="none" stroke="#3FA86B" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="488" y="428" text-anchor="middle" font-size="11" fill="#9A8F86">실제 크기 (r=38)</text>
+
+  <!-- Pros -->
+  <text x="380" y="462" font-size="12" font-weight="700" fill="#3B3A4E">왜 추천하나</text>
+  <text x="380" y="480" font-size="11" fill="#3B3A4E">• 저장됨 토스트 ✓ 와 동일한 언어</text>
+  <text x="380" y="496" font-size="11" fill="#3B3A4E">• 완료·확인의 직관적 의미</text>
+  <text x="380" y="512" font-size="11" fill="#3B3A4E">• 아이도 바로 이해</text>
+  <text x="380" y="528" font-size="11" fill="#3B3A4E">• 초록 + 체크 = "저장 = 좋은 것"</text>
+
+  <!-- Divider -->
+  <line x1="360" y1="546" x2="616" y2="546" stroke="#A8DFBF" stroke-width="1.5"/>
+  <text x="488" y="562" text-anchor="middle" font-size="11" fill="#3FA86B" font-weight="600">토스트와 시각 언어 통일</text>
+  <!-- Toast mini demo -->
+  <rect x="398" y="572" width="180" height="30" rx="15" fill="#E0F6E9"/>
+  <text x="488" y="592" text-anchor="middle" font-size="13" font-weight="700" fill="#3FA86B">✓ 저장됨</text>
+  <text x="488" y="618" text-anchor="middle" font-size="10" fill="#9A8F86">버튼(✓)과 토스트(✓) = 동일 기호</text>
+
+
+  <!-- Option B: arrow.down.circle -->
+  <rect x="636" y="66" width="248" height="560" rx="20" fill="#F8F3EE" stroke="#EBDFD2" stroke-width="1.5"/>
+  <text x="760" y="124" text-anchor="middle" font-size="15" font-weight="700" fill="#3B3A4E">아래 화살표</text>
+  <text x="760" y="143" text-anchor="middle" font-size="11" fill="#9A8F86">arrow.down.circle</text>
+
+  <!-- Large demo -->
+  <g filter="url(#shg)">
+    <circle cx="760" cy="240" r="64" fill="#E6F7EE" stroke="#A8DFBF" stroke-width="2.5"/>
+  </g>
+  <!-- Arrow down icon (large) -->
+  <line x1="760" y1="210" x2="760" y2="248" stroke="#3FA86B" stroke-width="6" stroke-linecap="round"/>
+  <polyline points="741,235 760,255 779,235" fill="none" stroke="#3FA86B" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <line x1="738" y1="264" x2="782" y2="264" stroke="#3FA86B" stroke-width="4.5" stroke-linecap="round"/>
+
+  <!-- Medium demo -->
+  <g filter="url(#shg)">
+    <circle cx="760" cy="368" r="44" fill="#E6F7EE" stroke="#A8DFBF" stroke-width="2"/>
+  </g>
+  <line x1="760" y1="349" x2="760" y2="378" stroke="#3FA86B" stroke-width="4.5" stroke-linecap="round"/>
+  <polyline points="747,368 760,382 773,368" fill="none" stroke="#3FA86B" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <line x1="745" y1="387" x2="775" y2="387" stroke="#3FA86B" stroke-width="3.5" stroke-linecap="round"/>
+  <text x="760" y="426" text-anchor="middle" font-size="11" fill="#9A8F86">실제 크기 (r=38)</text>
+
+  <text x="652" y="460" font-size="12" font-weight="700" fill="#3B3A4E">특징</text>
+  <text x="652" y="478" font-size="11" fill="#3B3A4E">• "저장 = 아래로 내려가는 것"</text>
+  <text x="652" y="494" font-size="11" fill="#3B3A4E">• 직관적이지만 "다운로드"로</text>
+  <text x="652" y="510" font-size="11" fill="#9A8F86">  오독될 수 있음</text>
+  <text x="652" y="526" font-size="11" fill="#9A8F86">• 체크마크보다 의미 약함</text>
+
+
+  <!-- Option C: tray.fill.and.arrow.down -->
+  <rect x="904" y="66" width="248" height="560" rx="20" fill="#F8F3EE" stroke="#EBDFD2" stroke-width="1.5"/>
+  <text x="1028" y="124" text-anchor="middle" font-size="15" font-weight="700" fill="#3B3A4E">저장 트레이</text>
+  <text x="1028" y="143" text-anchor="middle" font-size="11" fill="#9A8F86">tray.and.arrow.down</text>
+
+  <!-- Large demo -->
+  <g filter="url(#shg)">
+    <circle cx="1028" cy="240" r="64" fill="#E6F7EE" stroke="#A8DFBF" stroke-width="2.5"/>
+  </g>
+  <!-- Tray + arrow icon (large) -->
+  <line x1="1028" y1="205" x2="1028" y2="236" stroke="#3FA86B" stroke-width="6" stroke-linecap="round"/>
+  <polyline points="1011,225 1028,243 1045,225" fill="none" stroke="#3FA86B" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Tray shape -->
+  <path d="M1004,248 L1004,270 Q1004,274 1008,274 L1048,274 Q1052,274 1052,270 L1052,248" fill="none" stroke="#3FA86B" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Medium demo -->
+  <g filter="url(#shg)">
+    <circle cx="1028" cy="368" r="44" fill="#E6F7EE" stroke="#A8DFBF" stroke-width="2"/>
+  </g>
+  <line x1="1028" y1="350" x2="1028" y2="370" stroke="#3FA86B" stroke-width="4" stroke-linecap="round"/>
+  <polyline points="1018,363 1028,374 1038,363" fill="none" stroke="#3FA86B" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M1014,376 L1014,390 Q1014,393 1017,393 L1039,393 Q1042,393 1042,390 L1042,376" fill="none" stroke="#3FA86B" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="1028" y="426" text-anchor="middle" font-size="11" fill="#9A8F86">실제 크기 (r=38)</text>
+
+  <text x="920" y="460" font-size="12" font-weight="700" fill="#3B3A4E">특징</text>
+  <text x="920" y="478" font-size="11" fill="#3B3A4E">• 전통적 "저장" 아이콘 언어</text>
+  <text x="920" y="494" font-size="11" fill="#3B3A4E">• 어른에게 친숙</text>
+  <text x="920" y="510" font-size="11" fill="#9A8F86">• 아이에게 의미 전달이</text>
+  <text x="920" y="526" font-size="11" fill="#9A8F86">  체크마크보다 어려울 수 있음</text>
+
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <!-- BOTTOM: 색상 스펙                                             -->
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <rect x="360" y="646" width="792" height="82" rx="14" fill="#F0FAF4" stroke="#A8DFBF" stroke-width="1.5"/>
+  <text x="376" y="666" font-size="12" font-weight="700" fill="#3B3A4E">초록 색감 스펙</text>
+
+  <!-- Color chips -->
+  <circle cx="392" cy="690" r="12" fill="#E6F7EE" stroke="#A8DFBF" stroke-width="2"/>
+  <text x="412" y="695" font-size="11" fill="#3B3A4E">버튼 배경 #E6F7EE</text>
+
+  <circle cx="556" cy="690" r="12" fill="#A8DFBF" stroke="#A8DFBF" stroke-width="2"/>
+  <text x="576" y="695" font-size="11" fill="#3B3A4E">보더 #A8DFBF</text>
+
+  <circle cx="700" cy="690" r="12" fill="#3FA86B"/>
+  <text x="720" y="695" font-size="11" fill="#3B3A4E">아이콘 #3FA86B (저장됨 토스트와 동일)</text>
+
+  <text x="376" y="718" font-size="11" fill="#9A8F86">초기화 버튼(흰 배경·회색 아이콘)과 색감이 완전히 달라 저장=긍정, 초기화=중립 위계가 명확해짐</text>
+</svg>

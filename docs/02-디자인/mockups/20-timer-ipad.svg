@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1180" height="490" viewBox="0 0 1180 490">
+<svg xmlns="http://www.w3.org/2000/svg" width="1180" height="510" viewBox="0 0 1180 510">
   <defs>
     <linearGradient id="bg20" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0" stop-color="#FFFFFF"/>
@@ -13,10 +13,10 @@
   </defs>
 
   <!-- Background -->
-  <rect width="1180" height="490" fill="url(#bg20)"/>
-  <circle cx="60" cy="400" r="80" fill="#FF7A59" opacity="0.07"/>
+  <rect width="1180" height="510" fill="url(#bg20)"/>
+  <circle cx="60" cy="420" r="80" fill="#FF7A59" opacity="0.07"/>
   <circle cx="1120" cy="110" r="60" fill="#8A6CFF" opacity="0.06"/>
-  <circle cx="590" cy="470" r="55" fill="#36C5C0" opacity="0.06"/>
+  <circle cx="590" cy="490" r="55" fill="#36C5C0" opacity="0.06"/>
 
   <!-- Section label -->
   <text x="40" y="22" font-size="11" font-weight="600" fill="#B6A89B" font-family="-apple-system,sans-serif" letter-spacing="0.5">캔버스 슬림 상단 바 — 타이머 칩 배치 위치</text>
@@ -28,50 +28,54 @@
   <!-- Artwork name -->
   <text x="134" y="79" font-size="17" font-weight="700" fill="#3B3A4E" font-family="-apple-system,sans-serif">봄꽃 도안</text>
 
-  <!-- Timer chip — normal (blue), shown in context position -->
-  <rect x="858" y="53" width="148" height="40" rx="20" fill="#EBF3FF" filter="url(#sm20)"/>
-  <text x="932" y="78" text-anchor="middle" font-size="15" font-weight="700" fill="#2F6CB8" font-family="-apple-system,sans-serif">⏱ 14:32</text>
+  <!-- Timer chip — normal (blue), top bar context, wider for 분초 format -->
+  <rect x="822" y="50" width="194" height="46" rx="23" fill="#EBF3FF" filter="url(#sm20)"/>
+  <text x="919" y="79" text-anchor="middle" font-size="18" font-weight="700" fill="#2F6CB8" font-family="-apple-system,sans-serif">⏱ 14분 32초</text>
 
   <!-- Annotation -->
-  <line x1="932" y1="93" x2="932" y2="128" stroke="#C9BCAE" stroke-width="1" stroke-dasharray="3,2"/>
-  <text x="932" y="143" text-anchor="middle" font-size="11" fill="#9A8F86" font-family="-apple-system,sans-serif">상단 바 우측 고정 표시</text>
+  <line x1="919" y1="96" x2="919" y2="128" stroke="#C9BCAE" stroke-width="1" stroke-dasharray="3,2"/>
+  <text x="919" y="143" text-anchor="middle" font-size="11" fill="#9A8F86" font-family="-apple-system,sans-serif">상단 바 우측 고정 표시</text>
 
   <!-- Divider -->
   <line x1="40" y1="168" x2="1140" y2="168" stroke="#EBDFD2" stroke-width="1"/>
 
   <!-- States section label -->
-  <text x="590" y="194" text-anchor="middle" font-size="12" font-weight="600" fill="#B6A89B" font-family="-apple-system,sans-serif" letter-spacing="0.8">타이머 상태별 칩 디자인</text>
+  <text x="590" y="194" text-anchor="middle" font-size="12" font-weight="600" fill="#B6A89B" font-family="-apple-system,sans-serif" letter-spacing="0.8">타이머 상태별 칩 디자인 (표시 형식: X분 XX초 · 1분 미만은 XX초)</text>
 
-  <!-- ── CHIP 1: 기본 (blue) ── x center ≈ 210 -->
-  <rect x="100" y="210" width="220" height="148" rx="22" fill="white" filter="url(#sh20)"/>
-  <rect x="125" y="230" width="170" height="42" rx="21" fill="#EBF3FF"/>
-  <text x="210" y="256" text-anchor="middle" font-size="16" font-weight="700" fill="#2F6CB8" font-family="-apple-system,sans-serif">⏱ 14:32</text>
-  <text x="210" y="300" text-anchor="middle" font-size="13" font-weight="700" fill="#3B3A4E" font-family="-apple-system,sans-serif">기본</text>
-  <text x="210" y="318" text-anchor="middle" font-size="11" fill="#9A8F86" font-family="-apple-system,sans-serif">bg #EBF3FF · text #2F6CB8</text>
-  <text x="210" y="336" text-anchor="middle" font-size="11" fill="#9A8F86" font-family="-apple-system,sans-serif">6분 이상 남은 경우</text>
+  <!-- ── CHIP 1: 기본 (blue, 6분+) ── center ≈ 210 -->
+  <rect x="90" y="210" width="240" height="168" rx="22" fill="white" filter="url(#sh20)"/>
+  <rect x="103" y="230" width="214" height="50" rx="25" fill="#EBF3FF"/>
+  <text x="210" y="261" text-anchor="middle" font-size="18" font-weight="700" fill="#2F6CB8" font-family="-apple-system,sans-serif">⏱ 14분 32초</text>
+  <text x="210" y="312" text-anchor="middle" font-size="13" font-weight="700" fill="#3B3A4E" font-family="-apple-system,sans-serif">기본</text>
+  <text x="210" y="330" text-anchor="middle" font-size="11" fill="#9A8F86" font-family="-apple-system,sans-serif">bg #EBF3FF · text #2F6CB8</text>
+  <text x="210" y="348" text-anchor="middle" font-size="11" fill="#9A8F86" font-family="-apple-system,sans-serif">6분 이상 남은 경우</text>
 
-  <!-- ── CHIP 2: 5분 전 (amber) ── x center ≈ 590 -->
-  <rect x="480" y="210" width="220" height="148" rx="22" fill="white" filter="url(#sh20)"/>
-  <rect x="505" y="230" width="170" height="42" rx="21" fill="#FFF3E0"/>
-  <text x="590" y="256" text-anchor="middle" font-size="16" font-weight="700" fill="#D4720A" font-family="-apple-system,sans-serif">⏱ 04:58</text>
-  <text x="590" y="300" text-anchor="middle" font-size="13" font-weight="700" fill="#3B3A4E" font-family="-apple-system,sans-serif">5분 전 경고</text>
-  <text x="590" y="318" text-anchor="middle" font-size="11" fill="#9A8F86" font-family="-apple-system,sans-serif">bg #FFF3E0 · text #D4720A</text>
-  <text x="590" y="336" text-anchor="middle" font-size="11" fill="#9A8F86" font-family="-apple-system,sans-serif">5분 00초 이하 · 색 전환</text>
+  <!-- ── CHIP 2: 5분 전 (amber) ── center ≈ 590 -->
+  <rect x="470" y="210" width="240" height="168" rx="22" fill="white" filter="url(#sh20)"/>
+  <rect x="483" y="230" width="214" height="50" rx="25" fill="#FFF3E0"/>
+  <text x="590" y="261" text-anchor="middle" font-size="18" font-weight="700" fill="#D4720A" font-family="-apple-system,sans-serif">⏱ 4분 58초</text>
+  <text x="590" y="312" text-anchor="middle" font-size="13" font-weight="700" fill="#3B3A4E" font-family="-apple-system,sans-serif">5분 전 경고</text>
+  <text x="590" y="330" text-anchor="middle" font-size="11" fill="#9A8F86" font-family="-apple-system,sans-serif">bg #FFF3E0 · text #D4720A</text>
+  <text x="590" y="348" text-anchor="middle" font-size="11" fill="#9A8F86" font-family="-apple-system,sans-serif">5분 00초 이하 · 색 전환</text>
 
-  <!-- ── CHIP 3: 1분 전 (red + pulse ring) ── x center ≈ 970 -->
-  <rect x="860" y="210" width="220" height="148" rx="22" fill="white" filter="url(#sh20)"/>
-  <!-- Pulse outer ring (code side: repeating scale-up + fade) -->
-  <rect x="879" y="224" width="182" height="54" rx="27" fill="none" stroke="#FF5A5F" stroke-width="2.5" opacity="0.22"/>
-  <rect x="885" y="230" width="170" height="42" rx="21" fill="#FFE8E8"/>
-  <text x="970" y="256" text-anchor="middle" font-size="16" font-weight="700" fill="#FF5A5F" font-family="-apple-system,sans-serif">⏱ 00:47</text>
-  <text x="970" y="300" text-anchor="middle" font-size="13" font-weight="700" fill="#3B3A4E" font-family="-apple-system,sans-serif">1분 전 경고</text>
-  <text x="970" y="318" text-anchor="middle" font-size="11" fill="#9A8F86" font-family="-apple-system,sans-serif">bg #FFE8E8 · text #FF5A5F</text>
-  <text x="970" y="336" text-anchor="middle" font-size="11" fill="#E07070" font-family="-apple-system,sans-serif">1분 00초 이하 · 펄스 애니메이션</text>
+  <!-- ── CHIP 3: 1분 전 (red + pulse ring) ── center ≈ 970 -->
+  <rect x="850" y="210" width="240" height="168" rx="22" fill="white" filter="url(#sh20)"/>
+  <!-- Pulse outer ring (SVG static; code side: repeating scale-up + fade) -->
+  <rect x="859" y="224" width="222" height="62" rx="31" fill="none" stroke="#FF5A5F" stroke-width="2.5" opacity="0.25"/>
+  <rect x="863" y="230" width="214" height="50" rx="25" fill="#FFE8E8"/>
+  <!-- 1분 미만 → 초만 표시 -->
+  <text x="970" y="261" text-anchor="middle" font-size="18" font-weight="700" fill="#FF5A5F" font-family="-apple-system,sans-serif">⏱ 47초</text>
+  <text x="970" y="312" text-anchor="middle" font-size="13" font-weight="700" fill="#3B3A4E" font-family="-apple-system,sans-serif">1분 전 경고</text>
+  <text x="970" y="330" text-anchor="middle" font-size="11" fill="#9A8F86" font-family="-apple-system,sans-serif">bg #FFE8E8 · text #FF5A5F</text>
+  <text x="970" y="348" text-anchor="middle" font-size="11" fill="#E07070" font-family="-apple-system,sans-serif">1분 미만 · 초만 표시 · 펄스 애니메이션</text>
 
   <!-- Footer notes -->
-  <text x="590" y="400" text-anchor="middle" font-size="12" fill="#9A8F86" font-family="-apple-system,sans-serif">타이머 없으면 칩 숨김 · 소리 없음(시각 전용) · 만료 → 색칠 자동 저장 후 즉시 홈(프로필 선택) 이동</text>
-  <text x="590" y="420" text-anchor="middle" font-size="12" fill="#9A8F86" font-family="-apple-system,sans-serif">연결 끊겨도 iPad 단독 카운트다운 유지(만료 시각 기준)</text>
+  <text x="590" y="415" text-anchor="middle" font-size="12" fill="#9A8F86" font-family="-apple-system,sans-serif">타이머 없으면 칩 숨김 · 소리 없음(시각 전용) · 만료 → 색칠 자동 저장 후 즉시 프로필 선택 화면(화면 1)으로 이동</text>
+  <text x="590" y="435" text-anchor="middle" font-size="12" fill="#9A8F86" font-family="-apple-system,sans-serif">표시 규칙: 6분+ → "X분 XX초" / 5분- → "X분 XX초" (앰버) / 1분- → "XX초" (레드·펄스) · 연결 끊겨도 iPad 단독 카운트 유지</text>
+
+  <!-- Divider before file label -->
+  <line x1="40" y1="460" x2="1140" y2="460" stroke="#EBDFD2" stroke-width="0.5"/>
 
   <!-- File label -->
-  <text x="40" y="476" font-size="11" fill="#B6A89B" font-family="-apple-system,sans-serif">20-timer-ipad.svg · iPad 캔버스 — 부모 타이머 표시 디자인</text>
+  <text x="40" y="496" font-size="11" fill="#B6A89B" font-family="-apple-system,sans-serif">20-timer-ipad.svg · iPad 캔버스 — 부모 타이머 표시 디자인 (개정 2026-06-04: 분초 표시 형식, 만료→프로필 선택 이동)</text>
 </svg>

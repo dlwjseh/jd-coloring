@@ -38,10 +38,13 @@ struct TemplateCellView: View {
                 }
             }
 
-            Text(template.name)
-                .font(Theme.rounded(19, weight: .bold))
+            // 이름 라벨 영역 — 고정 높이 유지(이름 없는 카드와 높이 통일).
+            // 이름 없으면 opacity 0으로 숨기되 .frame(height:)은 그대로 → 그리드 셀 높이 일정.
+            Text(template.name.isEmpty ? " " : template.name)
+                .font(Theme.rounded(15, weight: .semibold))
                 .foregroundStyle(inProgress ? Theme.ink : Theme.subText)
                 .lineLimit(1)
+                .opacity(template.name.isEmpty ? 0 : 1)
         }
     }
 }

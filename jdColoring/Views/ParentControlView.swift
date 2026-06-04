@@ -2,17 +2,19 @@ import SwiftUI
 import MultipeerConnectivity
 
 /// iPhone 부모 제어판 — 타이머 설정·진행 화면.
-/// 디자인 스펙 §23.
+/// 디자인 스펙 §23 / 기획서 §「타이머 설정 UX — 선택 상태 표시」.
 struct ParentControlView: View {
 
     @Environment(PeerSession.self) private var peer
 
-    // 타이머 상태
-    @State private var selectedMinutes = 20
+    // 타이머 설정 상태 — 텍스트 필드가 단일 진실 공급원
+    @State private var inputText: String = ""        // 항상 보이는 분 수 입력 필드
+    @State private var selectedMinutes: Int? = nil   // 강조 중인 프리셋 (nil = 없음)
+    @State private var startedMinutes: Int = 0       // 진행 중 링 표시용 (시작 시 고정)
+
+    // 타이머 진행 상태
     @State private var timerEnd: Date? = nil
     @State private var now = Date()
-    @State private var showCustomInput = false
-    @State private var customText = ""
 
     private let presets = [10, 15, 20, 30]
     private let clock = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
@@ -22,6 +24,12 @@ struct ParentControlView: View {
         return max(0, end.timeIntervalSince(now))
     }
     private var timerRunning: Bool { timerEnd != nil }
+
+    // inputText 에서 파싱한 유효 분 수 (0 이하·파싱 실패 → nil)
+    private var validMinutes: Int? {
+        guard let m = Int(inputText), m > 0 else { return nil }
+        return m
+    }
 
     var body: some View {
         ZStack {
@@ -44,17 +52,15 @@ struct ParentControlView: View {
                 Spacer()
             }
         }
-        // C-1/M-1: 타이머 진행 중일 때만 state 갱신 → 대기 화면에서 매초 body 재평가 제거
+        // 타이머 진행 중일 때만 매초 갱신 (대기 화면 불필요한 body 재평가 방지)
         .onReceive(clock) { date in
             guard timerRunning else { return }
             now = date
         }
         .onChange(of: remaining) { _, rem in
-            // iPhone 측 카운트다운도 만료 시 초기화
             if rem == 0 { timerEnd = nil }
         }
         .onChange(of: peer.isConnected) { _, connected in
-            // 재연결 시 현재 타이머 상태 재전송
             if connected, let end = timerEnd { peer.sendTimerStart(endDate: end) }
         }
     }
@@ -116,51 +122,23 @@ struct ParentControlView: View {
 
             Rectangle().fill(Theme.cardBorder).frame(height: 1).padding(.horizontal, 24)
 
-            // 프리셋 그리드
-            VStack(spacing: 10) {
-                Text("빠른 설정")
-                    .font(Theme.rounded(12, weight: .semibold))
-                    .foregroundStyle(Theme.faintText)
-
-                LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
-                    ForEach(presets, id: \.self) { min in
-                        presetCard(min)
-                    }
+            // 프리셋 카드 그리드
+            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
+                ForEach(presets, id: \.self) { min in
+                    presetCard(min)
                 }
+            }
+            .padding(.horizontal, 24)
+
+            // 분 수 입력 필드 — 항상 표시, 텍스트 필드가 단일 진실 공급원
+            minuteInputField
                 .padding(.horizontal, 24)
-            }
-
-            // 직접 입력
-            if showCustomInput {
-                HStack(spacing: 10) {
-                    TextField("분", text: $customText)
-                        .keyboardType(.numberPad)
-                        .font(Theme.rounded(20, weight: .semibold))
-                        .multilineTextAlignment(.center)
-                        .frame(width: 72, height: 44)
-                        .background(RoundedRectangle(cornerRadius: 14).fill(Theme.card))
-                        .overlay(RoundedRectangle(cornerRadius: 14).stroke(Theme.cardBorder, lineWidth: 1))
-                    Text("분")
-                        .font(Theme.rounded(16))
-                        .foregroundStyle(Theme.subText)
-                    Button("확인") {
-                        if let m = Int(customText), m > 0 { selectedMinutes = m }
-                        showCustomInput = false
-                        customText = ""
-                    }
-                    .font(Theme.rounded(15, weight: .semibold))
-                    .foregroundStyle(Theme.coral)
-                }
-            } else {
-                Button("직접 입력") { showCustomInput = true }
-                    .font(Theme.rounded(14))
-                    .foregroundStyle(Theme.subText)
-                    .underline()
-            }
 
             // 시작 버튼
             Button {
-                let end = Date().addingTimeInterval(TimeInterval(selectedMinutes * 60))
+                guard let mins = validMinutes else { return }
+                startedMinutes = mins
+                let end = Date().addingTimeInterval(TimeInterval(mins * 60))
                 timerEnd = end
                 peer.sendTimerStart(endDate: end)
             } label: {
@@ -171,25 +149,65 @@ struct ParentControlView: View {
                     .frame(height: 56)
                     .background(
                         RoundedRectangle(cornerRadius: 22)
-                            .fill(peer.isConnected ? Theme.coral : Theme.subText.opacity(0.35))
+                            .fill(peer.isConnected && validMinutes != nil
+                                  ? Theme.coral
+                                  : Theme.subText.opacity(0.35))
                     )
             }
             .buttonStyle(.plain)
-            .disabled(!peer.isConnected)
+            .disabled(!peer.isConnected || validMinutes == nil)
             .padding(.horizontal, 24)
         }
     }
 
+    // MARK: - 분 수 입력 필드
+
+    private var minuteInputField: some View {
+        ZStack(alignment: .trailing) {
+            TextField("분 수 입력", text: $inputText)
+                .keyboardType(.numberPad)
+                .multilineTextAlignment(.center)
+                .font(Theme.rounded(22, weight: .semibold))
+                .foregroundStyle(Theme.ink)
+                .onChange(of: inputText) { _, newVal in
+                    // 숫자만 허용
+                    let digits = newVal.filter { $0.isNumber }
+                    if digits != newVal { inputText = digits }
+                    // 프리셋 강조 동기화
+                    withAnimation(.easeInOut(duration: 0.18)) {
+                        let parsed = Int(digits)
+                        selectedMinutes = (parsed ?? 0) > 0 ? parsed : nil
+                    }
+                }
+
+            // "분" 라벨은 우측 고정, 터치 차단
+            Text("분")
+                .font(Theme.rounded(15, weight: .medium))
+                .foregroundStyle(Theme.subText)
+                .padding(.trailing, 16)
+                .allowsHitTesting(false)
+        }
+        .frame(height: 52)
+        .background(RoundedRectangle(cornerRadius: 14).fill(Theme.card))
+        .overlay(RoundedRectangle(cornerRadius: 14).stroke(Theme.cardBorder, lineWidth: 1.5))
+        .shadow(color: Theme.softShadow, radius: 4, x: 0, y: 2)
+    }
+
+    // MARK: - 프리셋 카드
+
     private func presetCard(_ min: Int) -> some View {
         let selected = selectedMinutes == min
-        return Button { selectedMinutes = min } label: {
+        return Button {
+            // inputText 만 업데이트 → .onChange 가 selectedMinutes 를 애니메이션과 함께 동기화
+            inputText = "\(min)"
+        } label: {
             VStack(spacing: 2) {
                 Text("\(min)")
                     .font(Theme.rounded(26, weight: .bold))
                     .foregroundStyle(selected ? .white : Theme.coral)
                 Text("분")
                     .font(Theme.rounded(12))
-                    .foregroundStyle(selected ? .white.opacity(0.8) : Theme.subText)
+                    .foregroundStyle(selected ? .white.opacity(0.82) : Theme.subText)
             }
             .frame(maxWidth: .infinity)
             .frame(height: 74)
@@ -208,14 +226,13 @@ struct ParentControlView: View {
                 .font(Theme.rounded(13, weight: .semibold))
                 .foregroundStyle(Theme.subText)
 
-            // 원형 링 + 카운트다운
             ZStack {
                 Circle()
                     .stroke(Theme.cardBorder, lineWidth: 14)
                     .frame(width: 200, height: 200)
 
                 if let rem = remaining {
-                    let fraction = rem / max(1, TimeInterval(selectedMinutes * 60))
+                    let fraction = rem / max(1, TimeInterval(startedMinutes * 60))
                     Circle()
                         .trim(from: 0, to: fraction)
                         .stroke(ringColor(rem), style: StrokeStyle(lineWidth: 14, lineCap: .round))
@@ -230,13 +247,12 @@ struct ParentControlView: View {
                             .font(Theme.rounded(42, weight: .heavy))
                             .foregroundStyle(ringColor(remaining ?? 0))
                     }
-                    Text("\(selectedMinutes)분 설정")
+                    Text("\(startedMinutes)분 설정")
                         .font(Theme.rounded(13))
                         .foregroundStyle(Theme.subText)
                 }
             }
 
-            // 경고 칩
             if let rem = remaining {
                 if rem <= 60 {
                     warningChip("⏱ 1분이 남았어요",
@@ -247,7 +263,6 @@ struct ParentControlView: View {
                 }
             }
 
-            // 취소 버튼
             Button {
                 timerEnd = nil
                 peer.sendTimerCancel()

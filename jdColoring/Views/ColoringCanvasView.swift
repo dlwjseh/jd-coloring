@@ -46,6 +46,12 @@ struct ColoringCanvasView: View {
     }
 
     private var existing: Artwork? { artworks.first }
+    /// 초기화 다이얼로그 타이틀: 이름 있으면 "'{name}'의 색칠을…", 없으면 "이 그림의 색칠을…"
+    private var resetAlertTitle: String {
+        template.name.isEmpty
+            ? "이 그림의 색칠을 모두 지울까요?"
+            : "'\(template.name)'의 색칠을 모두 지울까요?"
+    }
     private var aspect: CGSize {
         let s = lineImage?.size ?? CGSize(width: 1, height: 1)
         return (s.width > 0 && s.height > 0) ? s : CGSize(width: 1, height: 1)
@@ -106,17 +112,23 @@ struct ColoringCanvasView: View {
             guard let rem, rem <= 0, !timerExpired else { return }
             timerExpired = true
             timerEnd = nil
+            peerSession.receivedTimerEnd = nil   // 재진입 시 만료 타이머 재적용 방지
             saver.flushThen {
                 withAnimation { path.removeAll() }
             }
         }
         // MAJOR-2: 포그라운드 복귀 즉시 timerNow 갱신 → 백그라운드 중 만료된 타이머 즉시 반영
+        // 백그라운드 진입 시 flush → onDisappear가 보장되지 않는 시스템 종료에서도 색칠 보존.
+        // (수동 저장 전용으로 전환되면서 디바운스 안전망이 사라진 것을 보완.)
         .onChange(of: scenePhase) { _, phase in
             if phase == .active, timerEnd != nil {
                 timerNow = Date()
             }
+            if phase == .background {
+                saver.flush()
+            }
         }
-        .alert("’\(template.name)’의 색칠을 모두 지울까요?", isPresented: $showResetConfirm) {
+        .alert(resetAlertTitle, isPresented: $showResetConfirm) {
             Button("취소", role: .cancel) {}
             Button("초기화", role: .destructive) { performReset() }
         } message: {
@@ -161,9 +173,13 @@ struct ColoringCanvasView: View {
                         .shadow(color: Theme.softShadow, radius: 8, x: 0, y: 4)
                 }
                 .buttonStyle(.plain)
-                Text(template.name)
-                    .font(Theme.rounded(22, weight: .bold))
-                    .foregroundStyle(Theme.ink)
+                if !template.name.isEmpty {
+                    Text(template.name)
+                        .font(Theme.rounded(22, weight: .bold))
+                        .foregroundStyle(Theme.ink)
+                        .lineLimit(1)
+                        .frame(maxWidth: 400, alignment: .leading)
+                }
                 Spacer()
                 if let rem = timerRemaining {
                     TimerChip(remaining: rem, formatted: timerFormatted(rem))
@@ -186,12 +202,30 @@ struct ColoringCanvasView: View {
         .background(Capsule().fill(Color(hex: 0xE0F6E9)))
     }
 
-    /// 우측 열: 툴 레일 + 그 아래 색칠 초기화(휴지통) 버튼.
+    /// 우측 열: 저장 버튼(위) · 툴 레일(중) · 색칠 초기화(아래). 디자인 §25.
     private var rightColumn: some View {
         VStack(spacing: 16) {
+            saveButton
             rightRail
             resetButton
         }
+    }
+
+    /// 수동 저장 — 레일 위 원형 버튼. 초록 색감으로 저장됨 토스트와 시각 언어 통일.
+    /// flush만 호출. 토스트는 실제 저장 완료(persist) 시 flashSaved()가 발화 — 중복 방지.
+    private var saveButton: some View {
+        Button {
+            saver.flush()
+        } label: {
+            Image(systemName: "checkmark")
+                .font(.system(size: 26, weight: .bold))
+                .foregroundStyle(.white)
+                .frame(width: 96, height: 96)
+                .background(Circle().fill(Color(hex: 0x3FA86B)))
+                .shadow(color: Color(hex: 0x3FA86B).opacity(0.22), radius: 11, x: 0, y: 7)
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("저장")
     }
 
     /// 색칠 초기화 — 레일 아래 원형 휴지통 버튼(지름 = 레일 폭 96). 디자인 §19-1.

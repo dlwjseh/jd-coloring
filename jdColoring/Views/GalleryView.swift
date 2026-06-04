@@ -21,6 +21,8 @@ struct GalleryView: View {
     @State private var exitTask: Task<Void, Never>?
     @State private var isUploadPresented = false
     @State private var pendingDelete: Template?
+    @State private var renameTarget: Template?
+    @State private var renameText = ""
 
     private let columns = [GridItem(.adaptive(minimum: 190, maximum: 240), spacing: 44)]
     private let sheetAnimation: Animation = .spring(response: 0.5, dampingFraction: 0.82)
@@ -88,8 +90,10 @@ struct GalleryView: View {
             if isUploadPresented {
                 Color.black.opacity(0.28).ignoresSafeArea()
                     .transition(.opacity)
-                TemplateUploadView(onCancel: dismissUpload, onSave: saveTemplate)
-                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                TemplateUploadView(onCancel: dismissUpload) { name, image, thumb in
+                    saveTemplate(name, image, thumb)
+                }
+                .transition(.move(edge: .bottom).combined(with: .opacity))
             }
         }
         .onAppear {
@@ -112,6 +116,17 @@ struct GalleryView: View {
             Button("취소", role: .cancel) { }
         } message: { _ in
             Text("이 도안과 모든 식구의 색칠 작업물이 함께 사라져요. 되돌릴 수 없어요.")
+        }
+        // 이름 수정 얼럿 — iOS 16+에서 alert 안 TextField 지원
+        .alert("이름 수정", isPresented: Binding(
+            get: { renameTarget != nil },
+            set: { if !$0 { renameTarget = nil; renameText = "" } }
+        )) {
+            TextField("도안 이름 (선택)", text: $renameText)
+            Button("저장") { commitRename() }
+            Button("취소", role: .cancel) { renameTarget = nil }
+        } message: {
+            Text("이름을 비워두면 이름이 표시되지 않아요")
         }
     }
 
@@ -206,6 +221,12 @@ struct GalleryView: View {
 
     @ViewBuilder
     private func menuItems(for template: Template, hasArtwork: Bool) -> some View {
+        Button {
+            renameText = template.name
+            renameTarget = template
+        } label: {
+            Label("이름 수정", systemImage: "pencil")
+        }
         if hasArtwork {
             Button {
                 resetArtwork(template)
@@ -268,10 +289,8 @@ struct GalleryView: View {
     private func presentUpload() { withAnimation(sheetAnimation) { isUploadPresented = true } }
     private func dismissUpload() { withAnimation(sheetAnimation) { isUploadPresented = false } }
 
-    private func saveTemplate(_ image: Data, _ thumbnail: Data) {
-        let template = Template(name: "도안 \(templates.count + 1)",
-                                imageData: image,
-                                thumbnailData: thumbnail)
+    private func saveTemplate(_ name: String, _ image: Data, _ thumbnail: Data) {
+        let template = Template(name: name, imageData: image, thumbnailData: thumbnail)
         context.insert(template)
         do {
             try context.save()
@@ -279,6 +298,19 @@ struct GalleryView: View {
             print("도안 저장 실패: \(error)")
         }
         dismissUpload()
+    }
+
+    private func commitRename() {
+        // 삭제된 객체에 쓰는 것을 방지 (외부 동기화 등으로 도중 삭제된 경우 대비)
+        guard let target = renameTarget, target.modelContext != nil else {
+            renameTarget = nil
+            renameText = ""
+            return
+        }
+        target.name = renameText.trimmingCharacters(in: .whitespaces)
+        try? context.save()
+        renameTarget = nil
+        renameText = ""
     }
 
     private func deleteTemplate(_ template: Template) {

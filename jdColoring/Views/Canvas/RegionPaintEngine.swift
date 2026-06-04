@@ -74,7 +74,6 @@ final class RegionPaintEngine {
     // 저장
     private var lineart: PlatformImage?
     private var onPersist: ((Data, Data) -> Void)?
-    private var saveTask: Task<Void, Never>?
     private var isEncoding = false             // PNG 인코딩 진행 중(중복 저장 직렬화, C)
     private var resaveRequested = false        // 인코딩 중 들어온 저장 요청 → 끝나고 1회 재실행
     private var pendingFlushCompletion: (() -> Void)? = nil  // flushThen 완료 콜백
@@ -215,7 +214,6 @@ final class RegionPaintEngine {
         lastImagePoint = nil
         lockedLabel = 0
         scheduleDisplayRefresh()
-        scheduleSave()
     }
 
     private func bufferPending(_ event: PendingEvent) {
@@ -242,8 +240,7 @@ final class RegionPaintEngine {
     /// 색칠 초기화: 색칠 버퍼를 비우고 진행 중/예약된 저장을 무효화한다.
     /// (작업물 Artwork 삭제는 뷰 쪽 책임. 여기선 엔진 버퍼만 비운다.)
     @MainActor func clear() {
-        // 예약 저장 취소 + 인코딩 세대 증가 → 진행 중 백그라운드 저장 결과(옛 색칠) 폐기.
-        saveTask?.cancel(); saveTask = nil
+        // 인코딩 세대 증가 → 진행 중 백그라운드 저장 결과(옛 색칠) 폐기.
         resaveRequested = false
         clearGeneration &+= 1
         savingEnabled = false            // 새로 칠하기 전까지 빈 버퍼를 저장하지 않음
@@ -434,18 +431,7 @@ final class RegionPaintEngine {
 
     // MARK: - 저장
 
-    private func scheduleSave() {
-        guard savingEnabled else { return }      // 초기화 직후 빈 버퍼 저장 방지
-        saveTask?.cancel()
-        saveTask = Task { @MainActor [weak self] in
-            try? await Task.sleep(nanoseconds: 1_000_000_000)
-            guard !Task.isCancelled else { return }
-            self?.saveNow()
-        }
-    }
-
     @MainActor private func saveNow() {
-        saveTask?.cancel()
         guard savingEnabled else { return }      // 초기화 후 미채색 상태면 저장하지 않음(flush 포함)
         // C: 인코딩이 진행 중이면 중복 실행하지 않고, 끝난 뒤 1회만 다시 저장하도록 표시.
         guard !isEncoding else { resaveRequested = true; return }

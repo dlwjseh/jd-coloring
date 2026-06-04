@@ -1,0 +1,198 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1180" height="744" viewBox="0 0 1180 744" font-family="'SF Pro Rounded','Helvetica Neue',sans-serif">
+  <defs>
+    <filter id="sh" x="-40%" y="-40%" width="180%" height="180%">
+      <feDropShadow dx="0" dy="6" stdDeviation="10" flood-color="#C9A88C" flood-opacity="0.30"/>
+    </filter>
+    <filter id="shg" x="-40%" y="-40%" width="180%" height="180%">
+      <feDropShadow dx="0" dy="6" stdDeviation="10" flood-color="#3FA86B" flood-opacity="0.35"/>
+    </filter>
+    <filter id="sh2" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="3" stdDeviation="6" flood-color="#3B3A4E" flood-opacity="0.10"/>
+    </filter>
+  </defs>
+
+  <!-- Page bg -->
+  <rect width="1180" height="744" fill="#FFFDFB"/>
+
+  <!-- Header -->
+  <text x="40" y="34" font-size="19" font-weight="700" fill="#3B3A4E">저장 버튼 시인성 문제 — 원인 분석 + 해결 방향 3가지</text>
+  <text x="40" y="54" font-size="12" fill="#9A8F86">BubbleBackground 초록·티일 방울과 버튼 색이 같은 계열 → 해결: 채움 방식 또는 분리 방식 중 선택</text>
+
+  <!-- ══════════════════════════════════════════════════ -->
+  <!-- LEFT: 문제 재현                                    -->
+  <!-- ══════════════════════════════════════════════════ -->
+  <rect x="30" y="66" width="260" height="666" rx="20" fill="#FFF4EC" stroke="#EBDFD2" stroke-width="1"/>
+  <text x="160" y="88" text-anchor="middle" font-size="11" font-weight="600" fill="#FF5A5F">⚠ 현재 문제</text>
+
+  <!-- BubbleBackground 재현 (실제 앱 배경) -->
+  <!-- 티일 방울 (x=0.80, y=0.52 → 우중, 약 d130) -->
+  <circle cx="238" cy="414" r="100" fill="#36C5C0" opacity="0.09"/>
+  <!-- 그린 방울 (x=0.24, y=0.90 → 좌하, d180) -->
+  <circle cx="92" cy="638" r="130" fill="#5FD08A" opacity="0.12"/>
+  <!-- 코랄 방울 (x=0.58, y=0.94) -->
+  <circle cx="181" cy="670" r="80" fill="#FF7A59" opacity="0.10"/>
+  <!-- 퍼플 방울 (좌상) -->
+  <circle cx="42" cy="158" r="100" fill="#8A6CFF" opacity="0.12"/>
+
+  <!-- 현재 저장 버튼 (연초록 bg — 방울에 묻힘) -->
+  <text x="160" y="112" text-anchor="middle" font-size="10" fill="#9A8F86">티일 방울 영역</text>
+  <g filter="url(#sh)">
+    <circle cx="160" cy="220" r="48" fill="#E6F7EE" stroke="#A8DFBF" stroke-width="2"/>
+  </g>
+  <polyline points="140,220 153,234 181,204" fill="none" stroke="#3FA86B" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="160" y="282" text-anchor="middle" font-size="11" font-weight="600" fill="#FF5A5F">연초록 버튼</text>
+  <text x="160" y="298" text-anchor="middle" font-size="10" fill="#9A8F86">방울과 색이 겹침</text>
+
+  <!-- Arrow down -->
+  <line x1="160" y1="312" x2="160" y2="340" stroke="#FF5A5F" stroke-width="2" stroke-dasharray="4 3"/>
+  <polygon points="155,338 165,338 160,346" fill="#FF5A5F"/>
+
+  <!-- Same button on green bubble area (worse) -->
+  <text x="160" y="372" text-anchor="middle" font-size="10" fill="#9A8F86">초록 방울 영역</text>
+  <g filter="url(#sh)">
+    <circle cx="160" cy="460" r="48" fill="#E6F7EE" stroke="#A8DFBF" stroke-width="2"/>
+  </g>
+  <!-- Green bubble overlapping (simulated) -->
+  <circle cx="130" cy="490" r="90" fill="#5FD08A" opacity="0.14"/>
+  <polyline points="140,460 153,474 181,444" fill="none" stroke="#3FA86B" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Red X showing low contrast -->
+  <circle cx="208" cy="432" r="16" fill="#FF5A5F"/>
+  <text x="208" y="438" text-anchor="middle" font-size="14" font-weight="700" fill="white">✕</text>
+  <text x="160" y="524" text-anchor="middle" font-size="11" font-weight="600" fill="#FF5A5F">시인성 낮음</text>
+  <text x="160" y="540" text-anchor="middle" font-size="10" fill="#9A8F86">#E6F7EE vs #5FD08A</text>
+  <text x="160" y="556" text-anchor="middle" font-size="10" fill="#9A8F86">대비가 거의 없음</text>
+
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <!-- RIGHT: 해결 방향 3가지                                        -->
+  <!-- ══════════════════════════════════════════════════════════════ -->
+
+  <!-- ── Option A: 진한 초록 채움 (RECOMMENDED) ── -->
+  <rect x="308" y="66" width="268" height="666" rx="20" fill="#F0FAF4" stroke="#A8DFBF" stroke-width="2"/>
+  <rect x="360" y="76" width="164" height="26" rx="13" fill="#3FA86B"/>
+  <text x="442" y="93" text-anchor="middle" font-size="12" font-weight="700" fill="white">✓ 추천</text>
+  <text x="442" y="126" text-anchor="middle" font-size="14" font-weight="700" fill="#3B3A4E">A. 진한 초록 채움</text>
+  <text x="442" y="144" text-anchor="middle" font-size="11" fill="#9A8F86">Solid fill — 모든 배경에서 보임</text>
+
+  <!-- Demo on green bubble bg -->
+  <circle cx="390" cy="310" r="110" fill="#5FD08A" opacity="0.14"/>
+  <circle cx="470" cy="280" r="90" fill="#36C5C0" opacity="0.10"/>
+  <text x="442" y="178" text-anchor="middle" font-size="10" fill="#9A8F86">초록·티일 방울 배경 시뮬레이션</text>
+
+  <!-- Option A button -->
+  <g filter="url(#shg)">
+    <circle cx="442" cy="268" r="52" fill="#3FA86B"/>
+  </g>
+  <polyline points="420,268 435,284 466,246" fill="none" stroke="white" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Green check badge -->
+  <circle cx="494" cy="226" r="16" fill="#FFFFFF" stroke="#3FA86B" stroke-width="2"/>
+  <text x="494" y="232" text-anchor="middle" font-size="13" font-weight="700" fill="#3FA86B">✓</text>
+
+  <!-- Medium size demo -->
+  <g filter="url(#shg)">
+    <circle cx="442" cy="400" r="38" fill="#3FA86B"/>
+  </g>
+  <polyline points="425,400 436,412 460,382" fill="none" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="442" y="452" text-anchor="middle" font-size="10" fill="#9A8F86">실제 크기 r=48</text>
+
+  <line x1="320" y1="472" x2="564" y2="472" stroke="#A8DFBF" stroke-width="1"/>
+  <text x="328" y="492" font-size="12" font-weight="700" fill="#3B3A4E">왜 이게 최선인가</text>
+  <text x="328" y="510" font-size="11" fill="#3B3A4E">• 배경색과 무관하게 항상 보임</text>
+  <text x="328" y="526" font-size="11" fill="#3B3A4E">• 저장됨 토스트 색(#3FA86B)과 일치</text>
+  <text x="328" y="542" font-size="11" fill="#3B3A4E">• 흰 체크 = 완료·저장 직관적</text>
+  <text x="328" y="558" font-size="11" fill="#3B3A4E">• 초기화(회색)와 명확히 구분</text>
+  <text x="328" y="574" font-size="11" fill="#3B3A4E">• 아이에게도 "눌러야 할 버튼"</text>
+
+  <line x1="320" y1="592" x2="564" y2="592" stroke="#A8DFBF" stroke-width="1"/>
+  <text x="442" y="610" text-anchor="middle" font-size="11" font-weight="700" fill="#3B3A4E">스펙</text>
+  <text x="442" y="628" text-anchor="middle" font-size="11" fill="#3B3A4E">bg #3FA86B · icon white</text>
+  <text x="442" y="645" text-anchor="middle" font-size="11" fill="#9A8F86">border 없음 · shadow #3FA86B 22%</text>
+  <!-- Color chips -->
+  <circle cx="370" cy="668" r="12" fill="#3FA86B"/>
+  <text x="388" y="673" font-size="10" fill="#3B3A4E">#3FA86B</text>
+  <circle cx="450" cy="668" r="12" fill="white" stroke="#3FA86B" stroke-width="1.5"/>
+  <text x="468" y="673" font-size="10" fill="#3B3A4E">white icon</text>
+
+  <!-- ── Option B: 흰 배경 + 진한 초록 테두리 ── -->
+  <rect x="592" y="66" width="264" height="666" rx="20" fill="#F8F3EE" stroke="#EBDFD2" stroke-width="1.5"/>
+  <text x="724" y="108" text-anchor="middle" font-size="14" font-weight="700" fill="#3B3A4E">B. 흰 배경 + 강한 테두리</text>
+  <text x="724" y="126" text-anchor="middle" font-size="11" fill="#9A8F86">White bg — 다른 버튼과 일관성</text>
+
+  <!-- Demo on green bubble bg -->
+  <circle cx="680" cy="300" r="100" fill="#5FD08A" opacity="0.14"/>
+  <circle cx="760" cy="270" r="80" fill="#36C5C0" opacity="0.10"/>
+  <text x="724" y="160" text-anchor="middle" font-size="10" fill="#9A8F86">초록·티일 방울 배경 시뮬레이션</text>
+
+  <!-- Option B button -->
+  <g filter="url(#sh)">
+    <circle cx="724" cy="258" r="52" fill="#FFFFFF" stroke="#3FA86B" stroke-width="4"/>
+  </g>
+  <polyline points="702,258 717,274 748,236" fill="none" stroke="#3FA86B" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Medium demo -->
+  <g filter="url(#sh)">
+    <circle cx="724" cy="392" r="38" fill="#FFFFFF" stroke="#3FA86B" stroke-width="3.5"/>
+  </g>
+  <polyline points="707,392 718,404 742,374" fill="none" stroke="#3FA86B" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="724" y="444" text-anchor="middle" font-size="10" fill="#9A8F86">실제 크기 r=48</text>
+
+  <line x1="604" y1="464" x2="844" y2="464" stroke="#EBDFD2" stroke-width="1"/>
+  <text x="612" y="484" font-size="12" font-weight="700" fill="#3B3A4E">특징</text>
+  <text x="612" y="502" font-size="11" fill="#3B3A4E">• 흰 배경 → 방울과 완전히 분리</text>
+  <text x="612" y="518" font-size="11" fill="#3B3A4E">• 레일·초기화 버튼과 배경 통일</text>
+  <text x="612" y="534" font-size="11" fill="#9A8F86">• 테두리만 초록 → 강조 약할 수 있음</text>
+  <text x="612" y="550" font-size="11" fill="#9A8F86">• 만약 배경 버블이 버튼보다 크면</text>
+  <text x="612" y="566" font-size="11" fill="#9A8F86">  흰 원이 떠 있는 느낌으로 구분됨</text>
+
+  <line x1="604" y1="584" x2="844" y2="584" stroke="#EBDFD2" stroke-width="1"/>
+  <text x="724" y="608" text-anchor="middle" font-size="11" font-weight="700" fill="#3B3A4E">스펙</text>
+  <text x="724" y="626" text-anchor="middle" font-size="11" fill="#3B3A4E">bg #FFFFFF · border #3FA86B 4pt</text>
+  <text x="724" y="643" text-anchor="middle" font-size="11" fill="#9A8F86">icon #3FA86B · shadow 기존 softShadow</text>
+  <circle cx="656" cy="664" r="12" fill="white" stroke="#3FA86B" stroke-width="3"/>
+  <text x="675" y="669" font-size="10" fill="#3B3A4E">#FFFFFF bg</text>
+  <circle cx="760" cy="664" r="12" fill="#3FA86B"/>
+  <text x="778" y="669" font-size="10" fill="#3B3A4E">#3FA86B border+icon</text>
+
+  <!-- ── Option C: 흰 후광 링 (White Halo) ── -->
+  <rect x="872" y="66" width="274" height="666" rx="20" fill="#F8F3EE" stroke="#EBDFD2" stroke-width="1.5"/>
+  <text x="1009" y="108" text-anchor="middle" font-size="14" font-weight="700" fill="#3B3A4E">C. 흰 후광 링</text>
+  <text x="1009" y="126" text-anchor="middle" font-size="11" fill="#9A8F86">White halo — 배경과 물리적 분리</text>
+
+  <!-- Demo on green bubble bg -->
+  <circle cx="960" cy="300" r="110" fill="#5FD08A" opacity="0.14"/>
+  <circle cx="1050" cy="270" r="90" fill="#36C5C0" opacity="0.10"/>
+  <text x="1009" y="160" text-anchor="middle" font-size="10" fill="#9A8F86">초록·티일 방울 배경 시뮬레이션</text>
+
+  <!-- Option C button: white outer ring + light green inner -->
+  <g filter="url(#sh)">
+    <!-- White halo ring (outer) -->
+    <circle cx="1009" cy="258" r="58" fill="white"/>
+    <!-- Light green fill (inner) -->
+    <circle cx="1009" cy="258" r="52" fill="#E6F7EE" stroke="#A8DFBF" stroke-width="2"/>
+  </g>
+  <polyline points="987,258 1002,274 1033,236" fill="none" stroke="#3FA86B" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Medium demo -->
+  <g filter="url(#sh)">
+    <circle cx="1009" cy="392" r="44" fill="white"/>
+    <circle cx="1009" cy="392" r="38" fill="#E6F7EE" stroke="#A8DFBF" stroke-width="2"/>
+  </g>
+  <polyline points="992,392 1003,404 1027,374" fill="none" stroke="#3FA86B" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="1009" y="448" text-anchor="middle" font-size="10" fill="#9A8F86">실제 크기 r=48 + halo r=54</text>
+
+  <line x1="884" y1="466" x2="1134" y2="466" stroke="#EBDFD2" stroke-width="1"/>
+  <text x="892" y="486" font-size="12" font-weight="700" fill="#3B3A4E">특징</text>
+  <text x="892" y="504" font-size="11" fill="#3B3A4E">• 흰 링이 배경과 버튼을 분리</text>
+  <text x="892" y="520" font-size="11" fill="#3B3A4E">• 기존 연초록 색감 유지 가능</text>
+  <text x="892" y="536" font-size="11" fill="#9A8F86">• 구현이 가장 복잡 (레이어 2개)</text>
+  <text x="892" y="552" font-size="11" fill="#9A8F86">• 버튼이 커 보여 레이아웃 영향</text>
+  <text x="892" y="568" font-size="11" fill="#9A8F86">• A·B보다 시인성 개선 폭 작음</text>
+
+  <line x1="884" y1="586" x2="1134" y2="586" stroke="#EBDFD2" stroke-width="1"/>
+  <text x="1009" y="610" text-anchor="middle" font-size="11" font-weight="700" fill="#3B3A4E">스펙</text>
+  <text x="1009" y="628" text-anchor="middle" font-size="11" fill="#3B3A4E">outer white r=54 · inner #E6F7EE r=48</text>
+  <text x="1009" y="645" text-anchor="middle" font-size="11" fill="#9A8F86">border #A8DFBF · icon #3FA86B</text>
+  <circle cx="940" cy="664" r="12" fill="white" stroke="#EBDFD2" stroke-width="1.5"/>
+  <text x="958" y="669" font-size="10" fill="#3B3A4E">white halo</text>
+  <circle cx="1040" cy="664" r="12" fill="#E6F7EE" stroke="#A8DFBF" stroke-width="1.5"/>
+  <text x="1058" y="669" font-size="10" fill="#3B3A4E">#E6F7EE inner</text>
+</svg>

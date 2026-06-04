@@ -4,12 +4,13 @@ import PhotosUI
 /// 도안 만들기 시트 — 사진 선택 → 미리보기 → 저장. (사진을 가공 없이 그대로 도안으로 등록)
 struct TemplateUploadView: View {
     var onCancel: () -> Void
-    /// (색칠용 이미지, 그리드 표시용 썸네일)
-    var onSave: (Data, Data) -> Void
+    /// (도안 이름, 색칠용 이미지, 그리드 표시용 썸네일)
+    var onSave: (String, Data, Data) -> Void
 
     @State private var pickerItem: PhotosPickerItem?
     @State private var imageData: Data?       // 색칠용(다운샘플) + 미리보기
     @State private var thumbnailData: Data?    // 그리드 표시용
+    @State private var templateName = ""
     @State private var isProcessing = false
     @State private var loadTask: Task<Void, Never>?
 
@@ -40,6 +41,15 @@ struct TemplateUploadView: View {
                 emptyPicker
             }
 
+            // 도안 이름 입력 — 선택 사항. 비워도 저장 가능.
+            TextField("도안 이름 (선택)", text: $templateName)
+                .font(Theme.rounded(18))
+                .padding(.horizontal, 18)
+                .padding(.vertical, 14)
+                .background(RoundedRectangle(cornerRadius: 14).fill(Theme.card))
+                .overlay(RoundedRectangle(cornerRadius: 14).stroke(Theme.cardBorder, lineWidth: 1.5))
+                .submitLabel(.done)
+
             HStack(spacing: 20) {
                 Button(action: onCancel) {
                     Text("취소")
@@ -51,7 +61,9 @@ struct TemplateUploadView: View {
                 .buttonStyle(.plain)
 
                 Button {
-                    if let img = imageData, let thumb = thumbnailData { onSave(img, thumb) }
+                    if let img = imageData, let thumb = thumbnailData {
+                        onSave(templateName.trimmingCharacters(in: .whitespaces), img, thumb)
+                    }
                 } label: {
                     Text("도안 저장")
                         .font(Theme.rounded(22, weight: .bold))
@@ -72,7 +84,10 @@ struct TemplateUploadView: View {
             guard let item else { return }
             startProcessing(item)
         }
-        .onDisappear { loadTask?.cancel() }
+        .onDisappear {
+            loadTask?.cancel()
+            templateName = ""
+        }
     }
 
     // MARK: - Subviews
