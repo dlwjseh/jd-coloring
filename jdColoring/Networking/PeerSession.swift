@@ -5,7 +5,11 @@ import UIKit
 /// 부모(iPhone) ↔ 아이(iPad) 1:1 로컬 연결.
 /// iPad = 광고(Advertiser), iPhone = 탐색(Browser) + 초대.
 /// 인터넷 불필요 — WiFi Direct / 블루투스 자동 선택.
+///
+/// @MainActor: 모든 공개 상태·메서드가 메인 스레드에서만 접근됨.
+/// 델리게이트는 nonisolated + Task { @MainActor in } 로 메인으로 hop.
 @Observable
+@MainActor
 final class PeerSession: NSObject {
 
     enum Role { case pad, phone }
@@ -21,26 +25,47 @@ final class PeerSession: NSObject {
     // MARK: - 내부
     private let role: Role
     private let myPeer: MCPeerID
-    private var session: MCSession!
-    private var advertiser: MCNearbyServiceAdvertiser?
-    private var browser: MCNearbyServiceBrowser?
+    // nonisolated(unsafe): MPC 객체는 자체 스레드 안전.
+    // deinit(비결정적 스레드)과 nonisolated 델리게이트에서도 정리·접근 필요.
+    nonisolated(unsafe) private var session: MCSession!
+    nonisolated(unsafe) private var advertiser: MCNearbyServiceAdvertiser?
+    nonisolated(unsafe) private var browser: MCNearbyServiceBrowser?
 
     private static let serviceType = "jd-coloring"
+    // 매 메시지마다 인스턴스를 생성하지 않도록 정적 재사용 (L-2 해소)
+    private static let encoder = JSONEncoder()
+    private static let decoder = JSONDecoder()
+
+    /// 기기별 고유 4자리 suffix — MCPeerID 표시명 중복 방지 (M-5 해소).
+    /// 동일 모델명("iPad")이 여러 대여도 화면에서 구분 가능하게.
+    private static let peerSuffix: String = {
+        let key = "jd.peerSuffix"
+        if let s = UserDefaults.standard.string(forKey: key) { return s }
+        let s = String(UUID().uuidString.suffix(4))
+        UserDefaults.standard.set(s, forKey: key)
+        return s
+    }()
 
     init(role: Role) {
         self.role = role
-        self.myPeer = MCPeerID(displayName: UIDevice.current.name)
+        // 기기 이름 + 고유 suffix 조합으로 표시명 중복 방지
+        self.myPeer = MCPeerID(displayName: "\(UIDevice.current.name)-\(Self.peerSuffix)")
         super.init()
         session = MCSession(peer: myPeer, securityIdentity: nil, encryptionPreference: .required)
         session.delegate = self
-        start()
+        startNetworking()
     }
 
-    deinit { stop() }
+    deinit {
+        // MPC 메서드는 스레드 안전 → deinit 스레드에서 직접 정리
+        advertiser?.stopAdvertisingPeer()
+        browser?.stopBrowsingForPeers()
+        session.disconnect()
+    }
 
-    // MARK: - 시작 / 중지
+    // MARK: - 네트워킹 시작 / 백그라운드 대응 (M-4 해소)
 
-    private func start() {
+    private func startNetworking() {
         switch role {
         case .pad:
             let ad = MCNearbyServiceAdvertiser(peer: myPeer, discoveryInfo: nil,
@@ -56,10 +81,18 @@ final class PeerSession: NSObject {
         }
     }
 
-    private func stop() {
+    /// 앱이 백그라운드로 진입할 때 호출. 광고·탐색을 멈춰 배터리 소모를 줄인다.
+    func suspend() {
         advertiser?.stopAdvertisingPeer()
         browser?.stopBrowsingForPeers()
-        session.disconnect()
+    }
+
+    /// 앱이 포그라운드로 복귀할 때 호출. 광고·탐색을 재개한다.
+    func resume() {
+        switch role {
+        case .pad: advertiser?.startAdvertisingPeer()
+        case .phone: browser?.startBrowsingForPeers()
+        }
     }
 
     // MARK: - 송신 (iPhone → iPad)
@@ -82,58 +115,65 @@ final class PeerSession: NSObject {
     private func send(_ message: PeerMessage) {
         guard isConnected else { return }
         let peers = session.connectedPeers
-        guard !peers.isEmpty, let data = try? JSONEncoder().encode(message) else { return }
+        guard !peers.isEmpty, let data = try? Self.encoder.encode(message) else { return }
         try? session.send(data, toPeers: peers, with: .reliable)
     }
 }
 
 // MARK: - MCSessionDelegate
+// nonisolated: MPC가 백그라운드 스레드에서 호출 → Task { @MainActor in } 로 상태 업데이트
 
 extension PeerSession: MCSessionDelegate {
-    func session(_ session: MCSession, peer peerID: MCPeerID, didChange state: MCSessionState) {
-        DispatchQueue.main.async {
-            switch state {
+    nonisolated func session(_ session: MCSession, peer peerID: MCPeerID,
+                              didChange state: MCSessionState) {
+        let p = peerID, s = state
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            switch s {
             case .connected:
-                self.isConnected = true
-                self.connectedPeerName = peerID.displayName
-                self.nearbyPeers.removeAll { $0 == peerID }
+                isConnected = true
+                connectedPeerName = p.displayName
+                nearbyPeers.removeAll { $0 == p }
             case .notConnected:
                 if session.connectedPeers.isEmpty {
-                    self.isConnected = false
-                    self.connectedPeerName = nil
+                    isConnected = false
+                    connectedPeerName = nil
                 }
             default: break
             }
         }
     }
 
-    func session(_ session: MCSession, didReceive data: Data, fromPeer peerID: MCPeerID) {
-        guard let msg = try? JSONDecoder().decode(PeerMessage.self, from: data) else { return }
-        DispatchQueue.main.async {
+    nonisolated func session(_ session: MCSession, didReceive data: Data,
+                              fromPeer peerID: MCPeerID) {
+        guard let msg = try? PeerSession.decoder.decode(PeerMessage.self, from: data) else { return }
+        Task { @MainActor [weak self] in
+            guard let self else { return }
             switch msg {
-            case .timerStart(let endDate):
-                self.receivedTimerEnd = endDate
-            case .timerCancel:
-                self.receivedTimerEnd = nil
+            case .timerStart(let endDate): receivedTimerEnd = endDate
+            case .timerCancel:             receivedTimerEnd = nil
             }
         }
     }
 
-    func session(_ session: MCSession, didReceive stream: InputStream,
-                 withName streamName: String, fromPeer peerID: MCPeerID) {}
-    func session(_ session: MCSession, didStartReceivingResourceWithName resourceName: String,
-                 fromPeer peerID: MCPeerID, with progress: Progress) {}
-    func session(_ session: MCSession, didFinishReceivingResourceWithName resourceName: String,
-                 fromPeer peerID: MCPeerID, at localURL: URL?, withError error: Error?) {}
+    nonisolated func session(_ session: MCSession, didReceive stream: InputStream,
+                              withName streamName: String, fromPeer peerID: MCPeerID) {}
+    nonisolated func session(_ session: MCSession,
+                              didStartReceivingResourceWithName resourceName: String,
+                              fromPeer peerID: MCPeerID, with progress: Progress) {}
+    nonisolated func session(_ session: MCSession,
+                              didFinishReceivingResourceWithName resourceName: String,
+                              fromPeer peerID: MCPeerID, at localURL: URL?,
+                              withError error: Error?) {}
 }
 
 // MARK: - MCNearbyServiceAdvertiserDelegate (iPad)
 
 extension PeerSession: MCNearbyServiceAdvertiserDelegate {
-    func advertiser(_ advertiser: MCNearbyServiceAdvertiser,
-                    didReceiveInvitationFromPeer peerID: MCPeerID,
-                    withContext context: Data?,
-                    invitationHandler: @escaping (Bool, MCSession?) -> Void) {
+    nonisolated func advertiser(_ advertiser: MCNearbyServiceAdvertiser,
+                                didReceiveInvitationFromPeer peerID: MCPeerID,
+                                withContext context: Data?,
+                                invitationHandler: @escaping (Bool, MCSession?) -> Void) {
         invitationHandler(true, session)
     }
 }
@@ -141,13 +181,17 @@ extension PeerSession: MCNearbyServiceAdvertiserDelegate {
 // MARK: - MCNearbyServiceBrowserDelegate (iPhone)
 
 extension PeerSession: MCNearbyServiceBrowserDelegate {
-    func browser(_ browser: MCNearbyServiceBrowser, foundPeer peerID: MCPeerID,
-                 withDiscoveryInfo info: [String: String]?) {
-        DispatchQueue.main.async {
-            if !self.nearbyPeers.contains(peerID) { self.nearbyPeers.append(peerID) }
+    nonisolated func browser(_ browser: MCNearbyServiceBrowser, foundPeer peerID: MCPeerID,
+                              withDiscoveryInfo info: [String: String]?) {
+        Task { @MainActor [weak self] in
+            guard let self, !nearbyPeers.contains(peerID) else { return }
+            nearbyPeers.append(peerID)
         }
     }
-    func browser(_ browser: MCNearbyServiceBrowser, lostPeer peerID: MCPeerID) {
-        DispatchQueue.main.async { self.nearbyPeers.removeAll { $0 == peerID } }
+
+    nonisolated func browser(_ browser: MCNearbyServiceBrowser, lostPeer peerID: MCPeerID) {
+        Task { @MainActor [weak self] in
+            self?.nearbyPeers.removeAll { $0 == peerID }
+        }
     }
 }

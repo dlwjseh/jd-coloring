@@ -16,6 +16,8 @@ struct jdColoringApp: App {
     @State private var peerSession = PeerSession(
         role: jdColoringApp.isPhone ? .phone : .pad
     )
+    // M-4: 백그라운드 진입 시 광고·탐색 정지 → 배터리 절약
+    @Environment(\.scenePhase) private var scenePhase
 
     var body: some Scene {
         WindowGroup {
@@ -28,6 +30,13 @@ struct jdColoringApp: App {
             }
         }
         .modelContainer(for: [Profile.self, Template.self, Artwork.self])
+        .onChange(of: scenePhase) { _, phase in
+            switch phase {
+            case .background: peerSession.suspend()
+            case .active:     peerSession.resume()
+            default: break
+            }
+        }
     }
 }
 

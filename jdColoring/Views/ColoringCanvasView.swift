@@ -27,6 +27,7 @@ struct ColoringCanvasView: View {
     // 부모 타이머
     @State private var timerEnd: Date? = nil
     @State private var timerNow = Date()
+    @State private var timerExpired = false   // C-2: 만료 중복 처리 방지
     private let clockTimer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
     private let panelAnimation: Animation = .spring(response: 0.42, dampingFraction: 0.86)
@@ -79,20 +80,28 @@ struct ColoringCanvasView: View {
         }
         .onAppear {
             if lineImage == nil { lineImage = PlatformImage(data: template.imageData) }
+            // M-2: 화면 재진입 시 이미 타이머가 설정돼 있으면 동기화 (onChange는 값 변화 시만 발화)
+            if timerEnd == nil, let end = peerSession.receivedTimerEnd {
+                timerEnd = end
+            }
         }
         .onDisappear { saver.flush() }
-        // 부모 타이머 수신 (iPad 역할)
-        .onReceive(clockTimer) { timerNow = $0 }
+        // C-1: 타이머가 없을 때는 state 갱신 안 함 → body 불필요 재평가 차단
+        .onReceive(clockTimer) { date in
+            guard timerEnd != nil else { return }
+            timerNow = date
+        }
         .onChange(of: peerSession.receivedTimerEnd) { _, end in
+            timerExpired = false   // 새 타이머 시작/취소 시 expired 초기화
             withAnimation(.easeInOut(duration: 0.3)) { timerEnd = end }
         }
+        // C-2: expired 플래그로 만료 진입점 단일화 (onDisappear flush와 중복 방지)
         .onChange(of: timerRemaining) { _, rem in
-            guard let rem else { return }
-            if rem <= 0 {
-                timerEnd = nil
-                saver.flush()
-                dismiss()
-            }
+            guard let rem, rem <= 0, !timerExpired else { return }
+            timerExpired = true
+            timerEnd = nil
+            saver.flush()
+            dismiss()
         }
         .alert("’\(template.name)’의 색칠을 모두 지울까요?", isPresented: $showResetConfirm) {
             Button("취소", role: .cancel) {}

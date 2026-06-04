@@ -44,7 +44,11 @@ struct ParentControlView: View {
                 Spacer()
             }
         }
-        .onReceive(clock) { now = $0 }
+        // C-1/M-1: 타이머 진행 중일 때만 state 갱신 → 대기 화면에서 매초 body 재평가 제거
+        .onReceive(clock) { date in
+            guard timerRunning else { return }
+            now = date
+        }
         .onChange(of: remaining) { _, rem in
             // iPhone 측 카운트다운도 만료 시 초기화
             if rem == 0 { timerEnd = nil }
