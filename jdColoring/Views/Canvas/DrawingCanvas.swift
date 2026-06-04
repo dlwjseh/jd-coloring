@@ -150,16 +150,24 @@ private struct PenOnlyGestureView: UIViewRepresentable {
         }
 
         override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-            guard activeTouch == nil, let t = touches.first else { return }
+            guard let t = touches.first else { return }
             // penOnly ON 이면 Pencil 타입 아닌 터치는 버린다
             guard !penOnly || t.type == .pencil else { return }
+            // 이전 스트로크가 ended/cancelled 없이 남아있으면(시스템 제스처 선점 등)
+            // onEnded를 먼저 발화해 엔진 상태(lastImagePoint, lockedLabel)를 정리한 후 재시작
+            if activeTouch != nil { onEnded?() }
             activeTouch = t
             onChanged?(t.location(in: self))
         }
 
         override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
             guard let t = touches.first(where: { $0 === activeTouch }) else { return }
-            onChanged?(t.location(in: self))
+            // MAJOR-2: Apple Pencil 120Hz 입력에서 UIKit이 묶어 전달하는 중간 샘플을
+            // 모두 처리해 고속 스트로크의 끊김·각짐을 방지한다.
+            let samples = event?.coalescedTouches(for: t) ?? [t]
+            for sample in samples {
+                onChanged?(sample.location(in: self))
+            }
         }
 
         override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {

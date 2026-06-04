@@ -130,26 +130,26 @@ final class RegionPaintEngine {
         DispatchQueue.global(qos: .userInitiated).async { [weak self] in
             let labels = Self.buildLabels(from: cg, width: w, height: h)
             let grain = Self.makeGrain(width: w, height: h)
-            DispatchQueue.main.async {
+            Task { @MainActor [weak self] in
                 guard let self else { return }
                 self.labels = labels
                 self.grain = grain
                 self.ready = true
-                self.replayPendingEvents()   // 준비 전 들어온 입력 재생
+                self.replayPendingEvents()
             }
         }
     }
 
     /// 라벨링 완료 전 버퍼링한 입력을 정상 경로로 재생한다(H-3).
     /// 한 번에 다 돌리지 않고 청크로 나눠 여러 런루프 틱에 분산 → 메인 점유(hitch) 방지.
-    private func replayPendingEvents() {
+    @MainActor private func replayPendingEvents() {
         guard !pendingEvents.isEmpty else { return }
         let events = pendingEvents
         pendingEvents = []
         replayChunk(events, from: 0)
     }
 
-    private func replayChunk(_ events: [PendingEvent], from start: Int) {
+    @MainActor private func replayChunk(_ events: [PendingEvent], from start: Int) {
         let end = min(start + 200, events.count)
         for i in start..<end {
             switch events[i] {
@@ -158,7 +158,7 @@ final class RegionPaintEngine {
             }
         }
         if end < events.count {
-            DispatchQueue.main.async { [weak self] in self?.replayChunk(events, from: end) }
+            Task { @MainActor [weak self] in self?.replayChunk(events, from: end) }
         }
     }
 
@@ -177,7 +177,7 @@ final class RegionPaintEngine {
 
     // MARK: - 스트로크 입력 (뷰 좌표 → 이미지 픽셀)
 
-    func strokeChanged(at viewPoint: CGPoint, viewSize: CGSize) {
+    @MainActor func strokeChanged(at viewPoint: CGPoint, viewSize: CGSize) {
         guard width > 0, viewSize.width > 0, viewSize.height > 0 else { return }
         guard ready else {                       // H-3: 라벨링 전이면 버퍼링
             bufferPending(.changed(viewPoint, viewSize))
@@ -206,7 +206,7 @@ final class RegionPaintEngine {
         scheduleDisplayRefresh()
     }
 
-    func strokeEnded() {
+    @MainActor func strokeEnded() {
         guard ready else {                       // H-3
             bufferPending(.ended)
             return
