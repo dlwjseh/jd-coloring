@@ -1,0 +1,397 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1000" viewBox="0 0 1800 1000" font-family="'SF Pro Rounded','Helvetica Neue',sans-serif">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#FFF4EC"/>
+    </linearGradient>
+    <filter id="sh" x="-40%" y="-40%" width="180%" height="180%">
+      <feDropShadow dx="0" dy="7" stdDeviation="11" flood-color="#C9A88C" flood-opacity="0.35"/>
+    </filter>
+    <filter id="shCard" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="6" stdDeviation="12" flood-color="#C9A88C" flood-opacity="0.28"/>
+    </filter>
+    <filter id="shSm" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="3" stdDeviation="6" flood-color="#C9A88C" flood-opacity="0.28"/>
+    </filter>
+    <clipPath id="canvasClipA">
+      <rect x="40" y="116" width="840" height="664" rx="32"/>
+    </clipPath>
+    <clipPath id="canvasClipB">
+      <rect x="1040" y="116" width="840" height="664" rx="32"/>
+    </clipPath>
+  </defs>
+
+  <!-- ─── 전체 배경 ─── -->
+  <rect width="1800" height="1000" fill="#F5F0EA"/>
+
+  <!-- ======================================================
+       FRAME A — 줌인 상태 (2×) : 확대된 캔버스 + 배율 뱃지
+       ====================================================== -->
+
+  <!-- 배경 그라데이션 -->
+  <rect x="0" y="0" width="880" height="900" rx="0" fill="url(#bg)"/>
+  <!-- 배경 방울 -->
+  <circle cx="60" cy="150" r="120" fill="#8A6CFF" opacity="0.09"/>
+  <circle cx="820" cy="110" r="100" fill="#36C5C0" opacity="0.09"/>
+  <circle cx="70" cy="820" r="80" fill="#FFC740" opacity="0.09"/>
+
+  <!-- 프레임 레이블 -->
+  <text x="440" y="38" font-size="20" font-weight="700" fill="#9A8F86" text-anchor="middle">A — 줌인 상태 (2×)</text>
+
+  <!-- 슬림 상단 -->
+  <g filter="url(#shSm)">
+    <circle cx="72" cy="76" r="30" fill="#FFFFFF" stroke="#EBDFD2" stroke-width="2"/>
+  </g>
+  <path d="M 82 62 L 64 76 L 82 90" fill="none" stroke="#3B3A4E" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="118" y="85" font-size="20" font-weight="700" fill="#3B3A4E">꽃 도안</text>
+
+  <!-- 배율 뱃지 (1x 초과일 때만 노출) — 좌상단, 뒤로 버튼 아래 -->
+  <g filter="url(#shSm)">
+    <rect x="40" y="120" width="64" height="30" rx="15" fill="#3B3A4E" opacity="0.82"/>
+  </g>
+  <text x="72" y="140" font-size="15" font-weight="800" fill="#FFFFFF" text-anchor="middle">2×</text>
+
+  <!-- ── 좌측 대형 캔버스 카드 (줌인: 도안이 확대돼 일부만 보임) ── -->
+  <g filter="url(#shCard)">
+    <rect x="40" y="116" width="840" height="664" rx="32" fill="#FFFFFF" stroke="#EBDFD2" stroke-width="2"/>
+  </g>
+
+  <!-- 줌인 상태: 도안이 2배로 확대되어 캔버스 클립 영역 안에 꽉 참 -->
+  <g clip-path="url(#canvasClipA)">
+    <!-- 색칠 레이어 (확대된 꽃: 위 꽃잎 3개 + 중심 채워짐, 아래 2개 미착수) -->
+    <!-- 확대(2×)로 꽃이 크고 일부가 클립됨 -->
+    <g transform="translate(460,390) scale(2.2)">
+      <!-- 색칠된 꽃잎들 -->
+      <circle cx="0"   cy="-90"  r="58" fill="#FFC6DD"/>
+      <circle cx="78"  cy="-45"  r="58" fill="#FFC6DD"/>
+      <circle cx="-78" cy="-45"  r="58" fill="#FFC6DD"/>
+      <!-- 미착수 꽃잎 (흰색) -->
+      <circle cx="48"  cy="65"   r="58" fill="#FFFFFF"/>
+      <circle cx="-48" cy="65"   r="58" fill="#FFFFFF"/>
+      <!-- 중심 -->
+      <circle cx="0"   cy="0"    r="46" fill="#FFD66B"/>
+      <!-- 라인아트 오버레이 -->
+      <g fill="none" stroke="#3B3A4E" stroke-width="3.5" stroke-linejoin="round">
+        <circle cx="0"   cy="-90"  r="58"/>
+        <circle cx="78"  cy="-45"  r="58"/>
+        <circle cx="-78" cy="-45"  r="58"/>
+        <circle cx="48"  cy="65"   r="58"/>
+        <circle cx="-48" cy="65"   r="58"/>
+        <circle cx="0"   cy="0"    r="46"/>
+      </g>
+    </g>
+    <!-- 확대로 인해 캔버스 가장자리가 보임 암시: 우하단 모서리 도안 밖 영역 -->
+    <rect x="680" y="560" width="200" height="220" fill="#FFF4EC" opacity="0.5"/>
+
+    <!-- 펜 커서 (미착수 꽃잎 근처) -->
+    <g transform="translate(560,640)">
+      <line x1="0" y1="0" x2="0" y2="-30" stroke="#FF6FAF" stroke-width="3.5" stroke-linecap="round"/>
+      <ellipse cx="0" cy="-30" rx="5" ry="7" fill="#FF6FAF"/>
+    </g>
+  </g>
+
+  <!-- ── 우측 저장 버튼 (레일 위) ── -->
+  <g filter="url(#sh)">
+    <circle cx="924" cy="154" r="48" fill="#3FA86B"/>
+  </g>
+  <!-- checkmark -->
+  <path d="M 904 154 l 12 13 l 22 -22" fill="none" stroke="white" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- ── 우측 툴 레일 ── -->
+  <g filter="url(#sh)">
+    <rect x="876" y="218" width="96" height="496" rx="46" fill="#FFFFFF" stroke="#EBDFD2" stroke-width="2"/>
+  </g>
+  <!-- 현재색 동그라미 (코랄, = 색 고르기 버튼) -->
+  <circle cx="924" cy="274" r="27" fill="#FF7A59"/>
+  <circle cx="924" cy="274" r="27" fill="none" stroke="#3B3A4E" stroke-width="3.5"/>
+  <!-- 구분선 -->
+  <line x1="890" y1="318" x2="958" y2="318" stroke="#EBDFD2" stroke-width="2"/>
+  <!-- 도구: 브러쉬(활성) -->
+  <text x="924" y="366" font-size="28" text-anchor="middle" fill="#FF7A59" font-weight="600">􀎑</text>
+  <rect x="904" y="344" width="40" height="44" rx="12" fill="#FF7A59" opacity="0.12"/>
+  <!-- 도구: 색연필(비활성) -->
+  <text x="924" y="420" font-size="28" text-anchor="middle" fill="#3B3A4E" font-weight="600">✏️</text>
+  <!-- 구분선 -->
+  <line x1="890" y1="446" x2="958" y2="446" stroke="#EBDFD2" stroke-width="2"/>
+  <!-- 굵기 점 4단 -->
+  <circle cx="924" cy="474" r="5"  fill="#3B3A4E"/>
+  <circle cx="924" cy="504" r="8"  fill="#3B3A4E"/>
+  <circle cx="924" cy="538" r="11" fill="#FF6FAF"/>
+  <circle cx="924" cy="576" r="14" fill="#3B3A4E"/>
+  <!-- 구분선 -->
+  <line x1="890" y1="606" x2="958" y2="606" stroke="#EBDFD2" stroke-width="2"/>
+  <!-- 지우개 -->
+  <rect x="907" y="622" width="34" height="22" rx="5" fill="#F0E8F8" stroke="#C9A8E0" stroke-width="1.5"/>
+  <rect x="907" y="622" width="12" height="22" rx="3" fill="#C9A8E0"/>
+  <!-- 구분선 -->
+  <line x1="890" y1="660" x2="958" y2="660" stroke="#EBDFD2" stroke-width="2"/>
+  <!-- 저장 버튼 (레일 내) - 비활성 처리 없음(활성 상태) -->
+  <text x="924" y="696" font-size="24" text-anchor="middle" fill="#3B3A4E" font-weight="600">⬇</text>
+
+  <!-- ── 초기화 휴지통 버튼 (레일 아래) ── -->
+  <g filter="url(#shSm)">
+    <circle cx="924" cy="762" r="48" fill="#FFFFFF" stroke="#EBDFD2" stroke-width="2"/>
+  </g>
+  <text x="924" y="771" font-size="22" text-anchor="middle" fill="#6E6258">🗑</text>
+
+  <!-- 배율 뱃지 설명 화살표 -->
+  <line x1="105" y1="135" x2="130" y2="152" stroke="#FF7A59" stroke-width="2" stroke-dasharray="4 3"/>
+  <text x="40" y="115" font-size="14" font-weight="600" fill="#FF7A59">배율 뱃지</text>
+  <text x="40" y="131" font-size="12" fill="#9A8F86">(1× 초과 시만 표시)</text>
+
+  <!-- 프레임 구분선 -->
+  <line x1="900" y1="50" x2="900" y2="960" stroke="#EBDFD2" stroke-width="2" stroke-dasharray="8 6"/>
+
+  <!-- ======================================================
+       FRAME B — 패닝 제스처 + 더블탭 리셋 설명
+       ====================================================== -->
+
+  <rect x="900" y="0" width="900" height="900" fill="url(#bg)"/>
+  <circle cx="960"  cy="130" r="110" fill="#FF7A59" opacity="0.08"/>
+  <circle cx="1760" cy="820" r="90"  fill="#36C5C0" opacity="0.09"/>
+
+  <!-- 프레임 레이블 -->
+  <text x="1350" y="38" font-size="20" font-weight="700" fill="#9A8F86" text-anchor="middle">B — 제스처 가이드</text>
+
+  <!-- ── B-1: 핀치 줌 다이어그램 (상단) ── -->
+  <text x="1000" y="88" font-size="17" font-weight="800" fill="#3B3A4E">① 두 손가락 핀치 — 확대 / 축소</text>
+
+  <!-- 축소 상태 (왼쪽) -->
+  <g filter="url(#shCard)">
+    <rect x="940" y="100" width="240" height="200" rx="20" fill="#FFFFFF" stroke="#EBDFD2" stroke-width="2"/>
+  </g>
+  <text x="1060" y="130" font-size="12" fill="#9A8F86" text-anchor="middle">1× (기본)</text>
+  <!-- 작은 꽃 -->
+  <g transform="translate(1060,200) scale(0.55)">
+    <circle cx="0" cy="-72" r="46" fill="#FFC6DD"/>
+    <circle cx="62" cy="-36" r="46" fill="#FFC6DD"/>
+    <circle cx="-62" cy="-36" r="46" fill="#FFC6DD"/>
+    <circle cx="38" cy="52" r="46" fill="#FFFFFF" stroke="#EBDFD2" stroke-width="1"/>
+    <circle cx="-38" cy="52" r="46" fill="#FFFFFF" stroke="#EBDFD2" stroke-width="1"/>
+    <circle cx="0" cy="0" r="37" fill="#FFD66B"/>
+    <g fill="none" stroke="#3B3A4E" stroke-width="5" stroke-linejoin="round">
+      <circle cx="0" cy="-72" r="46"/>
+      <circle cx="62" cy="-36" r="46"/>
+      <circle cx="-62" cy="-36" r="46"/>
+      <circle cx="38" cy="52" r="46"/>
+      <circle cx="-38" cy="52" r="46"/>
+      <circle cx="0" cy="0" r="37"/>
+    </g>
+  </g>
+  <!-- 손가락 오므린 모양 (핀치 인) -->
+  <circle cx="1020" cy="165" r="11" fill="#3B3A4E" opacity="0.22"/>
+  <circle cx="1100" cy="165" r="11" fill="#3B3A4E" opacity="0.22"/>
+  <line x1="1020" y1="165" x2="1100" y2="165" stroke="#3B3A4E" stroke-width="1.5" stroke-dasharray="4 3" opacity="0.4"/>
+
+  <!-- 화살표 (핀치 아웃 → 확대) -->
+  <text x="1200" y="212" font-size="28" text-anchor="middle" fill="#FF7A59">→</text>
+  <text x="1200" y="230" font-size="11" fill="#9A8F86" text-anchor="middle">벌리기</text>
+
+  <!-- 확대 상태 (오른쪽) -->
+  <g filter="url(#shCard)">
+    <rect x="1230" y="100" width="240" height="200" rx="20" fill="#FFFFFF" stroke="#EBDFD2" stroke-width="2"/>
+  </g>
+  <!-- 배율 뱃지 -->
+  <rect x="1238" y="107" width="50" height="24" rx="12" fill="#3B3A4E" opacity="0.82"/>
+  <text x="1263" y="124" font-size="12" font-weight="800" fill="#FFFFFF" text-anchor="middle">3×</text>
+  <text x="1350" y="130" font-size="12" fill="#9A8F86" text-anchor="middle">최대 3×</text>
+  <!-- 확대된 꽃 (일부만 보임) -->
+  <clipPath id="boxB">
+    <rect x="1230" y="100" width="240" height="200" rx="20"/>
+  </clipPath>
+  <g clip-path="url(#boxB)" transform="translate(1350,200) scale(1.2)">
+    <circle cx="0" cy="-72" r="46" fill="#FFC6DD"/>
+    <circle cx="62" cy="-36" r="46" fill="#FFC6DD"/>
+    <circle cx="-62" cy="-36" r="46" fill="#FFC6DD"/>
+    <circle cx="38" cy="52" r="46" fill="#FFFFFF"/>
+    <circle cx="-38" cy="52" r="46" fill="#FFFFFF"/>
+    <circle cx="0" cy="0" r="37" fill="#FFD66B"/>
+    <g fill="none" stroke="#3B3A4E" stroke-width="4" stroke-linejoin="round">
+      <circle cx="0" cy="-72" r="46"/>
+      <circle cx="62" cy="-36" r="46"/>
+      <circle cx="-62" cy="-36" r="46"/>
+      <circle cx="38" cy="52" r="46"/>
+      <circle cx="-38" cy="52" r="46"/>
+      <circle cx="0" cy="0" r="37"/>
+    </g>
+  </g>
+  <!-- 손가락 벌린 모양 -->
+  <circle cx="1272" cy="158" r="11" fill="#3B3A4E" opacity="0.22"/>
+  <circle cx="1428" cy="158" r="11" fill="#3B3A4E" opacity="0.22"/>
+  <line x1="1272" y1="158" x2="1428" y2="158" stroke="#3B3A4E" stroke-width="1.5" stroke-dasharray="4 3" opacity="0.4"/>
+
+  <!-- ── B-2: 패닝 다이어그램 ── -->
+  <text x="1000" y="360" font-size="17" font-weight="800" fill="#3B3A4E">② 두 손가락 드래그 — 패닝 (이동)</text>
+
+  <g filter="url(#shCard)">
+    <rect x="940" y="380" width="500" height="200" rx="20" fill="#FFFFFF" stroke="#EBDFD2" stroke-width="2"/>
+  </g>
+  <!-- 줌인된 캔버스의 "보이는 창" 표현 -->
+  <rect x="940" y="380" width="500" height="200" rx="20" fill="#FFF4EC" opacity="0.4"/>
+  <!-- 큰 꽃 (캔버스 전체, 뷰포트 밖 부분은 클립됨) -->
+  <clipPath id="panBox">
+    <rect x="940" y="380" width="500" height="200" rx="20"/>
+  </clipPath>
+  <g clip-path="url(#panBox)" transform="translate(1100,490) scale(1.5)">
+    <circle cx="0" cy="-72" r="46" fill="#FFC6DD"/>
+    <circle cx="62" cy="-36" r="46" fill="#FFC6DD"/>
+    <circle cx="-62" cy="-36" r="46" fill="#FFC6DD"/>
+    <circle cx="38" cy="52" r="46" fill="#FFFFFF"/>
+    <circle cx="-38" cy="52" r="46" fill="#FFFFFF"/>
+    <circle cx="0" cy="0" r="37" fill="#FFD66B"/>
+    <g fill="none" stroke="#3B3A4E" stroke-width="3.5" stroke-linejoin="round">
+      <circle cx="0" cy="-72" r="46"/>
+      <circle cx="62" cy="-36" r="46"/>
+      <circle cx="-62" cy="-36" r="46"/>
+      <circle cx="38" cy="52" r="46"/>
+      <circle cx="-38" cy="52" r="46"/>
+      <circle cx="0" cy="0" r="37"/>
+    </g>
+  </g>
+  <!-- 뷰포트 경계 표시 -->
+  <rect x="940" y="380" width="500" height="200" rx="20" fill="none" stroke="#FF7A59" stroke-width="2.5" stroke-dasharray="7 4" opacity="0.7"/>
+  <!-- 두 손가락 + 이동 화살표 -->
+  <circle cx="1150" cy="460" r="13" fill="#3B3A4E" opacity="0.20"/>
+  <circle cx="1210" cy="460" r="13" fill="#3B3A4E" opacity="0.20"/>
+  <path d="M 1180 455 l 80 0" fill="none" stroke="#FF7A59" stroke-width="3" marker-end="url(#arrow)" stroke-linecap="round"/>
+  <text x="1180" y="510" font-size="13" fill="#9A8F86" text-anchor="middle">두 손가락으로 끌기 → 도안 이동</text>
+  <text x="1180" y="528" font-size="12" fill="#B6A89B" text-anchor="middle">경계 클램핑: 도안이 뷰 밖으로 완전히 나가지 않음</text>
+
+  <!-- ── B-3: 더블탭 리셋 다이어그램 ── -->
+  <text x="1000" y="640" font-size="17" font-weight="800" fill="#3B3A4E">③ 두 손가락 더블탭 — 1× 원위치 리셋</text>
+
+  <!-- Before: 줌인 -->
+  <g filter="url(#shCard)">
+    <rect x="940" y="660" width="200" height="160" rx="16" fill="#FFFFFF" stroke="#EBDFD2" stroke-width="2"/>
+  </g>
+  <rect x="947" y="666" width="46" height="22" rx="11" fill="#3B3A4E" opacity="0.82"/>
+  <text x="970" y="681" font-size="11" font-weight="800" fill="#FFFFFF" text-anchor="middle">2×</text>
+  <g clip-path="url(#zoomBefore)">
+  </g>
+  <clipPath id="zoomBefore"><rect x="940" y="660" width="200" height="160" rx="16"/></clipPath>
+  <g clip-path="url(#zoomBefore)" transform="translate(1040,745) scale(1.4)">
+    <circle cx="0" cy="-60" r="40" fill="#FFC6DD"/>
+    <circle cx="52" cy="-30" r="40" fill="#FFC6DD"/>
+    <circle cx="-52" cy="-30" r="40" fill="#FFC6DD"/>
+    <circle cx="0" cy="0" r="32" fill="#FFD66B"/>
+    <g fill="none" stroke="#3B3A4E" stroke-width="3.5">
+      <circle cx="0" cy="-60" r="40"/>
+      <circle cx="52" cy="-30" r="40"/>
+      <circle cx="-52" cy="-30" r="40"/>
+      <circle cx="32" cy="44" r="40"/>
+      <circle cx="-32" cy="44" r="40"/>
+      <circle cx="0" cy="0" r="32"/>
+    </g>
+  </g>
+  <!-- 두 손가락 더블탭 표시 -->
+  <circle cx="1010" cy="720" r="11" fill="#3B3A4E" opacity="0.20"/>
+  <circle cx="1060" cy="720" r="11" fill="#3B3A4E" opacity="0.20"/>
+  <text x="978" y="708" font-size="10" fill="#9A8F86" font-style="italic">tap tap</text>
+  <!-- 2회 파문 -->
+  <circle cx="1035" cy="720" r="18" fill="none" stroke="#FF7A59" stroke-width="1.5" opacity="0.5"/>
+  <circle cx="1035" cy="720" r="28" fill="none" stroke="#FF7A59" stroke-width="1" opacity="0.25"/>
+
+  <!-- 화살표 -->
+  <g transform="translate(1175,740)">
+    <path d="M 0 0 l 28 0" fill="none" stroke="#FF7A59" stroke-width="3" stroke-linecap="round"/>
+    <path d="M 22 -7 l 10 7 l -10 7" fill="none" stroke="#FF7A59" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <text x="1175" y="780" font-size="11" fill="#9A8F86">스프링 애니메이션</text>
+
+  <!-- After: 1배 리셋 -->
+  <g filter="url(#shCard)">
+    <rect x="1220" y="660" width="200" height="160" rx="16" fill="#FFFFFF" stroke="#EBDFD2" stroke-width="2"/>
+  </g>
+  <text x="1320" y="686" font-size="11" fill="#9A8F86" text-anchor="middle">1× (배율 뱃지 숨김)</text>
+  <g transform="translate(1320,755) scale(0.6)">
+    <circle cx="0" cy="-72" r="46" fill="#FFC6DD"/>
+    <circle cx="62" cy="-36" r="46" fill="#FFC6DD"/>
+    <circle cx="-62" cy="-36" r="46" fill="#FFC6DD"/>
+    <circle cx="38" cy="52" r="46" fill="#FFFFFF" stroke="#EBDFD2" stroke-width="2"/>
+    <circle cx="-38" cy="52" r="46" fill="#FFFFFF" stroke="#EBDFD2" stroke-width="2"/>
+    <circle cx="0" cy="0" r="37" fill="#FFD66B"/>
+    <g fill="none" stroke="#3B3A4E" stroke-width="5.5">
+      <circle cx="0" cy="-72" r="46"/>
+      <circle cx="62" cy="-36" r="46"/>
+      <circle cx="-62" cy="-36" r="46"/>
+      <circle cx="38" cy="52" r="46"/>
+      <circle cx="-38" cy="52" r="46"/>
+      <circle cx="0" cy="0" r="37"/>
+    </g>
+  </g>
+
+  <!-- ── 제스처 규칙 요약표 ── -->
+  <rect x="1490" y="80" width="290" height="310" rx="20" fill="#FFFFFF" stroke="#EBDFD2" stroke-width="1.5" filter="url(#shSm)"/>
+  <text x="1635" y="112" font-size="15" font-weight="800" fill="#3B3A4E" text-anchor="middle">제스처 규칙</text>
+  <line x1="1506" y1="122" x2="1764" y2="122" stroke="#EBDFD2" stroke-width="1.5"/>
+
+  <!-- 행 1 -->
+  <text x="1506" y="148" font-size="13" fill="#9A8F86">제스처</text>
+  <text x="1640" y="148" font-size="13" fill="#9A8F86">동작</text>
+  <line x1="1506" y1="158" x2="1764" y2="158" stroke="#EBDFD2" stroke-width="1"/>
+
+  <text x="1506" y="180" font-size="13" fill="#3B3A4E">두 손가락 핀치</text>
+  <text x="1640" y="180" font-size="13" fill="#3B3A4E">확대/축소 (1×–3×)</text>
+  <line x1="1506" y1="193" x2="1764" y2="193" stroke="#F0EAE2" stroke-width="1"/>
+
+  <text x="1506" y="215" font-size="13" fill="#3B3A4E">두 손가락 드래그</text>
+  <text x="1640" y="215" font-size="13" fill="#3B3A4E">패닝 (이동)</text>
+  <line x1="1506" y1="228" x2="1764" y2="228" stroke="#F0EAE2" stroke-width="1"/>
+
+  <text x="1506" y="250" font-size="13" fill="#3B3A4E">두 손가락 더블탭</text>
+  <text x="1640" y="250" font-size="13" fill="#3B3A4E">1× + 원위치 리셋</text>
+  <line x1="1506" y1="263" x2="1764" y2="263" stroke="#F0EAE2" stroke-width="1"/>
+
+  <text x="1506" y="285" font-size="13" fill="#3B3A4E">한 손가락/펜 드래그</text>
+  <text x="1640" y="285" font-size="13" fill="#3B3A4E">색칠 (기존 그대로)</text>
+  <line x1="1506" y1="298" x2="1764" y2="298" stroke="#F0EAE2" stroke-width="1"/>
+
+  <text x="1506" y="320" font-size="12" fill="#B6A89B">penOnly ON 상태에서도</text>
+  <text x="1506" y="336" font-size="12" fill="#B6A89B">핀치/패닝은 손가락 허용</text>
+  <text x="1506" y="352" font-size="12" fill="#B6A89B">(색칠만 펜 전용)</text>
+  <rect x="1496" y="308" width="278" height="72" rx="8" fill="#FFF8F5" stroke="#FFD5C7" stroke-width="1"/>
+  <text x="1506" y="320" font-size="12" fill="#B6A89B">penOnly ON 상태에서도</text>
+  <text x="1506" y="336" font-size="12" fill="#B6A89B">핀치/패닝은 손가락 허용</text>
+  <text x="1506" y="352" font-size="12" fill="#B6A89B">(색칠만 펜 전용)</text>
+
+  <!-- ── 배율 뱃지 스펙 ── -->
+  <rect x="1490" y="420" width="290" height="160" rx="20" fill="#FFFFFF" stroke="#EBDFD2" stroke-width="1.5" filter="url(#shSm)"/>
+  <text x="1635" y="450" font-size="15" font-weight="800" fill="#3B3A4E" text-anchor="middle">배율 뱃지 스펙</text>
+  <line x1="1506" y1="460" x2="1764" y2="460" stroke="#EBDFD2" stroke-width="1.5"/>
+
+  <!-- 뱃지 예시 -->
+  <rect x="1510" y="474" width="52" height="28" rx="14" fill="#3B3A4E" opacity="0.82"/>
+  <text x="1536" y="493" font-size="14" font-weight="800" fill="#FFFFFF" text-anchor="middle">2×</text>
+
+  <text x="1575" y="488" font-size="12" fill="#3B3A4E">배경 #3B3A4E · opacity 82%</text>
+  <text x="1575" y="504" font-size="12" fill="#9A8F86">텍스트 흰색 15pt/800</text>
+  <text x="1575" y="520" font-size="12" fill="#9A8F86">rx 15, 크기 64×30pt</text>
+
+  <line x1="1506" y1="530" x2="1764" y2="530" stroke="#F0EAE2" stroke-width="1"/>
+  <text x="1510" y="550" font-size="12" fill="#3B3A4E">위치</text>
+  <text x="1575" y="550" font-size="12" fill="#9A8F86">캔버스 좌상단 코너</text>
+  <text x="1510" y="566" font-size="12" fill="#3B3A4E">노출 조건</text>
+  <text x="1575" y="566" font-size="12" fill="#9A8F86">scale &gt; 1.0 일 때만</text>
+
+  <!-- ── 좌표 변환 개발 메모 ── -->
+  <rect x="1490" y="610" width="290" height="130" rx="20" fill="#FFF8F5" stroke="#FFD5C7" stroke-width="1.5" filter="url(#shSm)"/>
+  <text x="1635" y="640" font-size="14" font-weight="800" fill="#FF7A59" text-anchor="middle">⚠ 개발 핵심 주의</text>
+  <line x1="1506" y1="650" x2="1764" y2="650" stroke="#FFD5C7" stroke-width="1.5"/>
+  <text x="1510" y="672" font-size="12" fill="#3B3A4E">색칠 좌표 역변환 필수:</text>
+  <text x="1510" y="690" font-size="12" fill="#9A8F86">canvasPos =</text>
+  <text x="1510" y="706" font-size="12" fill="#9A8F86">(touchPoint − offset) ÷ scale</text>
+  <text x="1510" y="724" font-size="12" fill="#B6A89B">미적용 시 줌인 상태에서 색칠 위치 어긋남</text>
+
+  <!-- ── 범위 밖 메모 ── -->
+  <rect x="1490" y="770" width="290" height="140" rx="20" fill="#F5F5F5" stroke="#EBDFD2" stroke-width="1.5" filter="url(#shSm)"/>
+  <text x="1635" y="800" font-size="14" font-weight="800" fill="#9A8F86" text-anchor="middle">이번 범위 밖</text>
+  <line x1="1506" y1="810" x2="1764" y2="810" stroke="#EBDFD2" stroke-width="1.5"/>
+  <text x="1510" y="830" font-size="12" fill="#B6A89B">• 1× 미만 축소 (도안 축소 보기)</text>
+  <text x="1510" y="848" font-size="12" fill="#B6A89B">• 한 손가락 더블탭 리셋</text>
+  <text x="1510" y="866" font-size="12" fill="#B6A89B">• 줌 +/- 레일 버튼</text>
+  <text x="1510" y="884" font-size="12" fill="#B6A89B">• 줌 상태 저장 (재진입 시 1× 초기화)</text>
+  <text x="1510" y="902" font-size="12" fill="#B6A89B">• 더블탭 힌트 (미제공)</text>
+
+  <!-- ── 하단 파일명 ── -->
+  <text x="900" y="975" font-size="13" fill="#B6A89B" text-anchor="middle">27-canvas-zoom-pan.svg · 화면 3 캔버스 줌/팬 기능 · 2026-06-04</text>
+</svg>

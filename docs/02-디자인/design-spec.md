@@ -34,6 +34,7 @@
 | `23-template-name.svg` | **도안 이름** — 갤러리 카드(이름 있음/없음) · 업로드 시트 이름 입력 필드 · 롱프레스 [이름 수정] 메뉴 |
 | `24-canvas-save-button.svg` | **수동 저장 버튼** — 우측 툴 레일 지우개 아래 신규 항목 · BEFORE/AFTER 레일 비교 · 저장됨 토스트 |
 | `26-settings.svg` | **설정 버튼 + 앱 설정 시트** — 화면 1 좌상단 기어 버튼 위치 · 모달 시트 · "펜으로만 색칠하기" 토글 |
+| `27-canvas-zoom-pan.svg` | **캔버스 줌/팬** — 줌인 상태(배율 뱃지) · 핀치/패닝/더블탭 리셋 제스처 다이어그램 · 좌표 변환 메모 |
 
 ---
 
@@ -598,6 +599,65 @@ PC 코드 행 순서: R1 914·1084·915·916·1002·942·1003·1034·917 / R2 94
 - **좌상단**: 설정 버튼 (56pt, 기어) ← 신규 추가
 - **중앙**: 프로필 원들 (기존 유지)
 - **우하단**: '추가' 버튼 (96pt, 코랄) (기존 유지)
+
+---
+
+## 27. 캔버스 줌/팬 (`27-canvas-zoom-pan.svg`) — 추가 2026-06-04
+
+입력 기획서: `requirements.md` 화면 3 §「캔버스 줌/팬」. 두 손가락 핀치로 도안을 최대 3배까지 확대하고, 확대 상태에서 패닝하며 색칠, 더블탭으로 즉시 원위치 복귀.
+
+### 27-1. Frame A — 줌인 상태 (2×)
+
+**배율 뱃지**
+- **노출 조건**: `scale > 1.0` 일 때만 표시. `scale == 1.0` 이면 완전 숨김(opacity 0, 공간 차지 없음).
+- **위치**: 캔버스 카드 좌상단 코너 안쪽. 뒤로 버튼/도안명과 겹치지 않게 캔버스 rect 기준 `x+8, y+8`.
+- **스펙**:
+
+| 항목 | 값 |
+|------|-----|
+| 배경 | `#3B3A4E` opacity 82% |
+| 크기 | `64×30`, `rx15` |
+| 텍스트 | `"Nx"` (N = 반올림 배율) · 흰색 · `15pt/800` |
+| 등장/소멸 | `withAnimation(.easeInOut(duration:0.2))` |
+
+**캔버스 영역 동작**
+- `scaleEffect` + `offset` 변환은 **캔버스 카드 내부 콘텐츠**에만 적용. 카드 테두리·레일·저장 버튼·초기화 버튼은 고정.
+- 도안 비율은 그대로 유지하며 확대. 줌 중심 = 두 손가락 midpoint.
+
+### 27-2. Frame B — 제스처 가이드
+
+#### 핀치 줌
+- `MagnificationGesture`(SwiftUI) 또는 `UIPinchGestureRecognizer`(UIKit 래퍼).
+- `scaleState = clamp(currentScale * gestureScale, 1.0, 3.0)`.
+- `onEnded`에서 경계 이하면 스프링 복귀(`withAnimation(.spring())`).
+
+#### 패닝 (두 손가락 드래그)
+- 한 손가락 드래그(색칠)와 분리: `UIGestureRecognizerDelegate.numberOfTouches == 2` 일 때만 패닝 처리.
+- 오프셋 클램핑: `maxOffset = canvasSize * (scaleState - 1) / 2`. 도안 가장자리가 뷰 영역 밖으로 완전히 나가지 않음.
+- `onEnded`에서 경계 초과 시 스프링 복귀.
+
+#### 더블탭 리셋
+- `TapGesture(count: 2)` + `numberOfTouches == 2` 조건 (두 손가락).
+- `withAnimation(.spring(response: 0.42, dampingFraction: 0.78)) { scaleState = 1.0; offsetState = .zero }`.
+- 한 손가락 더블탭은 색칠 제스처와 충돌 → **두 손가락으로만** 지정.
+
+### 27-3. 색칠 좌표 역변환 (⚠️ 핵심)
+줌인 상태에서 색칠 터치 포인트를 캔버스 로컬 좌표로 변환해야 함:
+```
+canvasPos = (touchPoint − offsetState) ÷ scaleState
+```
+이 역변환 없이는 확대 상태에서 색칠이 엉뚱한 위치에 찍힘.
+
+### 27-4. penOnly 설정과 상호작용
+- `penOnly == true` 여도 **핀치·패닝·더블탭은 손가락 허용**. 손가락으로 색칠만 차단.
+- 드래그 제스처 `onChanged` 진입 시점에 `UITouch.type` 확인 → `.pencil` 이 아닌 `.direct` 이면 색칠 경로만 early return.
+
+### 27-5. 접근성
+- 핀치/패닝은 시스템 표준 제스처라 별도 `accessibilityActivate` 불필요.
+- 더블탭 리셋: `accessibilityCustomAction(name: "원래 크기로")` 추가 권장(두 손가락 더블탭이 일부 VoiceOver 제스처와 충돌 가능).
+
+### 27-6. 범위 밖
+- 1× 미만 축소, 한 손가락 더블탭 리셋, 줌 +/- 레일 버튼, 줌 상태 저장, 첫 진입 더블탭 힌트 — 모두 이번 제외.
 
 ---
 

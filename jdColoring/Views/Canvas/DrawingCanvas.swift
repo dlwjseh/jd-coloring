@@ -25,6 +25,14 @@ struct DrawingCanvas: View {
     let saver: CanvasSaver
     var onPersist: (_ progressData: Data, _ thumbnail: Data) -> Void
 
+    // ── 줌/팬 이벤트 콜백 ──────────────────────────────────────────────────
+    /// 핀치 배율 델타(1.0 기준). ended=true 이면 제스처 완료.
+    var onPinch: (_ delta: CGFloat, _ ended: Bool) -> Void = { _, _ in }
+    /// 패닝 델타(window 좌표계 pt). ended=true 이면 제스처 완료.
+    var onPan: (_ delta: CGSize, _ ended: Bool) -> Void = { _, _ in }
+    /// 두 손가락 더블탭 → 줌 리셋.
+    var onZoomReset: () -> Void = {}
+
     @State private var engine = RegionPaintEngine()
 
     var body: some View {
@@ -36,13 +44,16 @@ struct DrawingCanvas: View {
                 }
             }
             .contentShape(Rectangle())
-            // DragGesture 대신 UIViewRepresentable 기반 터치 핸들러 사용.
-            // UITouch.type 을 직접 확인해 penOnly 설정을 적용한다.
+            // 단일 터치 색칠 + 두 손가락 줌/팬/더블탭을 하나의 UIView에서 처리.
+            // UIKit이 scaleEffect 역변환을 적용해 색칠 좌표는 자동으로 canvas 로컬 공간으로 들어옴.
             .overlay {
                 PenOnlyGestureView(
                     penOnly: penOnly,
                     onChanged: { loc in engine.strokeChanged(at: loc, viewSize: geo.size) },
-                    onEnded:   { engine.strokeEnded() }
+                    onEnded:   { engine.strokeEnded() },
+                    onPinch:   onPinch,
+                    onPan:     onPan,
+                    onZoomReset: onZoomReset
                 )
             }
             .onAppear {
@@ -56,21 +67,17 @@ struct DrawingCanvas: View {
                 saver.reset = { engine.clear() }
             }
             .onDisappear {
-                // CADisplayLink는 메인 스레드에서만 안전하게 invalidate 가능.
-                // deinit이 어느 스레드에서 불릴지 보장이 없어 여기서 명시 정리.
                 engine.stopDisplayLink()
             }
-            // 부모가 라인아트를 늦게 디코딩하면(onAppear 시 nil) 준비가 안 되므로,
-            // 라인아트가 채워지는 시점에 다시 구성한다.
             .onChange(of: lineart == nil) { _, isNil in
                 if !isNil {
                     engine.configure(lineart: lineart, initialData: initialData, onPersist: onPersist)
                 }
             }
-            .onChange(of: color) { _, c in engine.color = c }
+            .onChange(of: color)     { _, c in engine.color = c }
             .onChange(of: lineWidth) { _, w in engine.brushPointWidth = w }
-            .onChange(of: isEraser) { _, e in engine.isEraser = e }
-            .onChange(of: tool) { _, t in engine.tool = t }
+            .onChange(of: isEraser)  { _, e in engine.isEraser = e }
+            .onChange(of: tool)      { _, t in engine.tool = t }
         }
     }
 }
@@ -97,8 +104,6 @@ enum CanvasThumb {
 
         let renderer = ImageRenderer(content: content)
         renderer.scale = 2
-        // 배경이 흰색으로 항상 불투명 → 알파 채널 제거. JPEG 저장 시 ImageIO 경고를
-        // 막고, 디코딩 시 메모리가 2배로 드는 것을 피한다.
         renderer.isOpaque = true
         return renderer.uiImage?.jpegData(compressionQuality: 0.85)
     }
@@ -113,48 +118,190 @@ extension Image {
 // MARK: - PenOnlyGestureView
 
 /// 색칠 캔버스 위에 얹는 투명 터치 레이어.
-/// penOnly = true 이면 UITouch.type == .pencil 인 입력만 엔진으로 전달하고,
-/// 손가락 터치는 조용히 무시한다. UI 버튼(레일·팔레트 등)은 이 뷰 범위 밖이라 영향 없음.
-private struct PenOnlyGestureView: UIViewRepresentable {
+///
+/// 단일 터치(또는 Pencil):
+///   - penOnly = true 이면 .pencil 타입만 색칠, 손가락 터치는 무시.
+///   - UI 버튼(레일·팔레트 등)은 이 뷰 범위 밖이라 영향 없음.
+///
+/// 두 손가락 제스처:
+///   - UIPinchGestureRecognizer  → onPinch(delta, ended)
+///   - UIPanGestureRecognizer(2) → onPan(screenDelta, ended)
+///   - UITapGestureRecognizer(2탭, 2터치) → onZoomReset()
+///
+/// isMultipleTouchEnabled = false 유지:
+///   UIKit 규약상 제스처 인식기는 isMultipleTouchEnabled 에 구애받지 않아
+///   2-finger 제스처 인식기가 정상 동작하며, touchesBegan 계열은 단일 터치만 받아
+///   안전하게 색칠에 집중할 수 있다.
+struct PenOnlyGestureView: UIViewRepresentable {
     var penOnly: Bool
     var onChanged: (CGPoint) -> Void
     var onEnded: () -> Void
+    var onPinch: (CGFloat, Bool) -> Void
+    var onPan: (CGSize, Bool) -> Void
+    var onZoomReset: () -> Void
 
     func makeUIView(context: Context) -> Inner {
         let v = Inner()
         v.backgroundColor = .clear
-        v.isMultipleTouchEnabled = false
-        v.apply(penOnly: penOnly, onChanged: onChanged, onEnded: onEnded)
+        v.isMultipleTouchEnabled = false   // 색칠 touchesBegan 단일 터치 보장 (제스처 인식기는 무관)
+        v.apply(penOnly: penOnly,
+                onChanged: onChanged, onEnded: onEnded,
+                onPinch: onPinch, onPan: onPan, onZoomReset: onZoomReset)
         return v
     }
 
     func updateUIView(_ v: Inner, context: Context) {
-        v.apply(penOnly: penOnly, onChanged: onChanged, onEnded: onEnded)
+        v.apply(penOnly: penOnly,
+                onChanged: onChanged, onEnded: onEnded,
+                onPinch: onPinch, onPan: onPan, onZoomReset: onZoomReset)
     }
 
     // MARK: Inner UIView
 
-    final class Inner: UIView {
+    final class Inner: UIView, UIGestureRecognizerDelegate {
+
+        // ── 색칠 ──────────────────────────────────────────────────────────
         private var penOnly = true
         private var onChanged: ((CGPoint) -> Void)?
         private var onEnded: (() -> Void)?
         /// 진행 중인 터치 추적 — touchesBegan에서 수락한 터치만 이후 이벤트에서 처리
         private weak var activeTouch: UITouch?
 
+        // ── 줌/팬 ─────────────────────────────────────────────────────────
+        private var onPinch: ((CGFloat, Bool) -> Void)?
+        private var onPan: ((CGSize, Bool) -> Void)?
+        private var onZoomReset: (() -> Void)?
+
+        private var pinchRecognizer: UIPinchGestureRecognizer!
+        private var panRecognizer:   UIPanGestureRecognizer!
+        private var tapRecognizer:   UITapGestureRecognizer!
+
+        override init(frame: CGRect) {
+            super.init(frame: frame)
+            setupGestureRecognizers()
+        }
+        required init?(coder: NSCoder) { fatalError() }
+
         func apply(penOnly: Bool,
                    onChanged: @escaping (CGPoint) -> Void,
-                   onEnded: @escaping () -> Void) {
+                   onEnded: @escaping () -> Void,
+                   onPinch: @escaping (CGFloat, Bool) -> Void,
+                   onPan: @escaping (CGSize, Bool) -> Void,
+                   onZoomReset: @escaping () -> Void) {
             self.penOnly = penOnly
             self.onChanged = onChanged
             self.onEnded = onEnded
+            self.onPinch = onPinch
+            self.onPan = onPan
+            self.onZoomReset = onZoomReset
         }
+
+        // MARK: 제스처 인식기 설정
+
+        private func setupGestureRecognizers() {
+            // 핀치 줌
+            pinchRecognizer = UIPinchGestureRecognizer(target: self, action: #selector(handlePinch))
+            pinchRecognizer.delegate = self
+            addGestureRecognizer(pinchRecognizer)
+
+            // 두 손가락 패닝 (min 2, max 2 → 단일 터치 드래그와 겹치지 않음)
+            panRecognizer = UIPanGestureRecognizer(target: self, action: #selector(handlePan))
+            panRecognizer.minimumNumberOfTouches = 2
+            panRecognizer.maximumNumberOfTouches = 2
+            panRecognizer.delegate = self
+            addGestureRecognizer(panRecognizer)
+
+            // 두 손가락 더블탭 리셋
+            tapRecognizer = UITapGestureRecognizer(target: self, action: #selector(handleDoubleTap))
+            tapRecognizer.numberOfTapsRequired    = 2
+            tapRecognizer.numberOfTouchesRequired = 2
+            tapRecognizer.delegate = self
+            addGestureRecognizer(tapRecognizer)
+
+            // 패닝이 더블탭보다 우선 인식되지 않도록: 더블탭이 실패해야 패닝 인정
+            panRecognizer.require(toFail: tapRecognizer)
+        }
+
+        // MARK: UIGestureRecognizerDelegate
+
+        /// 핀치·패닝·더블탭은 서로 동시 인식 허용.
+        func gestureRecognizer(_ g: UIGestureRecognizer,
+                               shouldRecognizeSimultaneouslyWith o: UIGestureRecognizer) -> Bool {
+            let zoomSet: Set<UIGestureRecognizer> = [pinchRecognizer, panRecognizer, tapRecognizer]
+            return zoomSet.contains(g) && zoomSet.contains(o)
+        }
+
+        // MARK: 핀치 핸들러
+
+        @objc private func handlePinch(_ r: UIPinchGestureRecognizer) {
+            switch r.state {
+            case .began:
+                cancelActiveDrawStroke()
+            case .changed:
+                // r.scale 은 누적값 → 델타를 얻기 위해 매 프레임 1로 리셋
+                let delta = r.scale
+                r.scale = 1.0
+                onPinch?(delta, false)
+            case .ended:
+                onPinch?(1.0, true)
+            case .cancelled, .failed:
+                onPinch?(1.0, true)
+            default: break
+            }
+        }
+
+        // MARK: 패닝 핸들러
+
+        @objc private func handlePan(_ r: UIPanGestureRecognizer) {
+            guard r.numberOfTouches == 2 else { return }
+            // window 좌표계로 델타를 읽어야 한다.
+            // PenOnlyGestureView.Inner 는 scaleEffect 로 변환된 CanvasArea 안에 있어
+            // 뷰 로컬 좌표계가 이미 역변환된 캔버스 공간이다. 이 공간에서 읽으면
+            // delta * currentScale 을 적용해야 screen-pt 와 일치하게 된다.
+            // window 좌표계는 항상 screen-pt 와 일치하므로 변환 없이 offset 에 직접 더할 수 있다.
+            guard let win = window else { return }
+            switch r.state {
+            case .began:
+                cancelActiveDrawStroke()
+                r.setTranslation(.zero, in: win)
+            case .changed:
+                let t = r.translation(in: win)
+                onPan?(CGSize(width: t.x, height: t.y), false)
+                r.setTranslation(.zero, in: win)
+            case .ended:
+                let t = r.translation(in: win)
+                if t != .zero { onPan?(CGSize(width: t.x, height: t.y), false) }
+                onPan?(.zero, true)
+            case .cancelled, .failed:
+                onPan?(.zero, true)
+            default: break
+            }
+        }
+
+        // MARK: 더블탭 핸들러
+
+        @objc private func handleDoubleTap(_ r: UITapGestureRecognizer) {
+            cancelActiveDrawStroke()
+            onZoomReset?()
+        }
+
+        // MARK: 색칠 스트로크 취소 (줌/팬 제스처 시작 시)
+
+        private func cancelActiveDrawStroke() {
+            guard activeTouch != nil else { return }
+            activeTouch = nil
+            onEnded?()
+        }
+
+        // MARK: 색칠 터치 핸들러
 
         override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
             guard let t = touches.first else { return }
             // penOnly ON 이면 Pencil 타입 아닌 터치는 버린다
             guard !penOnly || t.type == .pencil else { return }
-            // 이전 스트로크가 ended/cancelled 없이 남아있으면(시스템 제스처 선점 등)
-            // onEnded를 먼저 발화해 엔진 상태(lastImagePoint, lockedLabel)를 정리한 후 재시작
+            // 줌/팬 제스처가 이미 인식 중이면 드로잉 시작 금지
+            guard !isZoomGestureActive else { return }
+            // 이전 스트로크가 ended/cancelled 없이 남아있으면 먼저 정리
             if activeTouch != nil { onEnded?() }
             activeTouch = t
             onChanged?(t.location(in: self))
@@ -179,6 +326,14 @@ private struct PenOnlyGestureView: UIViewRepresentable {
         override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
             activeTouch = nil
             onEnded?()
+        }
+
+        // MARK: 헬퍼
+
+        private var isZoomGestureActive: Bool {
+            let active: [UIGestureRecognizer.State] = [.began, .changed]
+            return active.contains(pinchRecognizer.state) ||
+                   active.contains(panRecognizer.state)
         }
     }
 }

@@ -28,6 +28,7 @@ struct ColoringCanvasView: View {
     @State private var saveFlashToken = 0
     @State private var showResetConfirm = false
 
+
     // 부모 타이머
     @State private var timerEnd: Date? = nil
     @State private var timerNow = Date()
@@ -66,21 +67,21 @@ struct ColoringCanvasView: View {
             VStack(spacing: 0) {
                 topBar
                 HStack(spacing: 24) {
-                    ZStack {
-                        CanvasArea(
-                            initialData: existing?.progressData,
-                            lineart: lineImage,
-                            aspect: aspect,
-                            color: selectedColor,
-                            lineWidth: brushWidth,
-                            isEraser: isEraser,
-                            tool: tool,
-                            penOnly: appSettings.penOnly,
-                            saver: saver,
-                            onPersist: persist
-                        )
-                        .equatable()
-                    }
+                    // ZoomableCanvasPanel 이 zoomState를 자체 @State로 보유.
+                    // 핀치/팬 프레임마다 이 패널의 body만 재평가되고,
+                    // topBar · rightColumn · BubbleBackground 등은 무효화되지 않는다.
+                    ZoomableCanvasPanel(
+                        initialData: existing?.progressData,
+                        lineart: lineImage,
+                        aspect: aspect,
+                        color: selectedColor,
+                        lineWidth: brushWidth,
+                        isEraser: isEraser,
+                        tool: tool,
+                        penOnly: appSettings.penOnly,
+                        saver: saver,
+                        onPersist: persist
+                    )
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     rightColumn
                 }
@@ -459,6 +460,11 @@ private struct CanvasArea: View, Equatable {
     let saver: CanvasSaver
     var onPersist: (Data, Data) -> Void
 
+    // ── 줌/팬 콜백 ── Equatable 비교 제외 (렌더 출력에 영향 없음)
+    var onPinch: (CGFloat, Bool) -> Void = { _, _ in }
+    var onPan: (CGSize, Bool) -> Void = { _, _ in }
+    var onZoomReset: () -> Void = {}
+
     var body: some View {
         ZStack {
             Color.white
@@ -471,7 +477,10 @@ private struct CanvasArea: View, Equatable {
                 tool: tool,
                 penOnly: penOnly,
                 saver: saver,
-                onPersist: onPersist
+                onPersist: onPersist,
+                onPinch: onPinch,
+                onPan: onPan,
+                onZoomReset: onZoomReset
             )
             if let lineart, let image = Image(platform: lineart) {
                 image.resizable().scaledToFit()
@@ -485,8 +494,9 @@ private struct CanvasArea: View, Equatable {
         .shadow(color: Theme.softShadow, radius: 10, x: 0, y: 6)
     }
 
-    /// 렌더 출력에 영향을 주는 값만 비교. `initialData`/`saver`/`onPersist`는
-    /// 최초 1회 `configure`에만 쓰이고(엔진이 이후 자체 보유) 출력에 영향 없어 제외.
+    /// 렌더 출력에 영향을 주는 값만 비교.
+    /// `initialData`/`saver`/`onPersist`/`onPinch`/`onPan`/`onZoomReset` 은
+    /// 렌더에 영향 없어 제외 — 콜백이 교체돼도 CanvasArea 서브트리 재렌더 없음.
     static func == (a: CanvasArea, b: CanvasArea) -> Bool {
         a.color == b.color &&
         a.lineWidth == b.lineWidth &&
@@ -495,5 +505,108 @@ private struct CanvasArea: View, Equatable {
         a.aspect == b.aspect &&
         a.lineart === b.lineart &&
         a.penOnly == b.penOnly
+    }
+}
+
+// MARK: - ZoomableCanvasPanel
+
+/// CanvasArea + 줌/팬 상태를 캡슐화한 패널.
+///
+/// `zoomState` / `canvasCardSize` 를 이 뷰의 `@State`로 격리함으로써,
+/// 핀치·팬 프레임(60~120Hz)마다 이 body 만 재평가되고
+/// `ColoringCanvasView.body`(topBar · rightColumn · BubbleBackground 등)는
+/// 무효화되지 않는다.
+private struct ZoomableCanvasPanel: View {
+    // CanvasArea 에 그대로 전달할 프로퍼티
+    let initialData: Data?
+    let lineart: PlatformImage?
+    let aspect: CGSize
+    var color: Color
+    var lineWidth: CGFloat
+    var isEraser: Bool
+    var tool: BrushTool
+    var penOnly: Bool
+    let saver: CanvasSaver
+    var onPersist: (Data, Data) -> Void
+
+    @State private var zoomState = ZoomPanState()
+    /// 캔버스 카드 레이아웃 크기 — 패닝 offset 클램핑 계산에 사용.
+    @State private var canvasCardSize: CGSize = .zero
+
+    var body: some View {
+        ZStack {
+            CanvasArea(
+                initialData: initialData,
+                lineart: lineart,
+                aspect: aspect,
+                color: color,
+                lineWidth: lineWidth,
+                isEraser: isEraser,
+                tool: tool,
+                penOnly: penOnly,
+                saver: saver,
+                onPersist: onPersist,
+                onPinch: handlePinch,
+                onPan: handlePan,
+                onZoomReset: handleZoomReset
+            )
+            .equatable()
+            // transform은 CanvasArea 밖에서 적용 → equatable() 서브트리와 독립.
+            .scaleEffect(zoomState.scale)
+            .offset(zoomState.offset)
+            .clipped()
+
+            // 배율 뱃지: 1× 초과일 때만 좌상단에 표시 (디자인 §27-1)
+            if zoomState.isZoomed {
+                zoomBadge
+                    .padding(10)
+                    .transition(.opacity)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+            }
+        }
+        // 캔버스 카드 크기 캡처 — 레이아웃 변경(회전 등) 시에만 발화
+        .onGeometryChange(for: CGSize.self) { $0.size } action: { canvasCardSize = $0 }
+    }
+
+    // MARK: 줌/팬 핸들러
+
+    /// 핀치 배율 델타(매 프레임 1.0 기준). ended=true 이면 경계 스프링 복귀.
+    private func handlePinch(delta: CGFloat, ended: Bool) {
+        zoomState.applyPinchDelta(delta, canvasSize: canvasCardSize)
+        guard ended else { return }
+        if zoomState.scale <= ZoomPanState.minScale + 0.01 {
+            withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) { zoomState.reset() }
+        } else {
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) {
+                zoomState.clampOffset(canvasSize: canvasCardSize)
+            }
+        }
+    }
+
+    /// 패닝 델타(window 좌표계 screen-pt). 1× 상태에선 무시.
+    private func handlePan(delta: CGSize, ended: Bool) {
+        guard zoomState.isZoomed, !ended else { return }
+        zoomState.applyPanDelta(delta, canvasSize: canvasCardSize)
+    }
+
+    /// 두 손가락 더블탭 → 스프링 애니메이션으로 1× 원위치 복귀.
+    private func handleZoomReset() {
+        withAnimation(.spring(response: 0.42, dampingFraction: 0.78)) { zoomState.reset() }
+    }
+
+    /// 배율 뱃지 (scale > 1×일 때만 노출).
+    private var zoomBadge: some View {
+        let s = zoomState.scale
+        let text = abs(s - s.rounded()) < 0.05
+            ? "\(Int(s.rounded()))×"
+            : String(format: "%.1f×", s)
+        return Text(text)
+            .font(.system(size: 15, weight: .black, design: .rounded))
+            .foregroundStyle(.white)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 5)
+            .background(Capsule().fill(Color(hex: 0x3B3A4E).opacity(0.82)))
+            .shadow(color: .black.opacity(0.18), radius: 4, x: 0, y: 2)
+            .accessibilityLabel("확대 \(text)")
     }
 }
