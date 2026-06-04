@@ -52,7 +52,7 @@ struct RootView: View {
                     case let .gallery(profile):
                         GalleryView(profile: profile, path: $path)
                     case let .coloring(profile, template):
-                        ColoringCanvasView(profile: profile, template: template)
+                        ColoringCanvasView(profile: profile, template: template, path: $path)
                     }
                 }
         }

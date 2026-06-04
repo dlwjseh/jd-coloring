@@ -5,6 +5,8 @@ import SwiftData
 struct ColoringCanvasView: View {
     let profile: Profile
     let template: Template
+    /// NavigationStack path — 만료 시 프로필 선택 화면(화면 1)으로 한 번에 복귀.
+    @Binding var path: [Route]
 
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var context
@@ -32,9 +34,10 @@ struct ColoringCanvasView: View {
 
     private let panelAnimation: Animation = .spring(response: 0.42, dampingFraction: 0.86)
 
-    init(profile: Profile, template: Template) {
+    init(profile: Profile, template: Template, path: Binding<[Route]>) {
         self.profile = profile
         self.template = template
+        self._path = path
         let pid = profile.persistentModelID, tid = template.persistentModelID
         _artworks = Query(filter: #Predicate<Artwork> {
             $0.profile?.persistentModelID == pid && $0.template?.persistentModelID == tid
@@ -96,12 +99,13 @@ struct ColoringCanvasView: View {
             withAnimation(.easeInOut(duration: 0.3)) { timerEnd = end }
         }
         // C-2: expired 플래그로 만료 진입점 단일화 (onDisappear flush와 중복 방지)
+        // path.removeAll() 로 갤러리를 건너뛰고 프로필 선택 화면(화면 1)으로 직행
         .onChange(of: timerRemaining) { _, rem in
             guard let rem, rem <= 0, !timerExpired else { return }
             timerExpired = true
             timerEnd = nil
             saver.flush()
-            dismiss()
+            path.removeAll()
         }
         .alert("’\(template.name)’의 색칠을 모두 지울까요?", isPresented: $showResetConfirm) {
             Button("취소", role: .cancel) {}
@@ -124,7 +128,12 @@ struct ColoringCanvasView: View {
 
     private func timerFormatted(_ interval: TimeInterval) -> String {
         let t = Int(interval)
-        return String(format: "%d:%02d", t / 60, t % 60)
+        let minutes = t / 60
+        let seconds = t % 60
+        if minutes == 0 {
+            return "\(seconds)초"
+        }
+        return "\(minutes)분 \(String(format: "%02d", seconds))초"
     }
 
     /// 슬림 상단: 좌측 뒤로가기 + 작은 도안명, 중앙에 잠깐 뜨는 "저장됨" 토스트,
@@ -371,7 +380,7 @@ private struct TimerChip: View {
 
     var body: some View {
         Text("⏱ \(formatted)")
-            .font(Theme.rounded(15, weight: .bold))
+            .font(Theme.rounded(18, weight: .bold))
             .foregroundStyle(chipFg)
             .padding(.horizontal, 16)
             .padding(.vertical, 9)
