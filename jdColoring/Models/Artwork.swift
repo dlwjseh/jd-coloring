@@ -13,7 +13,7 @@ final class Artwork {
     var profile: Profile?
     /// 그리드 표시용 진행 썸네일. nil 이면 '미착수'로 빈 도안을 보여준다.
     @Attribute(.externalStorage) var progressThumbnail: Data?
-    /// 색칠 진행 데이터. iOS=PKDrawing.dataRepresentation(), macOS=스트로크 JSON.
+    /// 색칠 진행 데이터. RegionPaintEngine 색칠 버퍼의 PNG.
     @Attribute(.externalStorage) var progressData: Data?
     var updatedAt: Date
 

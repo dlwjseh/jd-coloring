@@ -121,9 +121,7 @@ struct UserSelectionView: View {
         } message: { _ in
             Text("이 작업은 되돌릴 수 없어요")
         }
-        #if os(iOS)
         .toolbar(.hidden, for: .navigationBar)
-        #endif
     }
 
     // MARK: - Sections
@@ -287,15 +285,8 @@ struct UserSelectionView: View {
 }
 
 private extension View {
-    /// 컨텍스트 메뉴 프리뷰(누름/열림/해제) 하이라이트 형태를 원형으로.
-    /// `.contextMenuPreview`는 macOS 미지원 → iOS에서만 적용(맥은 여백만으로 충분).
-    @ViewBuilder
     func profilePreviewShape() -> some View {
-        #if os(iOS)
         contentShape(.contextMenuPreview, Circle())
-        #else
-        self
-        #endif
     }
 }
 

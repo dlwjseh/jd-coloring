@@ -8,6 +8,7 @@ struct ColoringCanvasView: View {
 
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var context
+    @Environment(PeerSession.self) private var peerSession
 
     @Query private var artworks: [Artwork]
 
@@ -22,6 +23,11 @@ struct ColoringCanvasView: View {
     @State private var showSaved = false
     @State private var saveFlashToken = 0
     @State private var showResetConfirm = false
+
+    // 부모 타이머
+    @State private var timerEnd: Date? = nil
+    @State private var timerNow = Date()
+    private let clockTimer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
     private let panelAnimation: Animation = .spring(response: 0.42, dampingFraction: 0.86)
 
@@ -75,21 +81,45 @@ struct ColoringCanvasView: View {
             if lineImage == nil { lineImage = PlatformImage(data: template.imageData) }
         }
         .onDisappear { saver.flush() }
-        .alert("‘\(template.name)’의 색칠을 모두 지울까요?", isPresented: $showResetConfirm) {
+        // 부모 타이머 수신 (iPad 역할)
+        .onReceive(clockTimer) { timerNow = $0 }
+        .onChange(of: peerSession.receivedTimerEnd) { _, end in
+            withAnimation(.easeInOut(duration: 0.3)) { timerEnd = end }
+        }
+        .onChange(of: timerRemaining) { _, rem in
+            guard let rem else { return }
+            if rem <= 0 {
+                timerEnd = nil
+                saver.flush()
+                dismiss()
+            }
+        }
+        .alert("’\(template.name)’의 색칠을 모두 지울까요?", isPresented: $showResetConfirm) {
             Button("취소", role: .cancel) {}
             Button("초기화", role: .destructive) { performReset() }
         } message: {
             Text("지운 색칠은 되돌릴 수 없어요")
         }
         .navigationBarBackButtonHidden(true)
-        #if os(iOS)
         .toolbar(.hidden, for: .navigationBar)
-        #endif
     }
 
     // MARK: - Sections
 
-    /// 슬림 상단: 좌측 뒤로가기 + 작은 도안명, 중앙에 잠깐 뜨는 "저장됨" 토스트.
+    // MARK: - 타이머 헬퍼
+
+    private var timerRemaining: TimeInterval? {
+        guard let end = timerEnd else { return nil }
+        return max(0, end.timeIntervalSince(timerNow))
+    }
+
+    private func timerFormatted(_ interval: TimeInterval) -> String {
+        let t = Int(interval)
+        return String(format: "%d:%02d", t / 60, t % 60)
+    }
+
+    /// 슬림 상단: 좌측 뒤로가기 + 작은 도안명, 중앙에 잠깐 뜨는 "저장됨" 토스트,
+    /// 우측에 부모 타이머 칩(타이머 없으면 숨김).
     private var topBar: some View {
         ZStack {
             if showSaved { savedToast.transition(.opacity) }
@@ -108,6 +138,9 @@ struct ColoringCanvasView: View {
                     .font(Theme.rounded(22, weight: .bold))
                     .foregroundStyle(Theme.ink)
                 Spacer()
+                if let rem = timerRemaining {
+                    TimerChip(remaining: rem, formatted: timerFormatted(rem))
+                }
             }
         }
         .padding(.horizontal, 28)
@@ -304,6 +337,47 @@ struct ColoringCanvasView: View {
                 withAnimation(.easeIn(duration: 0.3)) { showSaved = false }
             }
         }
+    }
+}
+
+// MARK: - 부모 타이머 칩
+
+/// 남은 시간을 상단 바에 표시하는 칩.
+/// 디자인 스펙 §22: 기본(파랑) → 5분 이하(주황) → 1분 이하(빨강+펄스).
+private struct TimerChip: View {
+    let remaining: TimeInterval
+    let formatted: String
+
+    @State private var pulse = false
+
+    private var isAlert: Bool { remaining <= 60 }
+    private var isWarning: Bool { remaining <= 300 }
+
+    private var chipBg: Color {
+        isAlert ? Color(hex: 0xFFE8E8) : isWarning ? Color(hex: 0xFFF3E0) : Color(hex: 0xEBF3FF)
+    }
+    private var chipFg: Color {
+        isAlert ? Color(hex: 0xFF5A5F) : isWarning ? Color(hex: 0xD4720A) : Color(hex: 0x2F6CB8)
+    }
+
+    var body: some View {
+        Text("⏱ \(formatted)")
+            .font(Theme.rounded(15, weight: .bold))
+            .foregroundStyle(chipFg)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 9)
+            .background(Capsule().fill(chipBg))
+            .scaleEffect(pulse ? 1.06 : 1.0)
+            .animation(
+                isAlert
+                    ? .easeInOut(duration: 0.55).repeatForever(autoreverses: true)
+                    : .default,
+                value: pulse
+            )
+            .onChange(of: isAlert) { _, alert in
+                pulse = alert
+            }
+            .onAppear { pulse = isAlert }
     }
 }
 

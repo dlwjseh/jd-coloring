@@ -98,9 +98,7 @@ struct GalleryView: View {
         }
         .onDisappear { exitTask?.cancel() }   // 외부 요인 pop 시 늦은 dismiss 취소
         .navigationBarBackButtonHidden(true)
-        #if os(iOS)
         .toolbar(.hidden, for: .navigationBar)
-        #endif
         // 도안 삭제 확인 (공유 도안 → 강한 경고)
         .alert(
             "‘\(pendingDelete?.name ?? "")’ 도안을 삭제할까요?",
@@ -192,7 +190,7 @@ struct GalleryView: View {
     /// - iOS는 `preview:`를 명시한다. 미지정 시 iOS가 그림자 블러까지 포함한 셀을
     ///   오프스크린 스냅샷(메인 스레드 동기)하느라 롱프레스 후 메뉴가 수 초 늦게 떴다.
     ///   캐시된 썸네일만 그리는 가벼운 프리뷰로 그 비용을 제거한다.
-    ///   (`preview:` 변형은 macOS 미지원이라 플랫폼 분기한다.)
+    ///   캐시된 썸네일만 그리는 가벼운 프리뷰를 명시한다.
     @ViewBuilder
     private func cell(_ template: Template, artwork: Artwork?, index: Int) -> some View {
         let base = Button { openColoring(template) } label: {
@@ -201,13 +199,9 @@ struct GalleryView: View {
         .buttonStyle(.plain)
         .gridEntrance(index: index, visible: appeared)
 
-        #if os(iOS)
         base.contextMenu { menuItems(for: template, hasArtwork: artwork != nil) } preview: {
             TemplateMenuPreview(template: template, artwork: artwork)
         }
-        #else
-        base.contextMenu { menuItems(for: template, hasArtwork: artwork != nil) }
-        #endif
     }
 
     @ViewBuilder
