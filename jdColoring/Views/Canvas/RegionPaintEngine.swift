@@ -77,6 +77,7 @@ final class RegionPaintEngine {
     private var saveTask: Task<Void, Never>?
     private var isEncoding = false             // PNG 인코딩 진행 중(중복 저장 직렬화, C)
     private var resaveRequested = false        // 인코딩 중 들어온 저장 요청 → 끝나고 1회 재실행
+    private var pendingFlushCompletion: (() -> Void)? = nil  // flushThen 완료 콜백
     private var configured = false
     // 초기화(clear) 가드: 비운 직후 빈 버퍼가 다시 저장돼 작업물이 되살아나는 것을 막는다.
     // savingEnabled=false면 새로 칠하기 전까지 저장 안 함. clearGeneration은 clear 시점에
@@ -223,6 +224,20 @@ final class RegionPaintEngine {
 
     /// 화면 이탈 등에서 즉시 저장.
     @MainActor func flush() { saveNow() }
+
+    /// PNG 인코딩까지 완전히 끝난 뒤 completion을 메인에서 호출한다.
+    /// 저장할 내용이 없으면(savingEnabled=false) 즉시 호출.
+    /// 타이머 만료 시 마지막 색칠을 보장한 뒤 화면 전환하는 용도.
+    @MainActor func flushThen(_ completion: @escaping () -> Void) {
+        guard savingEnabled else { completion(); return }
+        pendingFlushCompletion = completion
+        if isEncoding {
+            // 진행 중인 인코딩이 끝나면 resave 후 completion 호출
+            resaveRequested = true
+        } else {
+            saveNow()
+        }
+    }
 
     /// 색칠 초기화: 색칠 버퍼를 비우고 진행 중/예약된 저장을 무효화한다.
     /// (작업물 Artwork 삭제는 뷰 쪽 책임. 여기선 엔진 버퍼만 비운다.)
@@ -448,11 +463,21 @@ final class RegionPaintEngine {
                 guard let self else { return }
                 self.isEncoding = false
                 // clear가 끼어들었으면(세대 변경) 옛 색칠 결과이므로 폐기 → 작업물 부활 방지.
-                guard self.clearGeneration == gen else { self.resaveRequested = false; return }
+                guard self.clearGeneration == gen else {
+                    self.resaveRequested = false
+                    // clear가 끼었어도 flush 대기가 있으면 완료 알림 (저장할 게 없어진 상태)
+                    if let c = self.pendingFlushCompletion { self.pendingFlushCompletion = nil; c() }
+                    return
+                }
                 if let data, let onPersist = self.onPersist { onPersist(data, thumb) }
-                if self.resaveRequested {            // 진행 중 들어온 요청 처리
+                if self.resaveRequested {
+                    // 인코딩 중 새 획이 들어왔으면 한 번 더 저장 → completion은 그 이후 호출
                     self.resaveRequested = false
                     self.saveNow()
+                } else if let c = self.pendingFlushCompletion {
+                    // 저장 체인이 완전히 끝났을 때만 completion 호출
+                    self.pendingFlushCompletion = nil
+                    c()
                 }
             }
         }

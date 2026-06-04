@@ -11,6 +11,7 @@ struct ColoringCanvasView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var context
     @Environment(PeerSession.self) private var peerSession
+    @Environment(\.scenePhase) private var scenePhase
 
     @Query private var artworks: [Artwork]
 
@@ -99,13 +100,21 @@ struct ColoringCanvasView: View {
             withAnimation(.easeInOut(duration: 0.3)) { timerEnd = end }
         }
         // C-2: expired 플래그로 만료 진입점 단일화 (onDisappear flush와 중복 방지)
-        // path.removeAll() 로 갤러리를 건너뛰고 프로필 선택 화면(화면 1)으로 직행
+        // MAJOR-1: flush 완료 후 화면 전환 → 마지막 색칠 보장
+        // MINOR-1: withAnimation으로 전환 부드럽게
         .onChange(of: timerRemaining) { _, rem in
             guard let rem, rem <= 0, !timerExpired else { return }
             timerExpired = true
             timerEnd = nil
-            saver.flush()
-            path.removeAll()
+            saver.flushThen {
+                withAnimation { path.removeAll() }
+            }
+        }
+        // MAJOR-2: 포그라운드 복귀 즉시 timerNow 갱신 → 백그라운드 중 만료된 타이머 즉시 반영
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .active, timerEnd != nil {
+                timerNow = Date()
+            }
         }
         .alert("’\(template.name)’의 색칠을 모두 지울까요?", isPresented: $showResetConfirm) {
             Button("취소", role: .cancel) {}

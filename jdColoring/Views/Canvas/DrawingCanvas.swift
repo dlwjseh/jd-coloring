@@ -6,6 +6,8 @@ import SwiftUI
 /// 캔버스가 화면에 나타난 뒤에만 호출해야 하며, 그 이전엔 no-op이다.
 final class CanvasSaver {
     var flush: () -> Void = {}
+    /// 저장 완료 후 completion 호출 (엔진 미준비 시 즉시 호출).
+    var flushThen: (_ completion: @escaping () -> Void) -> Void = { $0() }
     var reset: () -> Void = {}
 }
 
@@ -44,6 +46,7 @@ struct DrawingCanvas: View {
                 engine.tool = tool
                 engine.configure(lineart: lineart, initialData: initialData, onPersist: onPersist)
                 saver.flush = { engine.flush() }
+                saver.flushThen = { engine.flushThen($0) }
                 saver.reset = { engine.clear() }
             }
             .onDisappear {
