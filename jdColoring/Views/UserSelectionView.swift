@@ -29,6 +29,8 @@ struct UserSelectionView: View {
 
     /// 삭제 확인 다이얼로그 대상 (nil = 미표시)
     @State private var pendingDelete: Profile?
+    /// 설정 시트 표시 여부
+    @State private var showSettings = false
 
     private let editorAnimation: Animation = .spring(response: 0.5, dampingFraction: 0.82)
 
@@ -66,6 +68,19 @@ struct UserSelectionView: View {
                         .opacity(scattered ? 0 : 1)
                         .offset(y: (leaving && !reduceMotion) ? 260 : 0)   // G1: 아래로 화면 밖 빠짐
                 }
+            }
+
+            // 좌상단 설정 버튼 (디자인 §26)
+            VStack {
+                HStack {
+                    settingsButton
+                        .padding(.leading, 40)
+                        .padding(.top, 32)
+                        .opacity(scattered ? 0 : 1)
+                        .offset(y: (leaving && !reduceMotion) ? -260 : 0)  // G1: 헤더와 함께 위로 빠짐
+                    Spacer()
+                }
+                Spacer()
             }
 
             // A2: 편집기 폼 (아래에서 등장)
@@ -122,9 +137,25 @@ struct UserSelectionView: View {
             Text("이 작업은 되돌릴 수 없어요")
         }
         .toolbar(.hidden, for: .navigationBar)
+        .sheet(isPresented: $showSettings) { SettingsView() }
     }
 
     // MARK: - Sections
+
+    /// 좌상단 설정 버튼 — 지름 56pt, 크림/카드 톤, gearshape 아이콘. 디자인 §26-1.
+    private var settingsButton: some View {
+        Button { showSettings = true } label: {
+            Image(systemName: "gearshape")
+                .font(.system(size: 22, weight: .medium))
+                .foregroundStyle(Color(hex: 0x6E6258))
+                .frame(width: 56, height: 56)
+                .background(Circle().fill(Theme.card))
+                .overlay(Circle().stroke(Theme.cardBorder, lineWidth: 2))
+                .shadow(color: Theme.softShadow, radius: 6, x: 0, y: 3)
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("설정")
+    }
 
     private var header: some View {
         VStack(spacing: 10) {

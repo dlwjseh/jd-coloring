@@ -11,7 +11,7 @@ final class CanvasSaver {
     var reset: () -> Void = {}
 }
 
-/// 채색 표면. iPad·Mac 공용 — 라인아트를 칸으로 분할해 브러시가 검은 선을
+/// 채색 표면. iPad 전용 — 라인아트를 칸으로 분할해 브러시가 검은 선을
 /// 넘지 못하게 가두는 래스터 엔진(`RegionPaintEngine`)을 SwiftUI `Canvas`로 표시한다.
 struct DrawingCanvas: View {
     let initialData: Data?
@@ -20,6 +20,8 @@ struct DrawingCanvas: View {
     var lineWidth: CGFloat
     var isEraser: Bool
     var tool: BrushTool
+    /// true = Apple Pencil 입력만 색칠 처리, 손가락 터치는 무시.
+    var penOnly: Bool
     let saver: CanvasSaver
     var onPersist: (_ progressData: Data, _ thumbnail: Data) -> Void
 
@@ -34,11 +36,15 @@ struct DrawingCanvas: View {
                 }
             }
             .contentShape(Rectangle())
-            .gesture(
-                DragGesture(minimumDistance: 0)
-                    .onChanged { v in engine.strokeChanged(at: v.location, viewSize: geo.size) }
-                    .onEnded { _ in engine.strokeEnded() }
-            )
+            // DragGesture 대신 UIViewRepresentable 기반 터치 핸들러 사용.
+            // UITouch.type 을 직접 확인해 penOnly 설정을 적용한다.
+            .overlay {
+                PenOnlyGestureView(
+                    penOnly: penOnly,
+                    onChanged: { loc in engine.strokeChanged(at: loc, viewSize: geo.size) },
+                    onEnded:   { engine.strokeEnded() }
+                )
+            }
             .onAppear {
                 engine.color = color
                 engine.brushPointWidth = lineWidth
@@ -101,5 +107,70 @@ enum CanvasThumb {
 extension Image {
     init?(platform image: PlatformImage) {
         self = Image(uiImage: image)
+    }
+}
+
+// MARK: - PenOnlyGestureView
+
+/// 색칠 캔버스 위에 얹는 투명 터치 레이어.
+/// penOnly = true 이면 UITouch.type == .pencil 인 입력만 엔진으로 전달하고,
+/// 손가락 터치는 조용히 무시한다. UI 버튼(레일·팔레트 등)은 이 뷰 범위 밖이라 영향 없음.
+private struct PenOnlyGestureView: UIViewRepresentable {
+    var penOnly: Bool
+    var onChanged: (CGPoint) -> Void
+    var onEnded: () -> Void
+
+    func makeUIView(context: Context) -> Inner {
+        let v = Inner()
+        v.backgroundColor = .clear
+        v.isMultipleTouchEnabled = false
+        v.apply(penOnly: penOnly, onChanged: onChanged, onEnded: onEnded)
+        return v
+    }
+
+    func updateUIView(_ v: Inner, context: Context) {
+        v.apply(penOnly: penOnly, onChanged: onChanged, onEnded: onEnded)
+    }
+
+    // MARK: Inner UIView
+
+    final class Inner: UIView {
+        private var penOnly = true
+        private var onChanged: ((CGPoint) -> Void)?
+        private var onEnded: (() -> Void)?
+        /// 진행 중인 터치 추적 — touchesBegan에서 수락한 터치만 이후 이벤트에서 처리
+        private weak var activeTouch: UITouch?
+
+        func apply(penOnly: Bool,
+                   onChanged: @escaping (CGPoint) -> Void,
+                   onEnded: @escaping () -> Void) {
+            self.penOnly = penOnly
+            self.onChanged = onChanged
+            self.onEnded = onEnded
+        }
+
+        override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+            guard activeTouch == nil, let t = touches.first else { return }
+            // penOnly ON 이면 Pencil 타입 아닌 터치는 버린다
+            guard !penOnly || t.type == .pencil else { return }
+            activeTouch = t
+            onChanged?(t.location(in: self))
+        }
+
+        override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
+            guard let t = touches.first(where: { $0 === activeTouch }) else { return }
+            onChanged?(t.location(in: self))
+        }
+
+        override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+            guard touches.contains(where: { $0 === activeTouch }) else { return }
+            activeTouch = nil
+            onEnded?()
+        }
+
+        override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
+            activeTouch = nil
+            onEnded?()
+        }
     }
 }

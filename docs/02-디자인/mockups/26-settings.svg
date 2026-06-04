@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 820"
+     font-family="'SF Pro Rounded','SF Pro Display',-apple-system,'Helvetica Neue',sans-serif">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="820" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="100%" stop-color="#FFF4EC"/>
+    </linearGradient>
+    <filter id="sh" x="-40%" y="-40%" width="180%" height="180%">
+      <feDropShadow dx="0" dy="7" stdDeviation="10" flood-color="#3B3A4E" flood-opacity="0.11"/>
+    </filter>
+    <filter id="shS" x="-60%" y="-60%" width="220%" height="220%">
+      <feDropShadow dx="0" dy="3" stdDeviation="5" flood-color="#3B3A4E" flood-opacity="0.09"/>
+    </filter>
+  </defs>
+
+  <!-- Page background -->
+  <rect width="1180" height="820" fill="#EEE8E0"/>
+
+  <!-- Header -->
+  <text x="590" y="42" text-anchor="middle" font-size="21" font-weight="800" fill="#3B3A4E">§26 설정 버튼 + 앱 설정 시트</text>
+  <line x1="40" y1="56" x2="1140" y2="56" stroke="#EBDFD2" stroke-width="1.5"/>
+
+
+  <!-- ====== FRAME A: Profile Screen ====== -->
+  <text x="300" y="76" text-anchor="middle" font-size="13" font-weight="600" fill="#9A8F86">Frame A — 화면 1: 프로필 선택 (설정 버튼 추가)</text>
+
+  <!-- Screen card -->
+  <rect x="54" y="88" width="492" height="698" rx="22" fill="url(#bg)" stroke="#EBDFD2" stroke-width="1.5" filter="url(#sh)"/>
+
+  <!-- BubbleBackground -->
+  <circle cx="98" cy="162" r="52" fill="#5FD08A" fill-opacity="0.10"/>
+  <circle cx="510" cy="215" r="65" fill="#36C5C0" fill-opacity="0.09"/>
+  <circle cx="92" cy="740" r="46" fill="#8A6CFF" fill-opacity="0.09"/>
+  <circle cx="496" cy="752" r="40" fill="#FFC740" fill-opacity="0.08"/>
+
+  <!-- Screen title -->
+  <text x="300" y="210" text-anchor="middle" font-size="20" font-weight="800" fill="#3B3A4E">오늘은 누가 색칠할까요?</text>
+  <text x="300" y="234" text-anchor="middle" font-size="13" fill="#9A8F86">프로필을 선택하세요</text>
+
+  <!-- Profile: Coral 지수 -->
+  <circle cx="172" cy="420" r="52" fill="#FFE4DB" stroke="#FF7A59" stroke-width="5"/>
+  <circle cx="160" cy="412" r="5.5" fill="#FF7A59"/>
+  <circle cx="184" cy="412" r="5.5" fill="#FF7A59"/>
+  <path d="M157,428 Q172,443 187,428" fill="none" stroke="#FF7A59" stroke-width="3.5" stroke-linecap="round"/>
+  <text x="172" y="490" text-anchor="middle" font-size="13" font-weight="700" fill="#3B3A4E">지수</text>
+
+  <!-- Profile: Purple 민준 -->
+  <circle cx="300" cy="420" r="52" fill="#EDE8FF" stroke="#8A6CFF" stroke-width="5"/>
+  <circle cx="288" cy="412" r="5.5" fill="#8A6CFF"/>
+  <circle cx="312" cy="412" r="5.5" fill="#8A6CFF"/>
+  <path d="M285,428 Q300,443 315,428" fill="none" stroke="#8A6CFF" stroke-width="3.5" stroke-linecap="round"/>
+  <text x="300" y="490" text-anchor="middle" font-size="13" font-weight="700" fill="#3B3A4E">민준</text>
+
+  <!-- Profile: Teal 예린 -->
+  <circle cx="428" cy="420" r="52" fill="#E0F7F7" stroke="#36C5C0" stroke-width="5"/>
+  <circle cx="416" cy="412" r="5.5" fill="#36C5C0"/>
+  <circle cx="440" cy="412" r="5.5" fill="#36C5C0"/>
+  <path d="M413,428 Q428,443 443,428" fill="none" stroke="#36C5C0" stroke-width="3.5" stroke-linecap="round"/>
+  <text x="428" y="490" text-anchor="middle" font-size="13" font-weight="700" fill="#3B3A4E">예린</text>
+
+  <!-- 추가 버튼 (기존 — 우하단) -->
+  <circle cx="498" cy="748" r="32" fill="#FF7A59" filter="url(#shS)"/>
+  <line x1="498" y1="736" x2="498" y2="760" stroke="white" stroke-width="4" stroke-linecap="round"/>
+  <line x1="486" y1="748" x2="510" y2="748" stroke="white" stroke-width="4" stroke-linecap="round"/>
+  <text x="498" y="793" text-anchor="middle" font-size="10" fill="#9A8F86">프로필 추가</text>
+
+  <!-- ★ 설정 버튼 (신규 — 좌상단) -->
+  <!-- Highlight dashed ring -->
+  <circle cx="102" cy="142" r="36" fill="none" stroke="#3FA86B" stroke-width="2" stroke-dasharray="6,3" opacity="0.75"/>
+  <!-- Button circle -->
+  <circle cx="102" cy="142" r="28" fill="#FFFFFF" stroke="#EBDFD2" stroke-width="2" filter="url(#shS)"/>
+  <!-- Gear icon (8 teeth + body + hub) -->
+  <g transform="translate(102,142)" fill="#6E6258">
+    <rect x="-3" y="-13.5" width="6" height="5.5" rx="1.5"/>
+    <rect x="-3" y="-13.5" width="6" height="5.5" rx="1.5" transform="rotate(45)"/>
+    <rect x="-3" y="-13.5" width="6" height="5.5" rx="1.5" transform="rotate(90)"/>
+    <rect x="-3" y="-13.5" width="6" height="5.5" rx="1.5" transform="rotate(135)"/>
+    <rect x="-3" y="-13.5" width="6" height="5.5" rx="1.5" transform="rotate(180)"/>
+    <rect x="-3" y="-13.5" width="6" height="5.5" rx="1.5" transform="rotate(225)"/>
+    <rect x="-3" y="-13.5" width="6" height="5.5" rx="1.5" transform="rotate(270)"/>
+    <rect x="-3" y="-13.5" width="6" height="5.5" rx="1.5" transform="rotate(315)"/>
+    <circle r="10"/>
+    <circle r="4" fill="white"/>
+  </g>
+
+  <!-- Callout annotation (gear button) -->
+  <rect x="146" y="124" width="192" height="38" rx="8" fill="#3FA86B" fill-opacity="0.13"/>
+  <text x="242" y="139" text-anchor="middle" font-size="12" font-weight="700" fill="#3FA86B">★ 신규: 설정 버튼</text>
+  <text x="242" y="155" text-anchor="middle" font-size="11" fill="#3FA86B">gearshape · 좌상단 · 지름 56pt</text>
+  <line x1="146" y1="143" x2="132" y2="143" stroke="#3FA86B" stroke-width="1.5"/>
+  <polygon points="132,143 140,138 140,148" fill="#3FA86B"/>
+
+  <!-- Spec line at bottom -->
+  <text x="300" y="808" text-anchor="middle" font-size="11" fill="#B6A89B">설정 버튼: bg #FFFFFF · 보더 #EBDFD2 · gearshape · 아이콘 #6E6258 · 지름 56pt · 좌상단</text>
+
+
+  <!-- ====== DIVIDER ====== -->
+  <rect x="573" y="68" width="2" height="728" fill="#EBDFD2"/>
+
+
+  <!-- ====== FRAME B: Settings Sheet ====== -->
+  <text x="877" y="76" text-anchor="middle" font-size="13" font-weight="600" fill="#9A8F86">Frame B — 앱 설정 시트 (모달 .sheet)</text>
+
+  <!-- App background (dimmed) -->
+  <rect x="590" y="88" width="552" height="698" rx="22" fill="#3B3A4E" fill-opacity="0.38" stroke="#EBDFD2" stroke-width="1.5"/>
+  <text x="866" y="260" text-anchor="middle" font-size="14" fill="rgba(255,255,255,0.32)">(배경 앱 화면 — 딤 처리)</text>
+
+  <!-- Settings sheet card (bottom sheet, slides up) -->
+  <rect x="610" y="458" width="512" height="328" rx="28" fill="#FFFFFF" filter="url(#sh)"/>
+
+  <!-- Handle bar -->
+  <rect x="842" y="477" width="68" height="5" rx="2.5" fill="#E0D5CB"/>
+
+  <!-- Sheet title -->
+  <text x="866" y="526" text-anchor="middle" font-size="22" font-weight="800" fill="#3B3A4E">설정</text>
+
+  <!-- Divider under title -->
+  <line x1="630" y1="543" x2="1102" y2="543" stroke="#F0EBE6" stroke-width="1.5"/>
+
+  <!-- === Toggle Row === -->
+
+  <!-- Left icon: Apple Pencil in circle -->
+  <circle cx="667" cy="584" r="22" fill="#EEF4FF"/>
+  <g transform="translate(667,584)">
+    <!-- Pencil body -->
+    <rect x="-3.5" y="-11" width="7" height="15" rx="2" fill="#4A90D9"/>
+    <!-- Pencil tip -->
+    <polygon points="-3.5,4 3.5,4 0,12" fill="#2E6CB3"/>
+    <!-- Metal band -->
+    <rect x="-3.5" y="-14" width="7" height="4" rx="1" fill="#7DBDE9"/>
+  </g>
+
+  <!-- Row labels -->
+  <text x="703" y="575" font-size="17" font-weight="700" fill="#3B3A4E">펜으로만 색칠하기</text>
+  <text x="703" y="597" font-size="13" fill="#9A8F86">Apple Pencil로만 색칠할 수 있어요</text>
+
+  <!-- iOS Toggle (ON — green, knob right) -->
+  <rect x="1042" y="571" width="52" height="30" rx="15" fill="#34C759"/>
+  <circle cx="1069" cy="586" r="13" fill="white" filter="url(#shS)"/>
+
+  <!-- "기본 ON" badge above toggle -->
+  <rect x="1034" y="553" width="66" height="18" rx="6" fill="#34C759" fill-opacity="0.18"/>
+  <text x="1067" y="565" text-anchor="middle" font-size="10" font-weight="700" fill="#34C759">기본 ON</text>
+
+  <!-- Row divider -->
+  <line x1="630" y1="616" x2="1102" y2="616" stroke="#F5F0EA" stroke-width="1"/>
+
+  <!-- Info notes -->
+  <text x="636" y="638" font-size="12.5" fill="#B6A89B">• 기본값: ON — 앱 첫 설치 시 자동으로 펜 전용 상태로 시작</text>
+  <text x="636" y="658" font-size="12.5" fill="#B6A89B">• 기기 전역 설정 — 변경 시 모든 프로필에 동일 적용 (UserDefaults)</text>
+  <text x="636" y="678" font-size="12.5" fill="#B6A89B">• 효과: 화면 3 캔버스에서 손가락 색칠 입력 무시 (UI 버튼 터치는 유지)</text>
+
+  <!-- Spacer + Dismiss hint -->
+  <text x="866" y="752" text-anchor="middle" font-size="12" fill="#B6A89B">↓ 아래로 스와이프 · 배경 탭 → 시트 닫힘</text>
+
+  <!-- Bottom spec -->
+  <text x="866" y="808" text-anchor="middle" font-size="11" fill="#B6A89B">시트: .sheet 모달 · rx28 · 핸들 바 · 아래에서 위로 등장 · 배경 탭 dismiss 가능</text>
+
+
+  <!-- ====== SPEC CALLOUT BOX (bottom center) ====== -->
+  <!-- Color spec for toggle -->
+  <g transform="translate(592,720)">
+    <rect width="260" height="52" rx="10" fill="white" stroke="#EBDFD2" stroke-width="1.5"/>
+    <text x="12" y="17" font-size="11" font-weight="700" fill="#3B3A4E">토글 색상 스펙</text>
+    <rect x="12" y="24" width="14" height="14" rx="3" fill="#34C759"/>
+    <text x="31" y="35" font-size="11" fill="#6E6258">ON (기본) #34C759</text>
+    <rect x="130" y="24" width="14" height="14" rx="3" fill="#E5E5EA"/>
+    <text x="149" y="35" font-size="11" fill="#6E6258">OFF #E5E5EA</text>
+  </g>
+
+</svg>

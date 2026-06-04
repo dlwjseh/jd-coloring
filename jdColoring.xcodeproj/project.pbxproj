@@ -10,13 +10,8 @@
 		AA0000000000000000000001 /* jdColoring.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = jdColoring.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
-/* Begin PBXFileSystemSynchronizedRootGroup section */
-		AA0000000000000000000010 /* jdColoring */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (AA0000000000000000000100 /* Info.plist exception */,); explicitFileTypes = {}; explicitFolders = (); path = jdColoring; sourceTree = "<group>"; };
-/* End PBXFileSystemSynchronizedRootGroup section */
-
-
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		AA0000000000000000000100 /* Info.plist exception */ = {
+		AA0000000000000000000100 /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
@@ -24,6 +19,11 @@
 			target = AA0000000000000000000050 /* jdColoring */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		AA0000000000000000000010 /* jdColoring */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (AA0000000000000000000100 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = jdColoring; sourceTree = "<group>"; };
+/* End PBXFileSystemSynchronizedRootGroup section */
+
 /* Begin PBXFrameworksBuildPhase section */
 		AA0000000000000000000020 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
@@ -181,7 +181,6 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../Frameworks",
 				);
-
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.jd.coloring;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -209,7 +208,6 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../Frameworks",
 				);
-
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.jd.coloring;
 				PRODUCT_NAME = "$(TARGET_NAME)";

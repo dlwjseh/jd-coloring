@@ -11,6 +11,7 @@ struct ColoringCanvasView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var context
     @Environment(PeerSession.self) private var peerSession
+    @Environment(AppSettings.self) private var appSettings
     @Environment(\.scenePhase) private var scenePhase
 
     @Query private var artworks: [Artwork]
@@ -74,6 +75,7 @@ struct ColoringCanvasView: View {
                             lineWidth: brushWidth,
                             isEraser: isEraser,
                             tool: tool,
+                            penOnly: appSettings.penOnly,
                             saver: saver,
                             onPersist: persist
                         )
@@ -453,6 +455,7 @@ private struct CanvasArea: View, Equatable {
     var lineWidth: CGFloat
     var isEraser: Bool
     var tool: BrushTool
+    var penOnly: Bool
     let saver: CanvasSaver
     var onPersist: (Data, Data) -> Void
 
@@ -466,6 +469,7 @@ private struct CanvasArea: View, Equatable {
                 lineWidth: lineWidth,
                 isEraser: isEraser,
                 tool: tool,
+                penOnly: penOnly,
                 saver: saver,
                 onPersist: onPersist
             )
@@ -489,6 +493,7 @@ private struct CanvasArea: View, Equatable {
         a.isEraser == b.isEraser &&
         a.tool == b.tool &&
         a.aspect == b.aspect &&
-        a.lineart === b.lineart
+        a.lineart === b.lineart &&
+        a.penOnly == b.penOnly
     }
 }
