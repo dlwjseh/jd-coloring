@@ -1,0 +1,122 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1180" height="820" viewBox="0 0 1180 820" font-family="'SF Pro Rounded','Helvetica Neue',sans-serif">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#FFF4EC"/>
+    </linearGradient>
+    <filter id="sh" x="-40%" y="-40%" width="180%" height="180%">
+      <feDropShadow dx="0" dy="7" stdDeviation="11" flood-color="#C9A88C" flood-opacity="0.35"/>
+    </filter>
+    <filter id="shBig" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="12" stdDeviation="22" flood-color="#C9A88C" flood-opacity="0.34"/>
+    </filter>
+    <filter id="shCard" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="6" stdDeviation="10" flood-color="#C9A88C" flood-opacity="0.28"/>
+    </filter>
+    <g id="face2">
+      <circle cx="-9" cy="-5" r="3.2" fill="#3B3A4E"/>
+      <circle cx="9" cy="-5" r="3.2" fill="#3B3A4E"/>
+      <path d="M -11 6 Q 0 16 11 6" fill="none" stroke="#3B3A4E" stroke-width="2.6" stroke-linecap="round"/>
+    </g>
+    <clipPath id="screen"><rect width="1180" height="820"/></clipPath>
+  </defs>
+
+  <g clip-path="url(#screen)">
+  <rect width="1180" height="820" fill="url(#bg)"/>
+  <!-- decorative blobs (BubbleBackground) -->
+  <circle cx="70" cy="160" r="120" fill="#8A6CFF" opacity="0.10"/>
+  <circle cx="1120" cy="130" r="140" fill="#36C5C0" opacity="0.10"/>
+  <circle cx="120" cy="730" r="90" fill="#5FD08A" opacity="0.11"/>
+  <circle cx="1080" cy="770" r="80" fill="#FFC740" opacity="0.10"/>
+
+  <!-- ===== top bar ===== -->
+  <g filter="url(#shCard)">
+    <circle cx="74" cy="74" r="30" fill="#FFFFFF" stroke="#EBDFD2" stroke-width="2"/>
+    <path d="M 84 60 L 66 74 L 84 88" fill="none" stroke="#3B3A4E" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <text x="590" y="60" font-size="38" font-weight="800" fill="#3B3A4E" text-anchor="middle">어떤 앨범을 열어볼까요?</text>
+  <text x="590" y="94" font-size="20" fill="#9A8F86" text-anchor="middle">주언이의 색칠 앨범 · 5개</text>
+  <g>
+    <text x="1048" y="82" font-size="24" font-weight="700" fill="#3B3A4E" text-anchor="end">주언이</text>
+    <circle cx="1090" cy="74" r="28" fill="#FFE4DB" stroke="#FF7A59" stroke-width="5" filter="url(#shCard)"/>
+    <use href="#face2" transform="translate(1090,74)"/>
+  </g>
+
+  <!-- =================================================================== -->
+  <!-- LEFT PEEK CARD (prev = '꽃')  1.5x, scale .85, cut at left edge       -->
+  <!-- card 401x476 @ x=-251 y=172 (right edge ≈150 → ~150px 노출)          -->
+  <!-- =================================================================== -->
+  <g opacity="0.5">
+    <g filter="url(#shCard)"><rect x="-251" y="172" width="401" height="476" rx="41" fill="#FFFFFF" stroke="#EBDFD2" stroke-width="2"/></g>
+    <rect x="-227" y="196" width="353" height="312" rx="32" fill="#FFEBF3"/>
+    <!-- flower -->
+    <g transform="translate(-50,352)">
+      <circle cx="0" cy="-58" r="34" fill="#FFD7E9" stroke="#3B3A4E" stroke-width="7"/>
+      <circle cx="55" cy="-18" r="34" fill="#FFD7E9" stroke="#3B3A4E" stroke-width="7"/>
+      <circle cx="34" cy="48" r="34" fill="#FFD7E9" stroke="#3B3A4E" stroke-width="7"/>
+      <circle cx="-34" cy="48" r="34" fill="#FFD7E9" stroke="#3B3A4E" stroke-width="7"/>
+      <circle cx="-55" cy="-18" r="34" fill="#FFD7E9" stroke="#3B3A4E" stroke-width="7"/>
+      <circle cx="0" cy="-5" r="27" fill="#FFC740" stroke="#3B3A4E" stroke-width="7"/>
+    </g>
+    <text x="-50" y="572" font-size="40" font-weight="800" fill="#3B3A4E" text-anchor="middle">꽃</text>
+    <text x="-50" y="616" font-size="22" fill="#9A8F86" text-anchor="middle">8개 도안</text>
+  </g>
+
+  <!-- =================================================================== -->
+  <!-- RIGHT PEEK CARD (next = '미분류')  cut at right edge                  -->
+  <!-- card 401x476 @ x=1030 y=172 (left edge 1030 → ~150px 노출)            -->
+  <!-- =================================================================== -->
+  <g opacity="0.5">
+    <g filter="url(#shCard)"><rect x="1030" y="172" width="401" height="476" rx="41" fill="#FFFFFF" stroke="#EBDFD2" stroke-width="2"/></g>
+    <rect x="1054" y="196" width="353" height="312" rx="32" fill="#F3EEE7"/>
+    <g transform="translate(1230,352)" fill="none" stroke="#B6A89B" stroke-width="8" stroke-linejoin="round">
+      <path d="M -80 -42 L -18 -42 L -2 -22 L 80 -22 L 80 56 L -80 56 Z"/>
+    </g>
+    <text x="1230" y="572" font-size="40" font-weight="800" fill="#9A8F86" text-anchor="middle">미분류</text>
+    <text x="1230" y="616" font-size="22" fill="#9A8F86" text-anchor="middle">3개 도안</text>
+  </g>
+
+  <!-- =================================================================== -->
+  <!-- CENTER CARD (current = '동물')  1.5x — 472 x 560 rx48                 -->
+  <!-- x=354 y=130 (가운데 x=590)                                           -->
+  <!-- =================================================================== -->
+  <g filter="url(#shBig)"><rect x="354" y="130" width="472" height="560" rx="48" fill="#FFFFFF" stroke="#EBDFD2" stroke-width="2"/></g>
+  <!-- cover image area -->
+  <rect x="378" y="156" width="424" height="384" rx="38" fill="#FFE9CF"/>
+  <!-- bear illustration (colored cover) -->
+  <g transform="translate(590,348)">
+    <circle cx="-56" cy="-58" r="28" fill="#FFD2A6" stroke="#3B3A4E" stroke-width="7"/>
+    <circle cx="56" cy="-58" r="28" fill="#FFD2A6" stroke="#3B3A4E" stroke-width="7"/>
+    <circle cx="0" cy="0" r="80" fill="#FFD2A6" stroke="#3B3A4E" stroke-width="7"/>
+    <circle cx="-30" cy="-12" r="8.5" fill="#3B3A4E"/>
+    <circle cx="30" cy="-12" r="8.5" fill="#3B3A4E"/>
+    <ellipse cx="0" cy="28" rx="26" ry="19" fill="#FFF1E2" stroke="#3B3A4E" stroke-width="6"/>
+    <ellipse cx="0" cy="18" rx="9" ry="6.5" fill="#3B3A4E"/>
+    <path d="M 0 25 L 0 36 M 0 36 Q -10 41 -15 34 M 0 36 Q 10 41 15 34" fill="none" stroke="#3B3A4E" stroke-width="5" stroke-linecap="round"/>
+  </g>
+  <!-- name + count -->
+  <text x="590" y="608" font-size="42" font-weight="800" fill="#3B3A4E" text-anchor="middle">동물</text>
+  <text x="590" y="652" font-size="23" fill="#9A8F86" text-anchor="middle">12개 도안</text>
+
+  <!-- ===== swipe chevrons (faded) ===== -->
+  <path d="M 332 388 L 308 412 L 332 436" fill="none" stroke="#3B3A4E" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" opacity="0.20"/>
+  <path d="M 848 388 L 872 412 L 848 436" fill="none" stroke="#3B3A4E" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" opacity="0.20"/>
+
+  <!-- ===== page dots (position in loop) ===== -->
+  <g>
+    <circle cx="546" cy="725" r="6" fill="#D8C9BA"/>
+    <rect x="566" y="719" width="28" height="12" rx="6" fill="#FF7A59"/>
+    <circle cx="612" cy="725" r="6" fill="#D8C9BA"/>
+    <circle cx="634" cy="725" r="6" fill="#D8C9BA"/>
+    <circle cx="656" cy="725" r="6" fill="#B6A89B"/><!-- last = 미분류, slightly muted -->
+  </g>
+  <text x="590" y="766" font-size="17" font-weight="600" fill="#B6A89B" text-anchor="middle">‹ 좌우로 넘겨 앨범을 골라요 · 끝에서 다시 처음으로 ›</text>
+
+  <!-- ===== add button (bottom-right corner) ===== -->
+  <g filter="url(#sh)">
+    <circle cx="1085" cy="704" r="44" fill="#FF7A59"/>
+    <path d="M 1085 684 L 1085 724 M 1065 704 L 1105 704" stroke="#fff" stroke-width="8" stroke-linecap="round"/>
+  </g>
+  <text x="1085" y="772" font-size="17" font-weight="600" fill="#7A6E64" text-anchor="middle">앨범 추가</text>
+  </g>
+</svg>

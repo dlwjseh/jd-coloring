@@ -2,9 +2,24 @@ import SwiftUI
 import SwiftData
 import UIKit
 
-/// 앱의 화면 이동 경로 (iPad 전용).
+/// 갤러리에서 보여줄 도안 묶음(앨범 또는 미분류).
+enum AlbumSelection: Hashable {
+    case album(Album)
+    case uncategorized
+
+    /// 화면 표시용 이름.
+    var title: String {
+        switch self {
+        case .album(let a): return a.name
+        case .uncategorized: return "미분류"
+        }
+    }
+}
+
+/// 앱의 화면 이동 경로 (iPad 전용). 프로필 → 앨범 → 갤러리 → 색칠.
 enum Route: Hashable {
-    case gallery(Profile)
+    case albums(Profile)
+    case gallery(Profile, AlbumSelection)
     case coloring(Profile, Template)
 }
 
@@ -32,7 +47,7 @@ struct jdColoringApp: App {
                     .environment(appSettings)
             }
         }
-        .modelContainer(for: [Profile.self, Template.self, Artwork.self])
+        .modelContainer(for: [Profile.self, Album.self, Template.self, Artwork.self])
         .onChange(of: scenePhase) { _, phase in
             switch phase {
             case .background: peerSession.suspend()
@@ -52,8 +67,10 @@ struct RootView: View {
             UserSelectionView(path: $path)
                 .navigationDestination(for: Route.self) { route in
                     switch route {
-                    case let .gallery(profile):
-                        GalleryView(profile: profile, path: $path)
+                    case let .albums(profile):
+                        AlbumCarouselView(profile: profile, path: $path)
+                    case let .gallery(profile, selection):
+                        GalleryView(profile: profile, selection: selection, path: $path)
                     case let .coloring(profile, template):
                         ColoringCanvasView(profile: profile, template: template, path: $path)
                     }
