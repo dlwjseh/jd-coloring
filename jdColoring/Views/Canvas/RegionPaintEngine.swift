@@ -49,6 +49,21 @@ final class RegionPaintEngine {
         (0...255).map { UInt8((pencilAlphaFirst * UInt32($0) + 127) / 255) }
     private static let pencilAlphaBuildLUT: [UInt8] =
         (0...255).map { UInt8((pencilAlphaBuild * UInt32($0) + 127) / 255) }
+
+    // 색연필 필압(§색연필 필압 반응): Apple Pencil 누르는 세기 → 한 획의 농담(진하기).
+    // 필압 0~1(nil=손가락/미지원)을 "한획 알파 배율"로 매핑한다.
+    //  - 바닥값(minScale): 아주 살짝 닿아도 0이 되지 않게(연하게라도 보이게).
+    //  - 상한 1.0 = 기본 알파(첫칠/덧칠 LUT 값). 더 진하게는 덧칠(build-up)로만 → 색연필 톤 유지.
+    //  - gamma: 손맛 곡선(1.0=선형). 실기기 튜닝 여지.
+    private static let pressureMinScale: CGFloat = 0.35
+    private static let pressureGamma: CGFloat = 1.0
+    /// 필압(0~1, nil) → 한획 알파 배율(minScale~1.0). 손가락/미지원은 기본 세기(1.0).
+    private func alphaScale(forPressure pressure: CGFloat?) -> CGFloat {
+        guard let pressure else { return 1 }                 // 손가락/펜 미지원 = 기본 세기
+        let pc = max(0, min(1, pressure))
+        return Self.pressureMinScale + (1 - Self.pressureMinScale) * pow(pc, Self.pressureGamma)
+    }
+
     private var grain: [UInt8] = []            // 종이결: 픽셀별 불투명도 배율(종이=좌표에 고정)
     // 색연필 덧칠(쌓임) 게이트 — 픽셀별 "마지막으로 칠한 누적 이동거리(px)". 0 = 아직 안 칠함.
     // 한 번 지나가며 생기는 인접 스탬프 겹침과 정지는 무시하고(균일·정지 시 안 진해짐),
@@ -61,6 +76,7 @@ final class RegionPaintEngine {
     // 스트로크 상태
     private var lockedLabel: Int32 = 0
     private var lastImagePoint: CGPoint?
+    private var lastAlphaScale: CGFloat = 1     // 직전 샘플의 필압 배율(한 획 내 보간용)
 
     // 표시 갱신 throttle (H-1): 샘플마다가 아니라 디스플레이 프레임당 1회만 makeImage.
     private var needsDisplayRefresh = false
@@ -68,7 +84,7 @@ final class RegionPaintEngine {
     private var linkProxy: DisplayLinkProxy?
 
     // 라벨링 완료 전 들어온 입력 버퍼 (H-3): 준비되면 재생.
-    private enum PendingEvent { case changed(CGPoint, CGSize); case ended }
+    private enum PendingEvent { case changed(CGPoint, CGSize, CGFloat?); case ended }
     private var pendingEvents: [PendingEvent] = []
 
     // 저장
@@ -153,7 +169,7 @@ final class RegionPaintEngine {
         let end = min(start + 200, events.count)
         for i in start..<end {
             switch events[i] {
-            case let .changed(p, s): strokeChanged(at: p, viewSize: s)
+            case let .changed(p, s, pr): strokeChanged(at: p, viewSize: s, pressure: pr)
             case .ended: strokeEnded()
             }
         }
@@ -177,17 +193,21 @@ final class RegionPaintEngine {
 
     // MARK: - 스트로크 입력 (뷰 좌표 → 이미지 픽셀)
 
-    @MainActor func strokeChanged(at viewPoint: CGPoint, viewSize: CGSize) {
+    /// - pressure: Apple Pencil 필압(0~1). nil이면 손가락/미지원 → 기본 세기(색연필 농담 변화 없음).
+    @MainActor func strokeChanged(at viewPoint: CGPoint, viewSize: CGSize, pressure: CGFloat? = nil) {
         guard width > 0, viewSize.width > 0, viewSize.height > 0 else { return }
         guard ready else {                       // H-3: 라벨링 전이면 버퍼링
-            bufferPending(.changed(viewPoint, viewSize))
+            bufferPending(.changed(viewPoint, viewSize, pressure))
             return
         }
         let p = imagePoint(viewPoint, viewSize: viewSize)
         let radius = brushRadius(viewSize: viewSize)
+        let scale = alphaScale(forPressure: pressure)   // 필압 → 한획 알파 배율
 
         if let last = lastImagePoint {
-            stampLine(from: last, to: p, radius: radius)
+            // 한 획 안에서 세기가 변하면 농담도 매끄럽게 변하도록 직전↔현재 배율을 보간.
+            stampLine(from: last, to: p, radius: radius,
+                      fromScale: lastAlphaScale, toScale: scale)
         } else {
             // 다운: 시작 칸 라벨 잠금 + (색연필) 새 획 시작
             lockedLabel = label(atX: Int(p.x), y: Int(p.y))
@@ -198,11 +218,12 @@ final class RegionPaintEngine {
                 travel = travel &+ penDownJump
                 travelCarry = 0
             }
-            if lockedLabel != 0 { stamp(center: p, radius: radius) }
+            if lockedLabel != 0 { stamp(center: p, radius: radius, alphaScale: scale) }
         }
         // 실제로 칠해지는 칸에 닿았을 때만 저장 재개(초기화 후 빈 채로 나가면 저장 안 함).
         if lockedLabel != 0 { savingEnabled = true }
         lastImagePoint = p
+        lastAlphaScale = scale
         scheduleDisplayRefresh()
     }
 
@@ -278,7 +299,9 @@ final class RegionPaintEngine {
     }
 
     /// 두 점 사이를 스탬프로 채워 연속된 선을 만든다.
-    private func stampLine(from a: CGPoint, to b: CGPoint, radius: CGFloat) {
+    /// fromScale~toScale: 필압 배율을 구간에서 선형 보간(한 획 내 농담 변화).
+    private func stampLine(from a: CGPoint, to b: CGPoint, radius: CGFloat,
+                           fromScale: CGFloat, toScale: CGFloat) {
         let dx = b.x - a.x, dy = b.y - a.y
         let dist = (dx * dx + dy * dy).squareRoot()
         let step = max(1, radius / 2)
@@ -292,7 +315,8 @@ final class RegionPaintEngine {
                 travel = travel &+ UInt32(whole)
                 travelCarry -= whole
             }
-            stamp(center: CGPoint(x: a.x + dx * t, y: a.y + dy * t), radius: radius)
+            stamp(center: CGPoint(x: a.x + dx * t, y: a.y + dy * t), radius: radius,
+                  alphaScale: fromScale + (toScale - fromScale) * t)
         }
     }
 
@@ -301,7 +325,9 @@ final class RegionPaintEngine {
     /// - 마커: 불투명 단색 덮어쓰기.
     /// - 색연필: 종이결로 변조한 반투명을 source-over로 누적. 한 지름 넘게 벗어났다
     ///   되돌아와 겹친 곳은 덧칠로 진해진다(한 번 지나감·정지는 균일 유지).
-    private func stamp(center: CGPoint, radius: CGFloat) {
+    /// - alphaScale: 색연필 필압 배율(0~1). 한 획 알파를 스탬프 단위로 한 번 고정소수점화해
+    ///   픽셀 루프에는 곱·시프트만 추가(LUT 재생성 없음). 마커·지우개는 미사용.
+    private func stamp(center: CGPoint, radius: CGFloat, alphaScale: CGFloat = 1) {
         guard lockedLabel != 0, let px = pixels else { return }
         let (r, g, b) = brushRGB                 // L-2: 캐시된 색 사용
         let rad = Int(radius.rounded())
@@ -315,6 +341,8 @@ final class RegionPaintEngine {
         let pencil = (tool == .pencil) && !isEraser
         let rU = UInt32(r), gU = UInt32(g), bU = UInt32(b)
         let tv = travel
+        // 필압 배율을 0~256 고정소수점으로 1회 변환(픽셀당 a = LUT×scaleFx>>8). 256=기본 알파(상한).
+        let scaleFx = UInt32(max(0, min(256, (alphaScale * 256).rounded())))
         // 덧칠 게이트 거리: 한 지름(2r)+여유. 이만큼 벗어났다 와야 다시 쌓인다.
         // 한 번 지나갈 때 인접 스탬프가 같은 픽셀을 덮는 폭(최대 2r)보다 커야 균일 유지.
         let revisit = UInt32(radius * 2) + 3
@@ -335,11 +363,13 @@ final class RegionPaintEngine {
                     // 벗어났다 되돌아온 곳만(거리 게이트 통과) 덧칠해 진해진다.
                     let last = coverage[i]
                     if last != 0 && tv &- last < revisit { continue }
-                    // 이번 픽셀의 올림 불투명도 = 알파 × 종이결(0.55~1.0). LUT 조회(무손실).
+                    // 이번 픽셀의 올림 불투명도 = 알파 × 종이결(0.55~1.0) × 필압 배율. LUT 조회(무손실).
                     // 봉우리(grain=255)는 본색이 진하게, 골은 옅게 → 연필 결이 또렷.
                     // 첫 칠(last==0)은 진하게, 덧칠(last!=0)은 약하게 → 첫 획 후 천천히 누적.
-                    let a = UInt32(last == 0 ? Self.pencilAlphaFirstLUT[Int(grain[i])]
-                                             : Self.pencilAlphaBuildLUT[Int(grain[i])])
+                    // scaleFx=256(기본 세기)이면 (x*256+128)>>8 == x 라 무필압 동작과 동일.
+                    let base = UInt32(last == 0 ? Self.pencilAlphaFirstLUT[Int(grain[i])]
+                                                : Self.pencilAlphaBuildLUT[Int(grain[i])])
+                    let a = (base * scaleFx + 128) >> 8
                     coverage[i] = tv
                     if a == 0 { continue }
                     let inv = 255 - a

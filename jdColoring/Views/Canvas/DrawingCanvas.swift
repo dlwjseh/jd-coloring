@@ -49,7 +49,9 @@ struct DrawingCanvas: View {
             .overlay {
                 PenOnlyGestureView(
                     penOnly: penOnly,
-                    onChanged: { loc in engine.strokeChanged(at: loc, viewSize: geo.size) },
+                    onChanged: { loc, pressure in
+                        engine.strokeChanged(at: loc, viewSize: geo.size, pressure: pressure)
+                    },
                     onEnded:   { engine.strokeEnded() },
                     onPinch:   onPinch,
                     onPan:     onPan,
@@ -134,7 +136,8 @@ extension Image {
 ///   안전하게 색칠에 집중할 수 있다.
 struct PenOnlyGestureView: UIViewRepresentable {
     var penOnly: Bool
-    var onChanged: (CGPoint) -> Void
+    /// (위치, 필압) — 필압은 Apple Pencil일 때 0~1, 손가락/미지원은 nil.
+    var onChanged: (CGPoint, CGFloat?) -> Void
     var onEnded: () -> Void
     var onPinch: (CGFloat, Bool) -> Void
     var onPan: (CGSize, Bool) -> Void
@@ -162,7 +165,7 @@ struct PenOnlyGestureView: UIViewRepresentable {
 
         // ── 색칠 ──────────────────────────────────────────────────────────
         private var penOnly = true
-        private var onChanged: ((CGPoint) -> Void)?
+        private var onChanged: ((CGPoint, CGFloat?) -> Void)?
         private var onEnded: (() -> Void)?
         /// 진행 중인 터치 추적 — touchesBegan에서 수락한 터치만 이후 이벤트에서 처리
         private weak var activeTouch: UITouch?
@@ -183,7 +186,7 @@ struct PenOnlyGestureView: UIViewRepresentable {
         required init?(coder: NSCoder) { fatalError() }
 
         func apply(penOnly: Bool,
-                   onChanged: @escaping (CGPoint) -> Void,
+                   onChanged: @escaping (CGPoint, CGFloat?) -> Void,
                    onEnded: @escaping () -> Void,
                    onPinch: @escaping (CGFloat, Bool) -> Void,
                    onPan: @escaping (CGSize, Bool) -> Void,
@@ -295,6 +298,14 @@ struct PenOnlyGestureView: UIViewRepresentable {
 
         // MARK: 색칠 터치 핸들러
 
+        /// Apple Pencil 필압 0~1. 손가락(.direct)·force 미지원(USB-C 펜슬 등)은 nil → 엔진 기본 세기.
+        private func pressure(of touch: UITouch) -> CGFloat? {
+            guard touch.type == .pencil else { return nil }
+            let maxForce = touch.maximumPossibleForce
+            guard maxForce > 0 else { return nil }          // 0 나눗셈/무반응 가드
+            return max(0, min(1, touch.force / maxForce))
+        }
+
         override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
             guard let t = touches.first else { return }
             // penOnly ON 이면 Pencil 타입 아닌 터치는 버린다
@@ -304,16 +315,16 @@ struct PenOnlyGestureView: UIViewRepresentable {
             // 이전 스트로크가 ended/cancelled 없이 남아있으면 먼저 정리
             if activeTouch != nil { onEnded?() }
             activeTouch = t
-            onChanged?(t.location(in: self))
+            onChanged?(t.location(in: self), pressure(of: t))
         }
 
         override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
             guard let t = touches.first(where: { $0 === activeTouch }) else { return }
             // MAJOR-2: Apple Pencil 120Hz 입력에서 UIKit이 묶어 전달하는 중간 샘플을
-            // 모두 처리해 고속 스트로크의 끊김·각짐을 방지한다.
+            // 모두 처리해 고속 스트로크의 끊김·각짐을 방지한다. 각 샘플의 필압도 함께 전달.
             let samples = event?.coalescedTouches(for: t) ?? [t]
             for sample in samples {
-                onChanged?(sample.location(in: self))
+                onChanged?(sample.location(in: self), pressure(of: sample))
             }
         }
 
