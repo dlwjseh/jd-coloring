@@ -15,14 +15,18 @@ final class Template {
     @Attribute(.externalStorage) var thumbnailData: Data
     var createdAt: Date
 
+    /// 소속 앨범(단일). `nil` = 미분류. 인버스는 `Album.templates`(앨범 삭제 시 nullify → 미분류).
+    var album: Album?
+
     /// 이 도안에 달린 작업물들 — 도안 삭제 시 함께 삭제(cascade).
     @Relationship(deleteRule: .cascade, inverse: \Artwork.template)
     var artworks: [Artwork] = []
 
-    init(name: String, imageData: Data, thumbnailData: Data, createdAt: Date = .now) {
+    init(name: String, imageData: Data, thumbnailData: Data, album: Album? = nil, createdAt: Date = .now) {
         self.name = name
         self.imageData = imageData
         self.thumbnailData = thumbnailData
+        self.album = album
         self.createdAt = createdAt
     }
 }

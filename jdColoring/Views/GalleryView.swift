@@ -1,17 +1,21 @@
 import SwiftUI
 import SwiftData
 
-/// 화면 2 — 색칠 도안 갤러리. 프로필 선택 후 진입.
+/// 화면 2 — 색칠 도안 갤러리. 앨범(또는 미분류)을 선택해 진입.
 struct GalleryView: View {
     let profile: Profile
+    let selection: AlbumSelection
     @Binding var path: [Route]
 
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var context
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
-    @Query(sort: \Template.createdAt) private var templates: [Template]
+    /// 선택된 앨범의 도안만 (init에서 selection 기준 predicate 주입).
+    @Query private var templates: [Template]
     @Query private var allArtworks: [Artwork]
+    /// 업로드/이동 시 앨범 선택용 (생성순).
+    @Query(sort: \Album.createdAt) private var categories: [Album]
 
     /// 진입 연출 트리거(G1 §12): 프로필이 흩어진 뒤 카드가 밑에서 우수수 올라온다.
     @State private var appeared = false
@@ -23,16 +27,35 @@ struct GalleryView: View {
     @State private var pendingDelete: Template?
     @State private var renameTarget: Template?
     @State private var renameText = ""
+    /// [앨범 이동] 대상 (nil = 미표시). 선택 시 confirmationDialog로 대상 앨범 고름.
+    @State private var moveTarget: Template?
 
     private let columns = [GridItem(.adaptive(minimum: 190, maximum: 240), spacing: 44)]
     private let sheetAnimation: Animation = .spring(response: 0.5, dampingFraction: 0.82)
 
-    init(profile: Profile, path: Binding<[Route]>) {
+    /// 현재 보고 있는 앨범(미분류면 nil) — 업로드 시 기본 앨범으로 쓴다.
+    private var currentAlbum: Album? {
+        if case .album(let a) = selection { return a }
+        return nil
+    }
+
+    init(profile: Profile, selection: AlbumSelection, path: Binding<[Route]>) {
         self.profile = profile
+        self.selection = selection
         self._path = path
         // 검수 increment4 #3: 전체 작업물을 가져와 거르지 않고, 현재 프로필 것만 fetch.
         let pid = profile.persistentModelID
         _allArtworks = Query(filter: #Predicate<Artwork> { $0.profile?.persistentModelID == pid })
+        // 선택된 앨범(또는 미분류)의 도안만 가져온다.
+        switch selection {
+        case .uncategorized:
+            _templates = Query(filter: #Predicate<Template> { $0.album == nil },
+                               sort: \Template.createdAt)
+        case .album(let album):
+            let aid = album.persistentModelID
+            _templates = Query(filter: #Predicate<Template> { $0.album?.persistentModelID == aid },
+                               sort: \Template.createdAt)
+        }
     }
 
     /// 작업물을 도안별로 빠르게 찾기 위한 매핑 (allArtworks는 이미 현재 프로필로 한정됨).
@@ -90,8 +113,8 @@ struct GalleryView: View {
             if isUploadPresented {
                 Color.black.opacity(0.28).ignoresSafeArea()
                     .transition(.opacity)
-                TemplateUploadView(onCancel: dismissUpload) { name, image, thumb in
-                    saveTemplate(name, image, thumb)
+                TemplateUploadView(albums: categories, initialAlbum: currentAlbum, onCancel: dismissUpload) { name, image, thumb, album in
+                    saveTemplate(name, image, thumb, album: album)
                 }
                 .transition(.move(edge: .bottom).combined(with: .opacity))
             }
@@ -128,6 +151,24 @@ struct GalleryView: View {
         } message: {
             Text("이름을 비워두면 이름이 표시되지 않아요")
         }
+        // 앨범 이동 — 대상 앨범(또는 미분류) 선택
+        .confirmationDialog(
+            "어느 앨범으로 옮길까요?",
+            isPresented: Binding(get: { moveTarget != nil },
+                                 set: { if !$0 { moveTarget = nil } }),
+            titleVisibility: .visible,
+            presenting: moveTarget
+        ) { template in
+            ForEach(categories) { album in
+                if album.persistentModelID != template.album?.persistentModelID {
+                    Button(album.name) { moveTemplate(template, to: album) }
+                }
+            }
+            if template.album != nil {
+                Button("미분류") { moveTemplate(template, to: nil) }
+            }
+            Button("취소", role: .cancel) { }
+        }
     }
 
     // MARK: - Sections
@@ -138,7 +179,7 @@ struct GalleryView: View {
                 Text("무엇을 색칠해볼까요?")
                     .font(Theme.rounded(38, weight: .heavy))
                     .foregroundStyle(Theme.ink)
-                Text("\(profile.name)의 색칠 도안 · \(templates.count)개")
+                Text("\(profile.name) · \(selection.title) · \(templates.count)개")
                     .font(Theme.rounded(20))
                     .foregroundStyle(Theme.subText)
             }
@@ -227,6 +268,11 @@ struct GalleryView: View {
         } label: {
             Label("이름 수정", systemImage: "pencil")
         }
+        Button {
+            moveTarget = template
+        } label: {
+            Label("앨범 이동", systemImage: "rectangle.stack.badge.plus")
+        }
         if hasArtwork {
             Button {
                 resetArtwork(template)
@@ -289,8 +335,8 @@ struct GalleryView: View {
     private func presentUpload() { withAnimation(sheetAnimation) { isUploadPresented = true } }
     private func dismissUpload() { withAnimation(sheetAnimation) { isUploadPresented = false } }
 
-    private func saveTemplate(_ name: String, _ image: Data, _ thumbnail: Data) {
-        let template = Template(name: name, imageData: image, thumbnailData: thumbnail)
+    private func saveTemplate(_ name: String, _ image: Data, _ thumbnail: Data, album: Album?) {
+        let template = Template(name: name, imageData: image, thumbnailData: thumbnail, album: album)
         context.insert(template)
         do {
             try context.save()
@@ -298,6 +344,18 @@ struct GalleryView: View {
             print("도안 저장 실패: \(error)")
         }
         dismissUpload()
+    }
+
+    /// 도안을 다른 앨범(nil = 미분류)으로 이동. 현재 화면(선택 앨범)에서 빠지면 자동으로 그리드에서 사라진다.
+    private func moveTemplate(_ template: Template, to album: Album?) {
+        moveTarget = nil
+        guard template.modelContext != nil else { return }
+        template.album = album
+        do {
+            try context.save()
+        } catch {
+            print("앨범 이동 실패: \(error)")
+        }
     }
 
     private func commitRename() {

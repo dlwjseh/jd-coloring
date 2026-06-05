@@ -310,7 +310,7 @@ struct UserSelectionView: View {
             guard !Task.isCancelled else { return }
             var t = Transaction()
             t.disablesAnimations = true
-            withTransaction(t) { path.append(.gallery(profile)) }
+            withTransaction(t) { path.append(.albums(profile)) }
         }
     }
 }
