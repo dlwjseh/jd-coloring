@@ -3,6 +3,7 @@
 
 # Xcode
 build/
+build_sim/
 DerivedData/
 *.xcuserstate
 *.xcuserdatad/
