@@ -1,0 +1,205 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1320" height="810" viewBox="0 0 1320 810">
+  <defs>
+    <linearGradient id="bg31" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#FFF4EC"/>
+    </linearGradient>
+    <linearGradient id="screen31" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#FFF4EC"/>
+    </linearGradient>
+    <filter id="sh31" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="5" stdDeviation="12" flood-color="#3B3A4E" flood-opacity="0.14"/>
+    </filter>
+    <filter id="sm31" x="-15%" y="-15%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="2" stdDeviation="5" flood-color="#3B3A4E" flood-opacity="0.09"/>
+    </filter>
+    <clipPath id="c31a"><rect x="32" y="32" width="336" height="696" rx="40"/></clipPath>
+    <clipPath id="c31b"><rect x="472" y="32" width="336" height="696" rx="40"/></clipPath>
+    <clipPath id="c31c"><rect x="912" y="32" width="336" height="696" rx="40"/></clipPath>
+  </defs>
+
+  <!-- SVG background -->
+  <rect width="1320" height="810" fill="url(#bg31)"/>
+  <circle cx="120" cy="700" r="90" fill="#36C5C0" opacity="0.05"/>
+  <circle cx="660" cy="120" r="80" fill="#FF7A59" opacity="0.05"/>
+  <circle cx="1240" cy="640" r="80" fill="#8A6CFF" opacity="0.05"/>
+
+  <!-- State labels -->
+  <text x="200" y="22" text-anchor="middle" font-size="12" font-weight="700" fill="#9A8F86" font-family="-apple-system,sans-serif">① 대기 — 아이 선택 + 시간</text>
+  <text x="640" y="22" text-anchor="middle" font-size="12" font-weight="700" fill="#9A8F86" font-family="-apple-system,sans-serif">② 진행 중 — 대상 아이 표시</text>
+  <text x="1080" y="22" text-anchor="middle" font-size="12" font-weight="700" fill="#9A8F86" font-family="-apple-system,sans-serif">③ 연결 전 / 미선택 — 비활성</text>
+
+  <!-- ══════════════════ PHONE ① 대기 ══════════════════ -->
+  <rect x="20" y="30" width="360" height="720" rx="48" fill="#1C1C1E" filter="url(#sh31)"/>
+  <rect x="32" y="32" width="336" height="696" rx="40" fill="url(#screen31)"/>
+  <rect x="140" y="32" width="120" height="32" rx="16" fill="#1C1C1E"/>
+  <g clip-path="url(#c31a)">
+    <circle cx="340" cy="700" r="70" fill="#FFC740" opacity="0.07"/>
+    <circle cx="40" cy="520" r="55" fill="#FF6FAF" opacity="0.06"/>
+
+    <!-- Connection bar -->
+    <rect x="32" y="80" width="336" height="46" fill="white" opacity="0.55"/>
+    <circle cx="60" cy="103" r="6" fill="#5FD08A"/>
+    <text x="75" y="108" font-size="14" font-weight="600" fill="#3B3A4E" font-family="-apple-system,sans-serif">Jeondo의 iPad</text>
+    <text x="358" y="108" text-anchor="end" font-size="12" font-weight="600" fill="#5FD08A" font-family="-apple-system,sans-serif">연결됨</text>
+
+    <!-- Section A: 누구 -->
+    <text x="52" y="156" font-size="12" font-weight="700" fill="#B6A89B" font-family="-apple-system,sans-serif" letter-spacing="0.5">누구에게 걸까요?</text>
+
+    <!-- profile 1 — 민준 (selected) -->
+    <circle cx="89" cy="200" r="31" fill="none" stroke="#FF7A59" stroke-width="4"/>
+    <circle cx="89" cy="200" r="26" fill="#FFE4DB" stroke="#FF7A59" stroke-width="3"/>
+    <circle cx="81" cy="196" r="2.2" fill="#3B3A4E"/><circle cx="97" cy="196" r="2.2" fill="#3B3A4E"/>
+    <path d="M80 204 Q89 213 98 204" fill="none" stroke="#3B3A4E" stroke-width="2" stroke-linecap="round"/>
+    <circle cx="108" cy="219" r="9" fill="#FF7A59"/>
+    <path d="M104 219 l3 3 l5 -6" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="89" y="245" text-anchor="middle" font-size="12" font-weight="700" fill="#FF7A59" font-family="-apple-system,sans-serif">민준</text>
+
+    <!-- profile 2 — 서연 -->
+    <circle cx="163" cy="200" r="26" fill="#ECE6FF" stroke="#8A6CFF" stroke-width="4"/>
+    <circle cx="155" cy="196" r="2.2" fill="#3B3A4E"/><circle cx="171" cy="196" r="2.2" fill="#3B3A4E"/>
+    <path d="M154 204 Q163 213 172 204" fill="none" stroke="#3B3A4E" stroke-width="2" stroke-linecap="round"/>
+    <text x="163" y="245" text-anchor="middle" font-size="12" font-weight="600" fill="#7A6E64" font-family="-apple-system,sans-serif">서연</text>
+
+    <!-- profile 3 — 지호 -->
+    <circle cx="237" cy="200" r="26" fill="#D9F4F3" stroke="#36C5C0" stroke-width="4"/>
+    <circle cx="229" cy="196" r="2.2" fill="#3B3A4E"/><circle cx="245" cy="196" r="2.2" fill="#3B3A4E"/>
+    <path d="M228 204 Q237 213 246 204" fill="none" stroke="#3B3A4E" stroke-width="2" stroke-linecap="round"/>
+    <text x="237" y="245" text-anchor="middle" font-size="12" font-weight="600" fill="#7A6E64" font-family="-apple-system,sans-serif">지호</text>
+
+    <!-- profile 4 — 하나 -->
+    <circle cx="311" cy="200" r="26" fill="#FFF3D4" stroke="#FFC740" stroke-width="4"/>
+    <circle cx="303" cy="196" r="2.2" fill="#3B3A4E"/><circle cx="319" cy="196" r="2.2" fill="#3B3A4E"/>
+    <path d="M302 204 Q311 213 320 204" fill="none" stroke="#3B3A4E" stroke-width="2" stroke-linecap="round"/>
+    <text x="311" y="245" text-anchor="middle" font-size="12" font-weight="600" fill="#7A6E64" font-family="-apple-system,sans-serif">하나</text>
+
+    <!-- partial 5th (scroll hint) -->
+    <circle cx="378" cy="200" r="26" fill="#FFE0EE" stroke="#FF6FAF" stroke-width="4"/>
+
+    <!-- Divider -->
+    <line x1="52" y1="270" x2="348" y2="270" stroke="#EBDFD2" stroke-width="1"/>
+
+    <!-- Section B: 얼마나 -->
+    <text x="52" y="294" font-size="12" font-weight="700" fill="#B6A89B" font-family="-apple-system,sans-serif" letter-spacing="0.5">얼마나?</text>
+
+    <!-- preset grid (20 selected) -->
+    <rect x="52" y="306" width="134" height="68" rx="20" fill="white" filter="url(#sm31)"/>
+    <text x="119" y="344" text-anchor="middle" font-size="26" font-weight="700" fill="#FF7A59" font-family="-apple-system,sans-serif">10</text>
+    <text x="119" y="360" text-anchor="middle" font-size="11" fill="#9A8F86" font-family="-apple-system,sans-serif">분</text>
+    <rect x="214" y="306" width="134" height="68" rx="20" fill="white" filter="url(#sm31)"/>
+    <text x="281" y="344" text-anchor="middle" font-size="26" font-weight="700" fill="#FF7A59" font-family="-apple-system,sans-serif">15</text>
+    <text x="281" y="360" text-anchor="middle" font-size="11" fill="#9A8F86" font-family="-apple-system,sans-serif">분</text>
+    <!-- 20 selected (coral fill) -->
+    <rect x="52" y="386" width="134" height="68" rx="20" fill="#FF7A59" filter="url(#sm31)"/>
+    <text x="119" y="424" text-anchor="middle" font-size="26" font-weight="700" fill="white" font-family="-apple-system,sans-serif">20</text>
+    <text x="119" y="440" text-anchor="middle" font-size="11" fill="rgba(255,255,255,0.82)" font-family="-apple-system,sans-serif">분</text>
+    <rect x="214" y="386" width="134" height="68" rx="20" fill="white" filter="url(#sm31)"/>
+    <text x="281" y="424" text-anchor="middle" font-size="26" font-weight="700" fill="#FF7A59" font-family="-apple-system,sans-serif">30</text>
+    <text x="281" y="440" text-anchor="middle" font-size="11" fill="#9A8F86" font-family="-apple-system,sans-serif">분</text>
+
+    <!-- input field -->
+    <rect x="52" y="470" width="296" height="48" rx="14" fill="white" stroke="#EBDFD2" stroke-width="1.5"/>
+    <text x="68" y="500" font-size="20" font-weight="600" fill="#3B3A4E" font-family="-apple-system,sans-serif">20</text>
+    <text x="332" y="500" text-anchor="end" font-size="14" fill="#9A8F86" font-family="-apple-system,sans-serif">분</text>
+
+    <!-- Start (enabled) -->
+    <rect x="52" y="534" width="296" height="56" rx="22" fill="#FF7A59" filter="url(#sm31)"/>
+    <text x="200" y="568" text-anchor="middle" font-size="18" font-weight="700" fill="white" font-family="-apple-system,sans-serif">민준에게 20분 시작</text>
+
+    <text x="200" y="624" text-anchor="middle" font-size="12" fill="#9A8F86" font-family="-apple-system,sans-serif">아이·시간 모두 골라야 시작돼요</text>
+  </g>
+
+  <!-- ══════════════════ PHONE ② 진행 중 ══════════════════ -->
+  <rect x="460" y="30" width="360" height="720" rx="48" fill="#1C1C1E" filter="url(#sh31)"/>
+  <rect x="472" y="32" width="336" height="696" rx="40" fill="url(#screen31)"/>
+  <rect x="580" y="32" width="120" height="32" rx="16" fill="#1C1C1E"/>
+  <g clip-path="url(#c31b)">
+    <circle cx="780" cy="690" r="70" fill="#FF7A59" opacity="0.07"/>
+    <circle cx="490" cy="540" r="55" fill="#FFC740" opacity="0.06"/>
+
+    <!-- Connection bar -->
+    <rect x="472" y="80" width="336" height="46" fill="white" opacity="0.55"/>
+    <circle cx="500" cy="103" r="6" fill="#5FD08A"/>
+    <text x="515" y="108" font-size="14" font-weight="600" fill="#3B3A4E" font-family="-apple-system,sans-serif">Jeondo의 iPad</text>
+    <text x="798" y="108" text-anchor="end" font-size="12" font-weight="600" fill="#5FD08A" font-family="-apple-system,sans-serif">연결됨</text>
+
+    <!-- target child chip -->
+    <circle cx="600" cy="166" r="15" fill="#FFE4DB" stroke="#FF7A59" stroke-width="3"/>
+    <circle cx="594" cy="163" r="1.8" fill="#3B3A4E"/><circle cx="606" cy="163" r="1.8" fill="#3B3A4E"/>
+    <path d="M593 169 Q600 175 607 169" fill="none" stroke="#3B3A4E" stroke-width="1.6" stroke-linecap="round"/>
+    <text x="623" y="171" font-size="15" font-weight="700" fill="#3B3A4E" font-family="-apple-system,sans-serif">민준에게</text>
+    <text x="640" y="200" text-anchor="middle" font-size="13" font-weight="600" fill="#9A8F86" font-family="-apple-system,sans-serif">남은 시간</text>
+
+    <!-- progress ring (amber, ~25%) -->
+    <circle cx="640" cy="330" r="86" fill="none" stroke="#EBDFD2" stroke-width="14"/>
+    <circle cx="640" cy="330" r="86" fill="none" stroke="#D4720A" stroke-width="14"
+            stroke-dasharray="135 405" stroke-linecap="round" transform="rotate(-90 640 330)"/>
+    <text x="640" y="338" text-anchor="middle" font-size="40" font-weight="800" fill="#D4720A" font-family="-apple-system,sans-serif">4분 32초</text>
+    <text x="640" y="360" text-anchor="middle" font-size="13" fill="#9A8F86" font-family="-apple-system,sans-serif">20분 설정</text>
+
+    <!-- 5min warning chip -->
+    <rect x="540" y="448" width="200" height="38" rx="19" fill="#FFF3E0"/>
+    <text x="640" y="472" text-anchor="middle" font-size="13" font-weight="600" fill="#D4720A" font-family="-apple-system,sans-serif">⚠ 5분이 남았어요</text>
+
+    <!-- cancel button -->
+    <rect x="532" y="506" width="216" height="56" rx="22" fill="white" stroke="#C9BCAE" stroke-width="1.5" filter="url(#sm31)"/>
+    <text x="640" y="540" text-anchor="middle" font-size="16" font-weight="600" fill="#7A6E64" font-family="-apple-system,sans-serif">취소</text>
+
+    <!-- footer -->
+    <text x="640" y="600" text-anchor="middle" font-size="12" fill="#9A8F86" font-family="-apple-system,sans-serif">민준이 색칠 중일 때만 iPad에 표시·작동</text>
+    <text x="640" y="619" text-anchor="middle" font-size="12" fill="#9A8F86" font-family="-apple-system,sans-serif">다른 아이가 쓰는 중 만료되면 → 그냥 소멸</text>
+    <text x="640" y="638" text-anchor="middle" font-size="12" fill="#9A8F86" font-family="-apple-system,sans-serif">만료 시 민준 색칠 저장 후 홈 복귀</text>
+  </g>
+
+  <!-- ══════════════════ PHONE ③ 비활성 ══════════════════ -->
+  <rect x="900" y="30" width="360" height="720" rx="48" fill="#1C1C1E" filter="url(#sh31)"/>
+  <rect x="912" y="32" width="336" height="696" rx="40" fill="url(#screen31)"/>
+  <rect x="1020" y="32" width="120" height="32" rx="16" fill="#1C1C1E"/>
+  <g clip-path="url(#c31c)">
+    <circle cx="1220" cy="690" r="70" fill="#8A6CFF" opacity="0.06"/>
+
+    <!-- Connection bar — searching -->
+    <rect x="912" y="80" width="336" height="46" fill="white" opacity="0.55"/>
+    <circle cx="940" cy="103" r="6" fill="#E0B45A"/>
+    <text x="955" y="108" font-size="14" font-weight="600" fill="#7A6E64" font-family="-apple-system,sans-serif">iPad 검색 중…</text>
+    <text x="1238" y="108" text-anchor="end" font-size="12" font-weight="600" fill="#B6A89B" font-family="-apple-system,sans-serif">연결 안 됨</text>
+
+    <!-- Section A label (dim) -->
+    <text x="932" y="156" font-size="12" font-weight="700" fill="#C9BCAE" font-family="-apple-system,sans-serif" letter-spacing="0.5">누구에게 걸까요?</text>
+
+    <!-- placeholder dashed profiles -->
+    <circle cx="969" cy="200" r="26" fill="none" stroke="#D8CCBE" stroke-width="2.5" stroke-dasharray="5 5"/>
+    <circle cx="1043" cy="200" r="26" fill="none" stroke="#D8CCBE" stroke-width="2.5" stroke-dasharray="5 5"/>
+    <circle cx="1117" cy="200" r="26" fill="none" stroke="#D8CCBE" stroke-width="2.5" stroke-dasharray="5 5"/>
+    <text x="1080" y="262" text-anchor="middle" font-size="13" font-weight="600" fill="#9A8F86" font-family="-apple-system,sans-serif">iPad와 연결되면</text>
+    <text x="1080" y="282" text-anchor="middle" font-size="13" fill="#B6A89B" font-family="-apple-system,sans-serif">아이 목록이 여기 표시돼요</text>
+
+    <line x1="932" y1="306" x2="1228" y2="306" stroke="#EBDFD2" stroke-width="1"/>
+    <text x="932" y="330" font-size="12" font-weight="700" fill="#C9BCAE" font-family="-apple-system,sans-serif" letter-spacing="0.5">얼마나?</text>
+
+    <!-- dim preset grid -->
+    <g opacity="0.4">
+      <rect x="932" y="342" width="134" height="64" rx="20" fill="white" stroke="#EBDFD2" stroke-width="1"/>
+      <text x="999" y="380" text-anchor="middle" font-size="24" font-weight="700" fill="#B6A89B" font-family="-apple-system,sans-serif">10</text>
+      <rect x="1094" y="342" width="134" height="64" rx="20" fill="white" stroke="#EBDFD2" stroke-width="1"/>
+      <text x="1161" y="380" text-anchor="middle" font-size="24" font-weight="700" fill="#B6A89B" font-family="-apple-system,sans-serif">15</text>
+      <rect x="932" y="418" width="134" height="64" rx="20" fill="white" stroke="#EBDFD2" stroke-width="1"/>
+      <text x="999" y="456" text-anchor="middle" font-size="24" font-weight="700" fill="#B6A89B" font-family="-apple-system,sans-serif">20</text>
+      <rect x="1094" y="418" width="134" height="64" rx="20" fill="white" stroke="#EBDFD2" stroke-width="1"/>
+      <text x="1161" y="456" text-anchor="middle" font-size="24" font-weight="700" fill="#B6A89B" font-family="-apple-system,sans-serif">30</text>
+    </g>
+
+    <!-- disabled start -->
+    <rect x="932" y="510" width="296" height="56" rx="22" fill="#ECE3DA"/>
+    <text x="1080" y="544" text-anchor="middle" font-size="18" font-weight="700" fill="#B6A89B" font-family="-apple-system,sans-serif">시작</text>
+    <text x="1080" y="600" text-anchor="middle" font-size="12" fill="#9A8F86" font-family="-apple-system,sans-serif">연결·아이 선택 전엔 시작할 수 없어요</text>
+  </g>
+
+  <!-- bottom captions -->
+  <text x="200" y="772" text-anchor="middle" font-size="12" fill="#9A8F86" font-family="-apple-system,sans-serif">프로필 행 = 가로 스크롤 · 선택=코랄 링+체크</text>
+  <text x="640" y="772" text-anchor="middle" font-size="12" fill="#9A8F86" font-family="-apple-system,sans-serif">대상 아이 = 부모가 고른 값(실시간 활동 아님)</text>
+  <text x="1080" y="772" text-anchor="middle" font-size="12" fill="#9A8F86" font-family="-apple-system,sans-serif">목록은 iPad→iPhone 동기화</text>
+
+  <text x="40" y="798" font-size="11" fill="#B6A89B" font-family="-apple-system,sans-serif">31-iphone-profile-timer.svg · iPhone 부모 제어판 — 프로필 지정 타이머(대기·진행·비활성)</text>
+</svg>

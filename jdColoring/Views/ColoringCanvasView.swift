@@ -94,9 +94,8 @@ struct ColoringCanvasView: View {
         .onAppear {
             if lineImage == nil { lineImage = PlatformImage(data: template.imageData) }
             // M-2: 화면 재진입 시 이미 타이머가 설정돼 있으면 동기화 (onChange는 값 변화 시만 발화)
-            if timerEnd == nil, let end = peerSession.receivedTimerEnd {
-                timerEnd = end
-            }
+            // 단, 이 타이머가 '이 프로필' 대상일 때만 적용(프로필 지정 타이머).
+            if timerEnd == nil { syncTimerFromPeer(peerSession.receivedTimerEnd) }
         }
         .onDisappear {
             saver.flush()
@@ -110,17 +109,23 @@ struct ColoringCanvasView: View {
             timerNow = date
         }
         .onChange(of: peerSession.receivedTimerEnd) { _, end in
-            timerExpired = false   // 새 타이머 시작/취소 시 expired 초기화
-            withAnimation(.easeInOut(duration: 0.3)) { timerEnd = end }
+            syncTimerFromPeer(end)
         }
         // C-2: expired 플래그로 만료 진입점 단일화 (onDisappear flush와 중복 방지)
         // MAJOR-1: flush 완료 후 화면 전환 → 마지막 색칠 보장
         // MINOR-1: withAnimation으로 전환 부드럽게
         .onChange(of: timerRemaining) { _, rem in
             guard let rem, rem <= 0, !timerExpired else { return }
+            // M-1: 만료 순간 활성 프로필(이 캔버스)이 지정 대상인지 명시 재검증.
+            // 불일치면 홈 복귀 없이 로컬 정리만(소멸). 기획 체크포인트(currentProfile.uuid == target) 명시화.
+            guard timerAppliesToMe else {
+                timerEnd = nil
+                return
+            }
             timerExpired = true
             timerEnd = nil
-            peerSession.receivedTimerEnd = nil   // 재진입 시 만료 타이머 재적용 방지
+            peerSession.receivedTimerEnd = nil      // 재진입 시 만료 타이머 재적용 방지
+            peerSession.receivedTimerTarget = nil
             saver.flushThen {
                 withAnimation { path.removeAll() }
             }
@@ -153,6 +158,31 @@ struct ColoringCanvasView: View {
     private var timerRemaining: TimeInterval? {
         guard let end = timerEnd else { return nil }
         return max(0, end.timeIntervalSince(timerNow))
+    }
+
+    /// 수신한 타이머가 '이 프로필' 대상인가 (프로필 지정 타이머).
+    private var timerAppliesToMe: Bool {
+        peerSession.receivedTimerTarget == profile.uuid
+    }
+
+    /// 수신 타이머를 로컬 timerEnd로 반영.
+    /// - 대상이 이 프로필이 아니면 무시(칩 미표시·만료 동작 없음).
+    /// - 대상이지만 이미 만료된 시각이면 '소멸'(동작 없이 정리) — 비활성 중 만료 후 뒤늦은 진입 케이스.
+    /// - 대상이고 아직 미래면 적용 → 칩 표시 + 만료 시 저장·홈 복귀.
+    private func syncTimerFromPeer(_ end: Date?) {
+        timerExpired = false
+        guard timerAppliesToMe, let end else {
+            withAnimation(.easeInOut(duration: 0.3)) { timerEnd = nil }
+            return
+        }
+        if end > Date() {
+            withAnimation(.easeInOut(duration: 0.3)) { timerEnd = end }
+        } else {
+            // 비활성(다른 아이/홈) 중 만료된 타이머에 뒤늦게 진입 → 소멸.
+            peerSession.receivedTimerEnd = nil
+            peerSession.receivedTimerTarget = nil
+            timerEnd = nil
+        }
     }
 
     private func timerFormatted(_ interval: TimeInterval) -> String {

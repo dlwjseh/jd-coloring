@@ -21,6 +21,12 @@ final class PeerSession: NSObject {
 
     /// iPad가 수신한 타이머 만료 시각. nil = 타이머 없음(취소 포함).
     var receivedTimerEnd: Date? = nil
+    /// iPad가 수신한 타이머 대상 프로필(Profile.uuid). nil = 대상 없음.
+    /// 활성 프로필과 일치할 때만 칩 표시·만료 동작이 적용된다.
+    var receivedTimerTarget: UUID? = nil
+
+    /// iPhone이 iPad에서 받은 프로필 목록(타이머 대상 후보). 미연결/동기화 전이면 비어 있음.
+    private(set) var availableProfiles: [ProfileSummary] = []
 
     // MARK: - 내부
     private let role: Role
@@ -97,12 +103,17 @@ final class PeerSession: NSObject {
 
     // MARK: - 송신 (iPhone → iPad)
 
-    func sendTimerStart(endDate: Date) {
-        send(.timerStart(endDate: endDate))
+    func sendTimerStart(endDate: Date, targetProfileId: UUID) {
+        send(.timerStart(endDate: endDate, targetProfileId: targetProfileId))
     }
 
     func sendTimerCancel() {
         send(.timerCancel)
+    }
+
+    /// iPad → iPhone: 프로필 목록 전송(연결 직후 + 추가/수정/삭제 시).
+    func sendProfileList(_ profiles: [ProfileSummary]) {
+        send(.profileList(profiles))
     }
 
     /// iPhone: 목록에서 iPad 선택 후 연결 요청.
@@ -150,8 +161,15 @@ extension PeerSession: MCSessionDelegate {
         Task { @MainActor [weak self] in
             guard let self else { return }
             switch msg {
-            case .timerStart(let endDate): receivedTimerEnd = endDate
-            case .timerCancel:             receivedTimerEnd = nil
+            case .timerStart(let endDate, let target):
+                // 대상을 먼저 갱신 → receivedTimerEnd 변화를 관찰하는 쪽에서 대상이 이미 보이도록.
+                receivedTimerTarget = target
+                receivedTimerEnd = endDate
+            case .timerCancel:
+                receivedTimerEnd = nil
+                receivedTimerTarget = nil
+            case .profileList(let list):
+                availableProfiles = list
             }
         }
     }

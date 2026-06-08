@@ -7,6 +7,7 @@ struct UserSelectionView: View {
 
     @Environment(\.modelContext) private var context
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(PeerSession.self) private var peer
     @Query(sort: \Profile.createdAt) private var profiles: [Profile]
 
     /// A1 진입 애니메이션 트리거
@@ -281,6 +282,7 @@ struct UserSelectionView: View {
         } catch {
             print("프로필 저장 실패: \(error)")
         }
+        broadcastProfilesIfConnected()   // M-2: CRUD 시점에 직접 전송(부모 제어판 목록 갱신)
         dismissEditor()
     }
 
@@ -294,6 +296,16 @@ struct UserSelectionView: View {
             try context.save()
         } catch {
             print("프로필 삭제 실패: \(error)")
+        }
+        broadcastProfilesIfConnected()   // M-2: 삭제도 즉시 부모 제어판 목록에 반영
+    }
+
+    /// iPhone(부모 제어판)이 연결돼 있으면 현재 프로필 목록을 전송.
+    /// SwiftData CRUD가 끝난 뒤 profiles 쿼리가 갱신되도록 다음 런루프에서 보낸다.
+    private func broadcastProfilesIfConnected() {
+        guard peer.isConnected else { return }
+        DispatchQueue.main.async {
+            peer.sendProfileList(profileSummaries(profiles))
         }
     }
 
