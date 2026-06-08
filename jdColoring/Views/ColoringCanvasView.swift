@@ -98,7 +98,12 @@ struct ColoringCanvasView: View {
                 timerEnd = end
             }
         }
-        .onDisappear { saver.flush() }
+        .onDisappear {
+            saver.flush()
+            // 풀해상 라인아트 비트맵(최대 1400px) 즉시 해제 — 반복 진입/이탈 시
+            // 캔버스 작업 버퍼와 겹쳐 메모리가 누적되는 것을 막는다.
+            lineImage = nil
+        }
         // C-1: 타이머가 없을 때는 state 갱신 안 함 → body 불필요 재평가 차단
         .onReceive(clockTimer) { date in
             guard timerEnd != nil else { return }

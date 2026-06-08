@@ -110,8 +110,19 @@ final class RegionPaintEngine {
     }
 
     deinit {
-        // invalidate는 stopDisplayLink()가 담당. deinit에서 link 참조만 해제.
+        // 정상 경로(onDisappear → stopDisplayLink)에서는 이미 nil이라 아무 일도 안 한다.
+        // onDisappear가 호출되지 않은 비정상 이탈에 대비한 안전망: 런루프가 retain한
+        // link/proxy가 매 프레임 tick하며 잔존하지 않도록 메인에서 invalidate한다.
+        // (deinit은 어느 스레드에서나 불릴 수 있어 CADisplayLink.invalidate를 직접 호출하지 않는다.
+        //  proxy는 [weak self]라 self 해제 후에는 tick이 무해하지만, link/proxy 자체를 정리한다.)
+        guard let link = displayLink else { return }
+        let proxy = linkProxy
         displayLink = nil
+        linkProxy = nil
+        DispatchQueue.main.async {
+            link.invalidate()
+            _ = proxy   // invalidate 시점까지 proxy 수명 유지
+        }
     }
 
     // MARK: - 구성
