@@ -597,7 +597,42 @@ final class RegionPaintEngine {
         for i in 0..<n where labels[i] != 0 {
             labels[i] = find(labels[i])
         }
+        // 칸 라벨을 경계(라인) 띠 안쪽으로 몇 px 팽창 → 색칠이 라인아트 가장자리 밑까지 들어가
+        // 검은 선과 색칠 영역 사이의 흰 틈(안티에일리어싱 띠)을 없앤다.
+        dilateLabelsIntoBarrier(&labels, width: w, height: h, radius: 4)
         return labels
+    }
+
+    /// 경계(라벨 0=라인) 픽셀을 인접 칸 라벨로 메워, 색칠이 라인아트의 안티에일리어싱
+    /// 가장자리 밑까지 들어가게 한다(채색-라인 사이 흰 틈 제거).
+    ///
+    /// 라인아트는 화면/썸네일에서 위에 multiply로 합성되므로, 선이 진한 곳은 라벨이 칠해져도
+    /// 그대로 검게 남고(덧칠 안 보임), 회색 가장자리만 칸 색으로 채워진다. 칸끼리 병합하지 않고
+    /// 경계 픽셀을 "가장 가까운 칸"에 나눠 배정만 하므로, 색이 다른 칸으로 새지 않는다.
+    /// (한 패스 = 1px 등방 성장. 직전 패스 결과만 읽도록 신규 배정을 모아 패스 끝에 일괄 적용.)
+    private static func dilateLabelsIntoBarrier(_ labels: inout [Int32],
+                                                width w: Int, height h: Int, radius: Int) {
+        guard radius > 0, w > 0, h > 0 else { return }
+        var added: [(Int, Int32)] = []
+        for _ in 0..<radius {
+            added.removeAll(keepingCapacity: true)
+            for y in 0..<h {
+                let row = y * w
+                for x in 0..<w {
+                    let i = row + x
+                    if labels[i] != 0 { continue }
+                    // 4-이웃 중 라벨 있는 첫 칸을 채택(이번 패스에 새로 메운 칸은 제외 → 등방 성장)
+                    var lab: Int32 = 0
+                    if x > 0, labels[i - 1] != 0 { lab = labels[i - 1] }
+                    else if x < w - 1, labels[i + 1] != 0 { lab = labels[i + 1] }
+                    else if y > 0, labels[i - w] != 0 { lab = labels[i - w] }
+                    else if y < h - 1, labels[i + w] != 0 { lab = labels[i + w] }
+                    if lab != 0 { added.append((i, lab)) }
+                }
+            }
+            if added.isEmpty { break }
+            for (i, lab) in added { labels[i] = lab }
+        }
     }
 }
 
