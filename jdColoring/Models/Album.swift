@@ -15,13 +15,19 @@ final class Album {
     @Attribute(.externalStorage) var coverImageData: Data?
     var createdAt: Date
 
+    /// 시스템(앱 기본 제공) 앨범 여부. true = '한글' 같은 보호 앨범 → 삭제·이름변경·대표이미지
+    /// 변경 불가, 캐러셀 맨 앞 고정, 안의 도안도 보호. (기획 §기본 제공 한글 앨범, 2026-06-09)
+    /// 경량 마이그레이션: 기존 행은 기본값 false.
+    var isSystem: Bool = false
+
     /// 이 앨범에 속한 도안들. 앨범 삭제 시 nullify → 도안의 album 이 nil(미분류)이 된다.
     @Relationship(deleteRule: .nullify, inverse: \Template.album)
     var templates: [Template] = []
 
-    init(name: String, coverImageData: Data? = nil, createdAt: Date = .now) {
+    init(name: String, coverImageData: Data? = nil, createdAt: Date = .now, isSystem: Bool = false) {
         self.name = name
         self.coverImageData = coverImageData
         self.createdAt = createdAt
+        self.isSystem = isSystem
     }
 }

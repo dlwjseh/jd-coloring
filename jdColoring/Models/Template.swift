@@ -15,6 +15,11 @@ final class Template {
     @Attribute(.externalStorage) var thumbnailData: Data
     var createdAt: Date
 
+    /// 시스템(앱 기본 제공) 도안 여부. true = '한글' 자음·모음 같은 보호 도안 → 삭제·이름변경·
+    /// 앨범이동 불가(롱프레스는 '내 색칠 초기화'만). 색칠·작업물은 일반 도안과 동일.
+    /// (기획 §기본 제공 한글 앨범, 2026-06-09) 경량 마이그레이션: 기존 행은 기본값 false.
+    var isSystem: Bool = false
+
     /// 소속 앨범(단일). `nil` = 미분류. 인버스는 `Album.templates`(앨범 삭제 시 nullify → 미분류).
     var album: Album?
 
@@ -22,11 +27,12 @@ final class Template {
     @Relationship(deleteRule: .cascade, inverse: \Artwork.template)
     var artworks: [Artwork] = []
 
-    init(name: String, imageData: Data, thumbnailData: Data, album: Album? = nil, createdAt: Date = .now) {
+    init(name: String, imageData: Data, thumbnailData: Data, album: Album? = nil, createdAt: Date = .now, isSystem: Bool = false) {
         self.name = name
         self.imageData = imageData
         self.thumbnailData = thumbnailData
         self.album = album
         self.createdAt = createdAt
+        self.isSystem = isSystem
     }
 }

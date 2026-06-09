@@ -1,0 +1,114 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1180" height="820" viewBox="0 0 1180 820" font-family="'SF Pro Rounded','Apple SD Gothic Neo','Noto Sans KR','Helvetica Neue',sans-serif">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#FFF4EC"/>
+    </linearGradient>
+    <filter id="shCard" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="6" stdDeviation="10" flood-color="#C9A88C" flood-opacity="0.28"/>
+    </filter>
+    <g id="face2">
+      <circle cx="-9" cy="-5" r="3.2" fill="#3B3A4E"/>
+      <circle cx="9" cy="-5" r="3.2" fill="#3B3A4E"/>
+      <path d="M -11 6 Q 0 16 11 6" fill="none" stroke="#3B3A4E" stroke-width="2.6" stroke-linecap="round"/>
+    </g>
+    <clipPath id="screen"><rect width="1180" height="820"/></clipPath>
+  </defs>
+
+  <g clip-path="url(#screen)">
+  <rect width="1180" height="820" fill="url(#bg)"/>
+  <circle cx="70" cy="160" r="120" fill="#8A6CFF" opacity="0.09"/>
+  <circle cx="1120" cy="130" r="140" fill="#36C5C0" opacity="0.09"/>
+  <circle cx="120" cy="730" r="90" fill="#5FD08A" opacity="0.10"/>
+  <circle cx="1080" cy="770" r="80" fill="#FFC740" opacity="0.09"/>
+
+  <!-- ===== top bar ===== -->
+  <g filter="url(#shCard)">
+    <circle cx="74" cy="74" r="30" fill="#FFFFFF" stroke="#EBDFD2" stroke-width="2"/>
+    <path d="M 84 60 L 66 74 L 84 88" fill="none" stroke="#3B3A4E" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <text x="590" y="56" font-size="36" font-weight="800" fill="#3B3A4E" text-anchor="middle">무엇을 색칠해볼까요?</text>
+  <text x="590" y="90" font-size="20" fill="#9A8F86" text-anchor="middle">한글 · 24개 도안 · 자음 14 · 모음 10</text>
+  <g>
+    <text x="1048" y="82" font-size="24" font-weight="700" fill="#3B3A4E" text-anchor="end">주언이</text>
+    <circle cx="1090" cy="74" r="28" fill="#FFE4DB" stroke="#FF7A59" stroke-width="5" filter="url(#shCard)"/>
+    <use href="#face2" transform="translate(1090,74)"/>
+  </g>
+
+  <!-- =================================================================== -->
+  <!-- GRID 6 x 4 = 24 jamo (자모 순). card 134x134 rx24                     -->
+  <!-- cols x: 123 283 443 603 763 923   rows y: 140 294 448 602            -->
+  <!-- glyph = white/pastel fill + dark stroke (= coloring template look)   -->
+  <!-- =================================================================== -->
+
+  <!-- card backgrounds -->
+  <g filter="url(#shCard)" fill="#FFFFFF" stroke="#EBDFD2" stroke-width="2">
+    <rect x="123" y="140" width="134" height="134" rx="24"/><rect x="283" y="140" width="134" height="134" rx="24"/><rect x="443" y="140" width="134" height="134" rx="24"/><rect x="603" y="140" width="134" height="134" rx="24"/><rect x="763" y="140" width="134" height="134" rx="24"/><rect x="923" y="140" width="134" height="134" rx="24"/>
+    <rect x="123" y="294" width="134" height="134" rx="24"/><rect x="283" y="294" width="134" height="134" rx="24"/><rect x="443" y="294" width="134" height="134" rx="24"/><rect x="603" y="294" width="134" height="134" rx="24"/><rect x="763" y="294" width="134" height="134" rx="24"/><rect x="923" y="294" width="134" height="134" rx="24"/>
+    <rect x="123" y="448" width="134" height="134" rx="24"/><rect x="283" y="448" width="134" height="134" rx="24"/><rect x="443" y="448" width="134" height="134" rx="24"/><rect x="603" y="448" width="134" height="134" rx="24"/><rect x="763" y="448" width="134" height="134" rx="24"/><rect x="923" y="448" width="134" height="134" rx="24"/>
+    <rect x="123" y="602" width="134" height="134" rx="24"/><rect x="283" y="602" width="134" height="134" rx="24"/><rect x="443" y="602" width="134" height="134" rx="24"/><rect x="603" y="602" width="134" height="134" rx="24"/><rect x="763" y="602" width="134" height="134" rx="24"/><rect x="923" y="602" width="134" height="134" rx="24"/>
+  </g>
+
+  <!-- glyph outlines (white = 미착수) -->
+  <g font-weight="900" text-anchor="middle" stroke="#3B3A4E" stroke-width="3" stroke-linejoin="round" paint-order="stroke" font-size="76">
+    <!-- row0 -->
+    <text x="190" y="232" fill="#FFD7E9">ㄱ</text><!-- 진행중(pink) -->
+    <text x="350" y="232" fill="#FFFFFF">ㄴ</text>
+    <text x="510" y="232" fill="#FFFFFF">ㄷ</text>
+    <text x="670" y="232" fill="#FFFFFF">ㄹ</text>
+    <text x="830" y="232" fill="#CDEBD6">ㅁ</text><!-- 진행중(mint) -->
+    <text x="990" y="232" fill="#FFFFFF">ㅂ</text>
+    <!-- row1 -->
+    <text x="190" y="386" fill="#FFFFFF">ㅅ</text>
+    <text x="350" y="386" fill="#FFFFFF">ㅇ</text>
+    <text x="510" y="386" fill="#FFFFFF">ㅈ</text>
+    <text x="670" y="386" fill="#FFFFFF">ㅊ</text>
+    <text x="830" y="386" fill="#FFFFFF">ㅋ</text>
+    <text x="990" y="386" fill="#FFFFFF">ㅌ</text>
+    <!-- row2 -->
+    <text x="190" y="540" fill="#FFFFFF">ㅍ</text>
+    <text x="350" y="540" fill="#FFFFFF">ㅎ</text>
+    <text x="510" y="540" fill="#BFE0FF">ㅏ</text><!-- 진행중(blue) -->
+    <text x="670" y="540" fill="#FFFFFF">ㅑ</text>
+    <text x="830" y="540" fill="#FFFFFF">ㅓ</text>
+    <text x="990" y="540" fill="#FFFFFF">ㅕ</text>
+    <!-- row3 -->
+    <text x="190" y="694" fill="#FFFFFF">ㅗ</text>
+    <text x="350" y="694" fill="#FFFFFF">ㅛ</text>
+    <text x="510" y="694" fill="#FFFFFF">ㅜ</text>
+    <text x="670" y="694" fill="#FFFFFF">ㅠ</text>
+    <text x="830" y="694" fill="#FFFFFF">ㅡ</text>
+    <text x="990" y="694" fill="#FFFFFF">ㅣ</text>
+  </g>
+
+  <!-- name labels (bottom of card) -->
+  <g text-anchor="middle" font-size="15" font-weight="600">
+    <text x="190" y="260" fill="#3B3A4E">ㄱ</text><text x="350" y="260" fill="#9A8F86">ㄴ</text><text x="510" y="260" fill="#9A8F86">ㄷ</text><text x="670" y="260" fill="#9A8F86">ㄹ</text><text x="830" y="260" fill="#3B3A4E">ㅁ</text><text x="990" y="260" fill="#9A8F86">ㅂ</text>
+    <text x="190" y="414" fill="#9A8F86">ㅅ</text><text x="350" y="414" fill="#9A8F86">ㅇ</text><text x="510" y="414" fill="#9A8F86">ㅈ</text><text x="670" y="414" fill="#9A8F86">ㅊ</text><text x="830" y="414" fill="#9A8F86">ㅋ</text><text x="990" y="414" fill="#9A8F86">ㅌ</text>
+    <text x="190" y="568" fill="#9A8F86">ㅍ</text><text x="350" y="568" fill="#9A8F86">ㅎ</text><text x="510" y="568" fill="#3B3A4E">ㅏ</text><text x="670" y="568" fill="#9A8F86">ㅑ</text><text x="830" y="568" fill="#9A8F86">ㅓ</text><text x="990" y="568" fill="#9A8F86">ㅕ</text>
+    <text x="190" y="722" fill="#9A8F86">ㅗ</text><text x="350" y="722" fill="#9A8F86">ㅛ</text><text x="510" y="722" fill="#9A8F86">ㅜ</text><text x="670" y="722" fill="#9A8F86">ㅠ</text><text x="830" y="722" fill="#9A8F86">ㅡ</text><text x="990" y="722" fill="#9A8F86">ㅣ</text>
+  </g>
+
+  <!-- 진행 중 badges (color filled = 현재 프로필이 색칠) -->
+  <g font-size="11" font-weight="700" fill="#FFFFFF" text-anchor="middle">
+    <rect x="133" y="150" width="58" height="22" rx="11" fill="#FF7A59"/><text x="162" y="165">진행 중</text>
+    <rect x="773" y="150" width="58" height="22" rx="11" fill="#FF7A59"/><text x="802" y="165">진행 중</text>
+    <rect x="453" y="458" width="58" height="22" rx="11" fill="#FF7A59"/><text x="482" y="473">진행 중</text>
+  </g>
+
+  <!-- consonant↔vowel boundary hint (ㅎ 다음 = 모음 시작) -->
+  <text x="430" y="492" font-size="12" font-weight="700" fill="#B6A89B" text-anchor="middle" transform="rotate(0)">모음 →</text>
+
+  <!-- ===== bottom band: protected info + longpress sample ===== -->
+  <!-- left: lock caption -->
+  <g filter="url(#shCard)"><rect x="40" y="752" width="520" height="48" rx="24" fill="#FFFFFF" stroke="#EBDFD2" stroke-width="2"/></g>
+  <text x="64" y="782" font-size="16" font-weight="700" fill="#3B3A4E">🔒 기본 제공 한글 도안 — 색칠·초기화만 (추가·삭제·이동 버튼 없음)</text>
+
+  <!-- right: longpress menu sample (protected = 초기화만) -->
+  <g filter="url(#shCard)"><rect x="780" y="744" width="360" height="64" rx="16" fill="#FFFFFF" stroke="#EBDFD2" stroke-width="2"/></g>
+  <text x="800" y="766" font-size="12" font-weight="700" fill="#B6A89B">롱프레스 시</text>
+  <rect x="800" y="772" width="180" height="28" rx="9" fill="#FFF1EC"/>
+  <text x="812" y="791" font-size="14" font-weight="700" fill="#FF7A59">🔄 내 색칠 초기화</text>
+  <text x="996" y="791" font-size="12" fill="#C8BAAE">이름·이동·삭제 없음</text>
+  </g>
+</svg>

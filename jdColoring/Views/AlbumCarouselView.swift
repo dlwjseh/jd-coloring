@@ -86,6 +86,8 @@ struct AlbumCarouselView: View {
         .onAppear {
             appeared = false
             Task { @MainActor in appeared = true }
+            // M-2 안전 재시도: 시드가 부분 완료/실패했어도 앨범 화면 진입 시 자가복구(완료 상태면 0작업).
+            HangulSeeder.ensure(context: context)
         }
         .onDisappear { exitTask?.cancel() }
         .navigationBarBackButtonHidden(true)
@@ -115,7 +117,9 @@ struct AlbumCarouselView: View {
             if let a = t.album { counts[a.persistentModelID, default: 0] += 1 }
             else { uncategorized += 1 }
         }
-        var result = albums.map { AlbumItem(kind: .album($0), count: counts[$0.persistentModelID] ?? 0) }
+        // 시스템 앨범('한글')은 생성순과 무관하게 **맨 앞 고정**(디자인 §32-1). 미분류는 맨 뒤.
+        let ordered = albums.filter(\.isSystem) + albums.filter { !$0.isSystem }
+        var result = ordered.map { AlbumItem(kind: .album($0), count: counts[$0.persistentModelID] ?? 0) }
         if uncategorized > 0 {
             result.append(AlbumItem(kind: .uncategorized, count: uncategorized))
         }
@@ -326,7 +330,8 @@ private struct AlbumCarouselDeck: View {
             .zIndex(2 - Double(abs(p)))
             .onTapGesture { tap(slot: k, centered: centered, item: item) }
 
-        if centered, case let .album(album) = item.kind {
+        // 시스템 앨범('한글')은 보호 — 롱프레스 메뉴(수정/삭제) 없음(디자인 §32-1).
+        if centered, case let .album(album) = item.kind, !album.isSystem {
             base
                 .contextMenu {
                     Button { onEdit(album) } label: { Label("수정", systemImage: "pencil") }
@@ -435,6 +440,11 @@ private struct AlbumItem {
         if case .uncategorized = kind { return true }
         return false
     }
+    /// 시스템(앱 기본 제공) 앨범 여부 — '기본 제공' 배지 표시·맨 앞 고정.
+    var isSystem: Bool {
+        if case .album(let a) = kind { return a.isSystem }
+        return false
+    }
     /// 커버 영역 파스텔 톤(앨범마다 약간씩 다르게).
     static let coverTints: [UInt] = [0xFFE9CF, 0xFFEBF3, 0xE6F0FF, 0xE3F6EC, 0xF1E9FF, 0xFFF6D9]
 }
@@ -469,6 +479,18 @@ private struct AlbumCardView: View {
                 }
             }
             .frame(width: width - 40, height: coverH)
+            .overlay(alignment: .topLeading) {
+                // '기본 제공' 배지 (디자인 §32-1) — 시스템 앨범('한글')만.
+                if item.isSystem {
+                    Text("★ 기본 제공")
+                        .font(Theme.rounded(min(18, height * 0.038), weight: .heavy))
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 7)
+                        .background(Capsule().fill(Theme.coral))
+                        .padding(14)
+                }
+            }
             .padding(.top, 20)
 
             Spacer(minLength: 0)

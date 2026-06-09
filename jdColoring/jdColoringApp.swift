@@ -100,6 +100,7 @@ struct RootView: View {
         }
         .onAppear {
             reconcileProfileUUIDsOnce()
+            HangulSeeder.ensure(context: context)   // 기본 제공 '한글' 앨범 + 24자 ensure-exists
             if peer.isConnected { peer.sendProfileList(profileSummaries(profiles)) }
         }
     }

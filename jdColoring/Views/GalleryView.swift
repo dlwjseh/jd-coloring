@@ -39,6 +39,12 @@ struct GalleryView: View {
         return nil
     }
 
+    /// 보호된 시스템 앨범('한글') 보기 중인가 — 추가 버튼 숨김·도안 보호(디자인 §32-2).
+    private var isSystemAlbum: Bool { currentAlbum?.isSystem ?? false }
+
+    /// 업로드/앨범이동 대상 후보 — 시스템 앨범('한글')은 제외(사용자 도안을 넣지 못하게).
+    private var selectableAlbums: [Album] { categories.filter { !$0.isSystem } }
+
     init(profile: Profile, selection: AlbumSelection, path: Binding<[Route]>) {
         self.profile = profile
         self.selection = selection
@@ -84,7 +90,7 @@ struct GalleryView: View {
 
                 Group {
                     if templates.isEmpty {
-                        emptyState
+                        if isSystemAlbum { systemPreparingState } else { emptyState }
                     } else {
                         grid
                     }
@@ -93,19 +99,21 @@ struct GalleryView: View {
                 .offset(y: (exiting && !reduceMotion) ? 80 : 0)
             }
 
-            // 우하단 추가 버튼
-            VStack {
-                Spacer()
-                HStack {
+            // 우하단 추가 버튼 — 보호된 시스템 앨범('한글')에는 표시하지 않음(디자인 §32-2).
+            if !isSystemAlbum {
+                VStack {
                     Spacer()
-                    AddButton(caption: "도안 추가", action: presentUpload)
-                        .padding(.trailing, 40)
-                        .padding(.bottom, 32)
-                        .opacity(isUploadPresented ? 0 : (appeared ? 1 : 0))   // 진입 시 밑에서 올라옴
-                        .offset(y: (appeared || reduceMotion) ? 0 : 90)
-                        .animation(.spring(response: 0.5, dampingFraction: 0.82).delay(0.12), value: appeared)
-                        .opacity(exiting ? 0 : 1)                              // 뒤로가기 시 아래로 빠짐
-                        .offset(y: (exiting && !reduceMotion) ? 120 : 0)
+                    HStack {
+                        Spacer()
+                        AddButton(caption: "도안 추가", action: presentUpload)
+                            .padding(.trailing, 40)
+                            .padding(.bottom, 32)
+                            .opacity(isUploadPresented ? 0 : (appeared ? 1 : 0))   // 진입 시 밑에서 올라옴
+                            .offset(y: (appeared || reduceMotion) ? 0 : 90)
+                            .animation(.spring(response: 0.5, dampingFraction: 0.82).delay(0.12), value: appeared)
+                            .opacity(exiting ? 0 : 1)                              // 뒤로가기 시 아래로 빠짐
+                            .offset(y: (exiting && !reduceMotion) ? 120 : 0)
+                    }
                 }
             }
 
@@ -113,7 +121,7 @@ struct GalleryView: View {
             if isUploadPresented {
                 Color.black.opacity(0.28).ignoresSafeArea()
                     .transition(.opacity)
-                TemplateUploadView(albums: categories, initialAlbum: currentAlbum, onCancel: dismissUpload) { name, image, thumb, album in
+                TemplateUploadView(albums: selectableAlbums, initialAlbum: currentAlbum, onCancel: dismissUpload) { name, image, thumb, album in
                     saveTemplate(name, image, thumb, album: album)
                 }
                 .transition(.move(edge: .bottom).combined(with: .opacity))
@@ -159,7 +167,7 @@ struct GalleryView: View {
             titleVisibility: .visible,
             presenting: moveTarget
         ) { template in
-            ForEach(categories) { album in
+            ForEach(selectableAlbums) { album in
                 if album.persistentModelID != template.album?.persistentModelID {
                     Button(album.name) { moveTemplate(template, to: album) }
                 }
@@ -255,35 +263,49 @@ struct GalleryView: View {
         .buttonStyle(.plain)
         .gridEntrance(index: index, visible: appeared)
 
-        base.contextMenu { menuItems(for: template, hasArtwork: artwork != nil) } preview: {
-            TemplateMenuPreview(template: template, artwork: artwork)
+        // 보호 도안('한글')이 아직 색칠 전이면 메뉴 항목이 없다 → 빈 메뉴를 띄우지 않게 contextMenu 자체를 생략.
+        if template.isSystem && artwork == nil {
+            base
+        } else {
+            base.contextMenu { menuItems(for: template, hasArtwork: artwork != nil) } preview: {
+                TemplateMenuPreview(template: template, artwork: artwork)
+            }
         }
     }
 
     @ViewBuilder
     private func menuItems(for template: Template, hasArtwork: Bool) -> some View {
-        Button {
-            renameText = template.name
-            renameTarget = template
-        } label: {
-            Label("이름 수정", systemImage: "pencil")
-        }
-        Button {
-            moveTarget = template
-        } label: {
-            Label("앨범 이동", systemImage: "rectangle.stack.badge.plus")
-        }
-        if hasArtwork {
-            Button {
-                resetArtwork(template)
-            } label: {
-                Label("내 색칠 초기화", systemImage: "arrow.counterclockwise")
+        if template.isSystem {
+            // 보호된 시스템 도안('한글') — '내 색칠 초기화'만 허용. 이름수정·앨범이동·삭제 없음(디자인 §32-2).
+            if hasArtwork {
+                Button { resetArtwork(template) } label: {
+                    Label("내 색칠 초기화", systemImage: "arrow.counterclockwise")
+                }
             }
-        }
-        Button(role: .destructive) {
-            pendingDelete = template
-        } label: {
-            Label("도안 삭제", systemImage: "trash")
+        } else {
+            Button {
+                renameText = template.name
+                renameTarget = template
+            } label: {
+                Label("이름 수정", systemImage: "pencil")
+            }
+            Button {
+                moveTarget = template
+            } label: {
+                Label("앨범 이동", systemImage: "rectangle.stack.badge.plus")
+            }
+            if hasArtwork {
+                Button {
+                    resetArtwork(template)
+                } label: {
+                    Label("내 색칠 초기화", systemImage: "arrow.counterclockwise")
+                }
+            }
+            Button(role: .destructive) {
+                pendingDelete = template
+            } label: {
+                Label("도안 삭제", systemImage: "trash")
+            }
         }
     }
 
@@ -309,6 +331,24 @@ struct GalleryView: View {
                         .font(Theme.rounded(20))
                         .foregroundStyle(Theme.subText)
                 }
+            }
+            Spacer()
+            Spacer()
+        }
+    }
+
+    /// 시스템 앨범('한글')이 시드 직후 잠깐 비어 보일 때의 안내(추가 버튼 없음 — 준비 중).
+    private var systemPreparingState: some View {
+        VStack {
+            Spacer()
+            VStack(spacing: 20) {
+                ProgressView().scaleEffect(1.4)
+                Text("한글 도안을 준비하고 있어요")
+                    .font(Theme.rounded(26, weight: .heavy))
+                    .foregroundStyle(Theme.ink)
+                Text("자음·모음 24자를 만들고 있어요. 잠시만요!")
+                    .font(Theme.rounded(18))
+                    .foregroundStyle(Theme.subText)
             }
             Spacer()
             Spacer()

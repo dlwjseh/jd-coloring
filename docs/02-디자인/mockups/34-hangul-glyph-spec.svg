@@ -1,0 +1,100 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1180" height="820" viewBox="0 0 1180 820" font-family="'SF Pro Rounded','Apple SD Gothic Neo','Noto Sans KR','Helvetica Neue',sans-serif">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#FFF4EC"/>
+    </linearGradient>
+    <filter id="shCard" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="6" stdDeviation="10" flood-color="#C9A88C" flood-opacity="0.28"/>
+    </filter>
+    <clipPath id="screen"><rect width="1180" height="820"/></clipPath>
+  </defs>
+
+  <g clip-path="url(#screen)">
+  <rect width="1180" height="820" fill="url(#bg)"/>
+  <circle cx="70" cy="160" r="120" fill="#8A6CFF" opacity="0.08"/>
+  <circle cx="1120" cy="700" r="140" fill="#36C5C0" opacity="0.08"/>
+
+  <text x="590" y="58" font-size="34" font-weight="800" fill="#3B3A4E" text-anchor="middle">한글 자음·모음 도안 — 글리프 윤곽 렌더 스펙</text>
+  <text x="590" y="88" font-size="18" fill="#9A8F86" text-anchor="middle">일러스트 에셋 없이 폰트 글리프 윤곽을 앱 내에서 그려 도안화 (결정적·선 항상 닫힘)</text>
+
+  <!-- =============== Frame A : filled glyph → outline =============== -->
+  <g filter="url(#shCard)"><rect x="40" y="112" width="340" height="448" rx="28" fill="#FFFFFF" stroke="#EBDFD2" stroke-width="2"/></g>
+  <text x="210" y="152" font-size="20" font-weight="800" fill="#3B3A4E" text-anchor="middle">① 글리프 → 윤곽선</text>
+
+  <!-- filled glyph -->
+  <text x="210" y="268" font-size="150" font-weight="900" fill="#3B3A4E" text-anchor="middle">ㄱ</text>
+  <text x="210" y="300" font-size="14" fill="#9A8F86" text-anchor="middle">폰트의 채워진 글리프</text>
+
+  <!-- arrow -->
+  <path d="M 210 318 L 210 356" fill="none" stroke="#FF7A59" stroke-width="5" stroke-linecap="round"/>
+  <path d="M 198 344 L 210 358 L 222 344" fill="none" stroke="#FF7A59" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- outline glyph (coloring template) -->
+  <text x="210" y="492" font-size="150" font-weight="900" fill="#FFFFFF" stroke="#3B3A4E" stroke-width="4" stroke-linejoin="round" paint-order="stroke" text-anchor="middle">ㄱ</text>
+  <text x="210" y="528" font-size="14" fill="#9A8F86" text-anchor="middle">윤곽선만 stroke · 속은 흰색 = 도안</text>
+
+  <!-- =============== Frame B : fill regions =============== -->
+  <g filter="url(#shCard)"><rect x="420" y="112" width="340" height="448" rx="28" fill="#FFFFFF" stroke="#EBDFD2" stroke-width="2"/></g>
+  <text x="590" y="152" font-size="20" font-weight="800" fill="#3B3A4E" text-anchor="middle">② 칠하기 영역</text>
+
+  <!-- ㅇ : ring colored, hole stays bg, outside stays white -->
+  <text x="590" y="420" font-size="240" font-weight="900" fill="#BFE0FF" stroke="#3B3A4E" stroke-width="4" stroke-linejoin="round" paint-order="stroke" text-anchor="middle">ㅇ</text>
+
+  <!-- annotations -->
+  <g font-size="13" font-weight="700">
+    <path d="M 690 250 L 628 300" fill="none" stroke="#FF7A59" stroke-width="2.5"/>
+    <circle cx="690" cy="250" r="4" fill="#FF7A59"/>
+    <text x="698" y="246" fill="#FF7A59">글자 속 = 한 칸 (칠해짐)</text>
+
+    <path d="M 690 470 L 596 380" fill="none" stroke="#9A8F86" stroke-width="2.5" stroke-dasharray="4 4"/>
+    <circle cx="690" cy="470" r="4" fill="#9A8F86"/>
+    <text x="698" y="474" fill="#9A8F86">구멍은 별도 영역</text>
+  </g>
+  <text x="590" y="528" font-size="14" fill="#9A8F86" text-anchor="middle">검은 선이 경계 — 색이 옆으로 안 번져요</text>
+
+  <!-- =============== Frame C : cover + font spec =============== -->
+  <g filter="url(#shCard)"><rect x="800" y="112" width="340" height="448" rx="28" fill="#FFFFFF" stroke="#EBDFD2" stroke-width="2"/></g>
+  <text x="970" y="152" font-size="20" font-weight="800" fill="#3B3A4E" text-anchor="middle">③ 앨범 커버 자동 생성</text>
+
+  <!-- mini cover -->
+  <rect x="848" y="176" width="244" height="184" rx="22" fill="#E9EEFF"/>
+  <g font-weight="900" text-anchor="middle" stroke="#3B3A4E" stroke-width="2.5" stroke-linejoin="round" paint-order="stroke" font-size="62">
+    <text x="912" y="262" fill="#FFFFFF">ㄱ</text>
+    <text x="1028" y="262" fill="#FFD7E9">ㄴ</text>
+    <text x="912" y="346" fill="#FFE9A8">ㅏ</text>
+    <text x="1028" y="346" fill="#FFFFFF">ㅑ</text>
+  </g>
+  <text x="970" y="392" font-size="13" fill="#9A8F86" text-anchor="middle">같은 렌더로 커버도 생성 (전용 에셋 불필요)</text>
+
+  <!-- font / stroke spec list -->
+  <g font-size="14" fill="#3B3A4E">
+    <text x="824" y="436" font-weight="800">렌더 파라미터</text>
+    <text x="824" y="464">• stroke ≈ 도안 짧은변의 2.5% · 라운드 캡/조인</text>
+    <text x="824" y="490">• 글리프 여백 ~12% letterbox (정사각/도안비)</text>
+    <text x="824" y="516">• 폰트 = 둥근 굵은 한글체</text>
+    <text x="838" y="540" fill="#9A8F86" font-size="13">Apple SD Gothic Neo Bold 1순위 · 둥근 무료폰트 번들 여지</text>
+  </g>
+
+  <!-- =============== bottom : pipeline + ensure-exists =============== -->
+  <g filter="url(#shCard)"><rect x="40" y="592" width="1100" height="196" rx="28" fill="#FFFFFF" stroke="#EBDFD2" stroke-width="2"/></g>
+  <text x="72" y="632" font-size="20" font-weight="800" fill="#3B3A4E">생성 파이프라인 (개발 인계)</text>
+
+  <!-- pipeline chips -->
+  <g font-size="14" font-weight="700" text-anchor="middle">
+    <rect x="72" y="652" width="180" height="48" rx="14" fill="#EEF2FF"/><text x="162" y="681" fill="#4A5B8A">CTFont 글리프 path</text>
+    <rect x="290" y="652" width="170" height="48" rx="14" fill="#EEF2FF"/><text x="375" y="681" fill="#4A5B8A">UIBezierPath stroke</text>
+    <rect x="498" y="652" width="210" height="48" rx="14" fill="#EEF2FF"/><text x="603" y="681" fill="#4A5B8A">흰 배경에 검은 선 렌더</text>
+    <rect x="746" y="652" width="160" height="48" rx="14" fill="#EEF2FF"/><text x="826" y="681" fill="#4A5B8A">라스터 다운샘플</text>
+    <rect x="944" y="652" width="170" height="48" rx="14" fill="#E0F6E9"/><text x="1029" y="673" fill="#3FA86B">Template.imageData</text><text x="1029" y="690" fill="#3FA86B" font-size="12">+ thumbnailData</text>
+  </g>
+  <!-- arrows between chips -->
+  <g stroke="#C8BAAE" stroke-width="3" stroke-linecap="round" fill="none">
+    <path d="M 256 676 L 286 676"/><path d="M 464 676 L 494 676"/><path d="M 712 676 L 742 676"/><path d="M 910 676 L 940 676"/>
+  </g>
+
+  <text x="72" y="742" font-size="15" font-weight="700" fill="#3B3A4E">시작 시 ensure-exists:</text>
+  <text x="220" y="742" font-size="15" fill="#9A8F86">'한글' 시스템 앨범 + 24자(name 키)가 다 있나 확인 → 없으면 백그라운드 생성 (있으면 렌더 0회).</text>
+  <text x="72" y="768" font-size="15" fill="#9A8F86">Category.isSystem / Template.isSystem = true 로 보호 · 경량 마이그레이션(기본값 false, 기존 데이터 무영향).</text>
+  </g>
+</svg>
