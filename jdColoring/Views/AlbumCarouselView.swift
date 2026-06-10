@@ -308,19 +308,24 @@ private struct AlbumCarouselDeck: View {
             let step = geo.size.width * 0.52
 
             ZStack {
-                if n == 1 {
-                    // 한 장뿐 → 단독 표시(양옆 복제·순환 없음).
-                    card(slot: 0, item: items[0], idx: 0, p: 0, centered: true,
-                         cardW: cardW, cardH: cardH, step: step)
-                } else {
-                    let pos = scrollIndex - drag / step      // 드래그 반영 실효 위치
-                    let centerSlot = Int(pos.rounded())
-                    ForEach(centerSlot - 3 ... centerSlot + 3, id: \.self) { k in
-                        let p = CGFloat(k) - pos             // 0=중앙, ±1=양옆
-                        if abs(p) < 2.6 {
-                            let idx = ((k % n) + n) % n        // 가상 슬롯 → 실제 앨범
-                            card(slot: k, item: items[idx], idx: idx, p: p, centered: abs(p) < 0.5,
-                                 cardW: cardW, cardH: cardH, step: step)
+                // 초기 레이아웃 패스에서 GeometryReader가 size=0을 보고하면 cardW/step이 0이 되어
+                // 카드 프레임이 음수가 되고 "Invalid frame dimension" 경고가 찍힌다.
+                // 유효 크기가 잡히기 전까지 카드 렌더를 보류한다.
+                if cardW > 0, cardH > 0, step > 0 {
+                    if n == 1 {
+                        // 한 장뿐 → 단독 표시(양옆 복제·순환 없음).
+                        card(slot: 0, item: items[0], idx: 0, p: 0, centered: true,
+                             cardW: cardW, cardH: cardH, step: step)
+                    } else {
+                        let pos = scrollIndex - drag / step      // 드래그 반영 실효 위치
+                        let centerSlot = Int(pos.rounded())
+                        ForEach(centerSlot - 3 ... centerSlot + 3, id: \.self) { k in
+                            let p = CGFloat(k) - pos             // 0=중앙, ±1=양옆
+                            if abs(p) < 2.6 {
+                                let idx = ((k % n) + n) % n        // 가상 슬롯 → 실제 앨범
+                                card(slot: k, item: items[idx], idx: idx, p: p, centered: abs(p) < 0.5,
+                                     cardW: cardW, cardH: cardH, step: step)
+                            }
                         }
                     }
                 }
@@ -478,7 +483,8 @@ private struct AlbumCardView: View {
     }
 
     var body: some View {
-        let coverH = height * 0.66
+        let coverH = max(0, height * 0.66)
+        let innerW = max(0, width - 40)                // 음수 프레임 방지(작은/0 크기 방어)
         VStack(spacing: 0) {
             ZStack {
                 RoundedRectangle(cornerRadius: 30).fill(coverTint)
@@ -486,7 +492,7 @@ private struct AlbumCardView: View {
                     image
                         .resizable()
                         .scaledToFill()
-                        .frame(width: width - 40, height: coverH - 8)
+                        .frame(width: innerW, height: max(0, coverH - 8))
                         .clipShape(RoundedRectangle(cornerRadius: 30))
                 } else {
                     Image(systemName: item.isUncategorized ? "tray.full" : "rectangle.stack")
@@ -494,7 +500,7 @@ private struct AlbumCardView: View {
                         .foregroundStyle(Color(hex: 0xB6A89B))
                 }
             }
-            .frame(width: width - 40, height: coverH)
+            .frame(width: innerW, height: coverH)
             .overlay(alignment: .topLeading) {
                 // '기본 제공' 배지 (디자인 §32-1) — 시스템 앨범('한글')만.
                 if item.isSystem {
