@@ -25,6 +25,9 @@ enum GlyphAlbumSeeder {
         let glyphs: [String]            // 생성/존재판정 글자 (표시·생성 순)
         let glyphVersion: Int           // 룩 변경 시 +1 → 기존 시드 재생성
         let versionKey: String          // UserDefaults 버전 저장 키
+        let coverAsset: String          // 번들 커버 PNG 리소스 이름(확장자 제외)
+        let coverVersion: Int           // 커버 이미지 교체 시 +1 → 기존 앨범 커버만 갱신(글자 재생성 X)
+        let coverVersionKey: String     // UserDefaults 커버 버전 저장 키
     }
 
     /// 자음 먼저·모음 나중(자모 순). 한글 글리프 v2 = Heavy + 둥근 모서리(2026-06-09).
@@ -34,7 +37,10 @@ enum GlyphAlbumSeeder {
         glyphs: ["ㄱ","ㄴ","ㄷ","ㄹ","ㅁ","ㅂ","ㅅ","ㅇ","ㅈ","ㅊ","ㅋ","ㅌ","ㅍ","ㅎ",
                  "ㅏ","ㅑ","ㅓ","ㅕ","ㅗ","ㅛ","ㅜ","ㅠ","ㅡ","ㅣ"],
         glyphVersion: 2,
-        versionKey: "hangulGlyphRenderVersion"
+        versionKey: "hangulGlyphRenderVersion",
+        coverAsset: "cover_hangul",
+        coverVersion: 2,
+        coverVersionKey: "hangulCoverVersion"
     )
 
     /// 대문자 A–Z(26) → 소문자 a–z(26) 순(디자인 §33-0-2). 알파벳 글리프 v1(신규).
@@ -44,7 +50,10 @@ enum GlyphAlbumSeeder {
         glyphs: (UnicodeScalar("A").value...UnicodeScalar("Z").value).map { String(UnicodeScalar($0)!) }
               + (UnicodeScalar("a").value...UnicodeScalar("z").value).map { String(UnicodeScalar($0)!) },
         glyphVersion: 1,
-        versionKey: "alphabetGlyphRenderVersion"
+        versionKey: "alphabetGlyphRenderVersion",
+        coverAsset: "cover_alphabet",
+        coverVersion: 2,
+        coverVersionKey: "alphabetCoverVersion"
     )
 
     static let allKinds: [Kind] = [hangul, alphabet]
@@ -85,7 +94,11 @@ enum GlyphAlbumSeeder {
             ? []
             : (existing.map { Set($0.templates.filter { $0.isSystem }.map(\.name)) } ?? [])
         let missing = kind.glyphs.filter { !haveNames.contains($0) }
-        let needCover = needsRegen || (existing?.coverImageData == nil)
+        // 커버는 글자 룩과 독립으로 갱신한다: nil 이거나 / 룩 재생성이거나 / 커버 버전이 올랐으면 다시 그린다.
+        let storedCoverVersion = UserDefaults.standard.integer(forKey: kind.coverVersionKey)
+        let needCover = needsRegen
+            || (existing?.coverImageData == nil)
+            || (existing != nil && storedCoverVersion != kind.coverVersion)
 
         // 앨범도 있고 글자도 다 있고 커버도 있고 버전도 같으면 → 할 일 없음.
         guard existing == nil || !missing.isEmpty || needCover else { return }
@@ -99,12 +112,16 @@ enum GlyphAlbumSeeder {
         let allCount = kind.glyphs.count
         let versionKey = kind.versionKey
         let version = kind.glyphVersion
+        let coverAsset = kind.coverAsset
+        let coverVersion = kind.coverVersion
+        let coverVersionKey = kind.coverVersionKey
 
         // 2) 백그라운드 렌더(Data 만 반환) → 3) 메인에서 삽입.
         Task {
             defer { seeding.remove(sysKind) }   // 완료/실패 무관 가드 해제 → 다음 호출이 재시도(M-2 자가복구)
             let payload = await Task.detached(priority: .utility) {
-                renderPayload(systemKind: sysKind, missing: missing, needCover: needCover)
+                renderPayload(systemKind: sysKind, missing: missing,
+                              coverAsset: needCover ? coverAsset : nil)
             }.value
 
             let album: Album
@@ -119,9 +136,9 @@ enum GlyphAlbumSeeder {
                 // m-3: 순회 중 삭제가 관계 배열을 변형하지 않도록 스냅샷을 떠서 삭제.
                 let toDelete = album.templates.filter { $0.isSystem }
                 for t in toDelete { context.delete(t) }
-                album.coverImageData = nil
             }
-            if album.coverImageData == nil, let cover = payload.cover { album.coverImageData = cover }
+            // 커버 교체(신규/룩 재생성/커버 버전 상승) — 기존 커버가 있어도 새 번들 이미지로 덮어쓴다.
+            if needCover, let cover = payload.cover { album.coverImageData = cover }
             // M-1: 렌더 사이 다른 경로가 채웠을 수 있으니 삽입 직전 메인에서 보유 글자 재확인 → 중복 방지.
             let nowHave = Set(album.templates.filter { $0.isSystem }.map(\.name))
             for g in payload.glyphs where !nowHave.contains(g.name) {
@@ -132,6 +149,10 @@ enum GlyphAlbumSeeder {
             }
             try? context.save()
 
+            // 커버가 실제로 채워졌으면 커버 버전 확정(다음 호출에서 재교체 방지).
+            if album.coverImageData != nil {
+                UserDefaults.standard.set(coverVersion, forKey: coverVersionKey)
+            }
             // 글자가 모두 갖춰졌을 때만 렌더 버전을 확정(부분 실패 시 다음 호출이 재시도).
             if album.templates.filter({ $0.isSystem }).count >= allCount {
                 UserDefaults.standard.set(version, forKey: versionKey)
@@ -148,8 +169,9 @@ enum GlyphAlbumSeeder {
         let cover: Data?
     }
 
-    /// 백그라운드에서 호출 — 모델/컨텍스트를 만지지 않고 PNG Data 만 생성한다. systemKind 로 폰트·커버 결정.
-    nonisolated private static func renderPayload(systemKind: String, missing: [String], needCover: Bool) -> Payload {
+    /// 백그라운드에서 호출 — 모델/컨텍스트를 만지지 않고 PNG/JPEG Data 만 생성한다.
+    /// `coverAsset` 이 nil 이면 커버는 다시 그리지 않는다(부족 글자만 렌더).
+    nonisolated private static func renderPayload(systemKind: String, missing: [String], coverAsset: String?) -> Payload {
         let font = glyphFont(for: systemKind)
         var glyphs: [Payload.Glyph] = []
         glyphs.reserveCapacity(missing.count)
@@ -158,7 +180,7 @@ enum GlyphAlbumSeeder {
                   let thumb = GlyphOutlineRenderer.outlineImage(g, side: thumbSide, font: font) else { continue }
             glyphs.append(.init(name: g, full: full, thumb: thumb))
         }
-        let cover = needCover ? renderCover(systemKind: systemKind) : nil
+        let cover = coverAsset.flatMap { renderCover(asset: $0) }
         return Payload(glyphs: glyphs, cover: cover)
     }
 
@@ -166,26 +188,12 @@ enum GlyphAlbumSeeder {
         systemKind == "hangul" ? .korean : .latinRounded
     }
 
-    /// 커버 자동 생성 — 한글: 소프트블루(#E9EEFF) + ㄱㄴㅏㅑ / 알파벳: 소프트민트(#E6F5EC) + A B a b (디자인 §33-1).
-    nonisolated private static func renderCover(systemKind: String) -> Data? {
-        let pink = UIColor(red: 1, green: 0xD7/255, blue: 0xE9/255, alpha: 1)
-        let yellow = UIColor(red: 1, green: 0xE9/255, blue: 0xA8/255, alpha: 1)
-        let mint = UIColor(red: 0xCD/255, green: 0xEB/255, blue: 0xD6/255, alpha: 1)
-        switch systemKind {
-        case "hangul":
-            let bg = UIColor(red: 0xE9/255, green: 0xEE/255, blue: 0xFF/255, alpha: 1)
-            let layout: [(String, UIColor, Int, Int)] = [
-                ("ㄱ", .white, 0, 0), ("ㄴ", pink, 1, 0),
-                ("ㅏ", yellow, 0, 1), ("ㅑ", .white, 1, 1),
-            ]
-            return GlyphOutlineRenderer.coverImage(side: coverSide, background: bg, layout: layout, font: .korean)
-        default:    // alphabet
-            let bg = UIColor(red: 0xE6/255, green: 0xF5/255, blue: 0xEC/255, alpha: 1)
-            let layout: [(String, UIColor, Int, Int)] = [
-                ("A", .white, 0, 0), ("B", pink, 1, 0),
-                ("a", yellow, 0, 1), ("b", mint, 1, 1),
-            ]
-            return GlyphOutlineRenderer.coverImage(side: coverSide, background: bg, layout: layout, font: .latinRounded)
-        }
+    /// 커버 = 번들에 동봉한 디자인 PNG(예술가 제작)를 커버 크기로 다운샘플한 Data.
+    /// (이전: 코드로 글리프를 그려 합성 → 2026-06-10 AI 제작 일러스트로 교체.)
+    nonisolated private static func renderCover(asset: String) -> Data? {
+        guard let url = Bundle.main.url(forResource: asset, withExtension: "png"),
+              let data = try? Data(contentsOf: url) else { return nil }
+        // 원본(고해상)을 그대로 보관하면 메모리 폭증 → coverSide 로 다운샘플(JPEG).
+        return ImageDownsampler.thumbnailData(from: data, maxPixel: coverSide, compression: 0.9)
     }
 }
