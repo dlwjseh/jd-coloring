@@ -78,13 +78,26 @@ final class RegionPaintEngine {
     private var lastImagePoint: CGPoint?
     private var lastAlphaScale: CGFloat = 1     // 직전 샘플의 필압 배율(한 획 내 보간용)
 
+    // 페인트통(§35): 탭 1회로 칸(라벨) 전체를 단색 채움. 탭 판별 상태.
+    private var fillDownPoint: CGPoint?         // 다운 지점(이미지 px). nil = 페인트통 탭 진행 중 아님
+    private var fillCancelled = false           // 다운 후 임계 이상 이동 = 드래그 → 채우기 취소
+
+    // 채우기 Undo(§35-4): 마지막 채우기 1회만 되돌림. 영향 픽셀만 스냅샷(가볍게).
+    // labels는 빌드 후 불변이라, Undo 시 같은 라벨을 다시 스캔하면 채운 픽셀 집합·순서가
+    // 동일하다 → 인덱스 배열 없이 라벨 1개 + 픽셀당 RGBA(UInt32 패킹)만 보관(메모리 절반).
+    private var fillUndoLabel: Int32 = 0         // 마지막으로 채운 칸 라벨(0 = 보관 없음)
+    private var fillUndoPrev: [UInt32] = []      // 채운 픽셀의 채우기 직전 RGBA(라벨 스캔 순서, 픽셀당 1)
+    private var fillUndoAvailable = false        // onFillUndoChange 중복 호출 방지용 캐시
+    /// 채우기 Undo 가능 여부가 바뀔 때 호출(뷰의 레일 Undo 버튼 활성/비활성 동기화).
+    var onFillUndoChange: (Bool) -> Void = { _ in }
+
     // 표시 갱신 throttle (H-1): 샘플마다가 아니라 디스플레이 프레임당 1회만 makeImage.
     private var needsDisplayRefresh = false
     private var displayLink: CADisplayLink?
     private var linkProxy: DisplayLinkProxy?
 
     // 라벨링 완료 전 들어온 입력 버퍼 (H-3): 준비되면 재생.
-    private enum PendingEvent { case changed(CGPoint, CGSize, CGFloat?); case ended }
+    private enum PendingEvent { case changed(CGPoint, CGSize, CGFloat?); case ended; case cancelled }
     private var pendingEvents: [PendingEvent] = []
 
     // 저장
@@ -182,6 +195,7 @@ final class RegionPaintEngine {
             switch events[i] {
             case let .changed(p, s, pr): strokeChanged(at: p, viewSize: s, pressure: pr)
             case .ended: strokeEnded()
+            case .cancelled: strokeCancelled()
             }
         }
         if end < events.count {
@@ -212,6 +226,21 @@ final class RegionPaintEngine {
             return
         }
         let p = imagePoint(viewPoint, viewSize: viewSize)
+
+        // 페인트통: 칠하지 않고 탭만 추적. 다운 지점 기록 + 임계 이상 이동하면 드래그로 보고 취소.
+        // 실제 채움은 strokeEnded(탭 업)에서 1회 수행한다(§35).
+        if tool == .fill && !isEraser {
+            if fillDownPoint == nil {
+                fillDownPoint = p
+                fillCancelled = false
+            } else if let d = fillDownPoint {
+                let dx = p.x - d.x, dy = p.y - d.y
+                let tol = max(6, CGFloat(width) * 0.02)   // 탭 허용 이동(이미지 px)
+                if dx * dx + dy * dy > tol * tol { fillCancelled = true }
+            }
+            return
+        }
+
         let radius = brushRadius(viewSize: viewSize)
         let scale = alphaScale(forPressure: pressure)   // 필압 → 한획 알파 배율
 
@@ -220,7 +249,9 @@ final class RegionPaintEngine {
             stampLine(from: last, to: p, radius: radius,
                       fromScale: lastAlphaScale, toScale: scale)
         } else {
-            // 다운: 시작 칸 라벨 잠금 + (색연필) 새 획 시작
+            // 다운: 시작 칸 라벨 잠금 + (색연필) 새 획 시작.
+            // 브러쉬·색연필·지우개 획이 시작되면 보관 중인 채우기 Undo는 만료(§35-4).
+            invalidateFillUndo()
             lockedLabel = label(atX: Int(p.x), y: Int(p.y))
             if tool == .pencil && !isEraser {
                 ensurePencilBuffers()
@@ -243,6 +274,27 @@ final class RegionPaintEngine {
             bufferPending(.ended)
             return
         }
+        // 페인트통: 탭 업 시 1회 채움(드래그로 취소되지 않았을 때만).
+        if tool == .fill && !isEraser {
+            if let d = fillDownPoint, !fillCancelled { performFill(at: d) }
+            fillDownPoint = nil
+            fillCancelled = false
+            return
+        }
+        lastImagePoint = nil
+        lockedLabel = 0
+        scheduleDisplayRefresh()
+    }
+
+    /// 스트로크 취소 — 줌/팬 제스처 시작 등으로 진행 중 터치가 끊길 때. strokeEnded와 달리
+    /// **페인트통 채움을 수행하지 않는다**(두 손가락 줌이 의도치 않은 채우기를 일으키지 않게, §35).
+    @MainActor func strokeCancelled() {
+        guard ready else {
+            bufferPending(.cancelled)
+            return
+        }
+        fillDownPoint = nil
+        fillCancelled = false
         lastImagePoint = nil
         lockedLabel = 0
         scheduleDisplayRefresh()
@@ -250,6 +302,103 @@ final class RegionPaintEngine {
 
     private func bufferPending(_ event: PendingEvent) {
         if pendingEvents.count < 2_000 { pendingEvents.append(event) }   // 폭주 방지 상한
+    }
+
+    // MARK: - 페인트통(영역 채우기) + 채우기 Undo (§35)
+
+    /// 탭 지점이 속한 칸(라벨)의 모든 픽셀을 현재 색 단색(alpha 255)으로 채운다.
+    /// - 경계/빈 곳(라벨 0)은 무동작.
+    /// - 이미 칠해진 칸은 기존 색·자국을 덮어 교체.
+    /// - 채우기 직전 그 칸 픽셀의 RGBA만 스냅샷 → 1단계 Undo(§35-4).
+    @MainActor private func performFill(at p: CGPoint) {
+        guard let px = pixels else { return }
+        let L = label(atX: Int(p.x), y: Int(p.y))
+        guard L != 0 else { return }                 // 경계/빈 곳 → 무동작
+
+        let (r, g, b) = brushRGB                       // 캐시된 현재색
+        let n = width * height
+        let hasCoverage = !coverage.isEmpty
+
+        // 2패스(탭당 1회): append/grow 없이 정확 크기로 1회 할당. 큰 배경 칸(수십만 px)에서도
+        // 재할당·픽셀당 4회 append를 피해 메인 스레드 hitch를 막는다.
+        var snapshot: [UInt32] = []
+        let didChange: Bool = labels.withUnsafeBufferPointer { lab -> Bool in
+            // 1패스: 대상 픽셀 수 + 실제 변화 여부. 변화 없으면 할당 전에 종료(헛 할당·헛 Undo 방지).
+            var cnt = 0
+            var changed = false
+            for i in 0..<n where lab[i] == L {
+                cnt += 1
+                let o = i * 4
+                if px[o] != r || px[o + 1] != g || px[o + 2] != b || px[o + 3] != 255 { changed = true }
+            }
+            guard changed else { return false }
+
+            // 2패스: 정확 크기 스냅샷(픽셀당 UInt32 1개) + 단색 쓰기.
+            var snap = [UInt32](repeating: 0, count: cnt)
+            snap.withUnsafeMutableBufferPointer { s in
+                var k = 0
+                for i in 0..<n where lab[i] == L {
+                    let o = i * 4
+                    s[k] = UInt32(px[o]) | (UInt32(px[o + 1]) << 8)
+                         | (UInt32(px[o + 2]) << 16) | (UInt32(px[o + 3]) << 24)
+                    k += 1
+                    px[o] = r; px[o + 1] = g; px[o + 2] = b; px[o + 3] = 255
+                    // 색연필 쌓임 게이트 초기화 → 채운 칸 위에 다시 색연필 칠 때 정상 누적.
+                    if hasCoverage { coverage[i] = 0 }
+                }
+            }
+            snapshot = snap
+            return true
+        }
+        guard didChange else { return }
+
+        fillUndoLabel = L
+        fillUndoPrev = snapshot
+        savingEnabled = true                           // 이후 수동 저장이 채움 결과를 보존
+        setFillUndoAvailable(true)
+        refreshDisplay()
+    }
+
+    /// 마지막 채우기 1회를 되돌린다(레일 Undo 버튼 → CanvasSaver.undoFill).
+    /// 스냅샷한 픽셀을 채우기 직전 값으로 복원. 1단계만(다단계 아님).
+    @MainActor func undoFill() {
+        guard fillUndoLabel != 0, !fillUndoPrev.isEmpty, let px = pixels else { return }
+        let L = fillUndoLabel
+        let n = width * height
+        // performFill과 같은 라벨을 같은 순서(0..<n 오름차순)로 다시 스캔하며 보관한 RGBA로 복원.
+        // labels는 불변이라 채운 픽셀 집합·순서가 동일하다.
+        labels.withUnsafeBufferPointer { lab in
+            fillUndoPrev.withUnsafeBufferPointer { snap in
+                var k = 0
+                for i in 0..<n where lab[i] == L {
+                    if k >= snap.count { break }       // 안전 가드(이론상 항상 일치)
+                    let packed = snap[k]; k += 1
+                    let o = i * 4
+                    px[o]     = UInt8(packed & 0xFF)
+                    px[o + 1] = UInt8((packed >> 8) & 0xFF)
+                    px[o + 2] = UInt8((packed >> 16) & 0xFF)
+                    px[o + 3] = UInt8((packed >> 24) & 0xFF)
+                }
+            }
+        }
+        fillUndoLabel = 0
+        fillUndoPrev.removeAll(keepingCapacity: false)
+        setFillUndoAvailable(false)
+        refreshDisplay()
+    }
+
+    /// 보관 중인 채우기 Undo를 만료(다른 동작이 끼어들거나 초기화될 때).
+    private func invalidateFillUndo() {
+        guard fillUndoAvailable else { return }
+        fillUndoLabel = 0
+        fillUndoPrev.removeAll(keepingCapacity: false)
+        setFillUndoAvailable(false)
+    }
+
+    private func setFillUndoAvailable(_ v: Bool) {
+        guard fillUndoAvailable != v else { return }
+        fillUndoAvailable = v
+        onFillUndoChange(v)
     }
 
     /// 화면 이탈 등에서 즉시 저장.
@@ -279,6 +428,10 @@ final class RegionPaintEngine {
         // 스트로크 상태 리셋(혹시 드래그 중이었다면 끊는다)
         lastImagePoint = nil
         lockedLabel = 0
+        // 페인트통 탭/채우기 Undo 상태도 리셋(초기화 후 옛 채움을 되살리지 못하게).
+        fillDownPoint = nil
+        fillCancelled = false
+        invalidateFillUndo()
         // 색칠 버퍼 비우기(투명). 픽셀 포인터는 그대로 유효.
         if let ctx = paintCtx {
             ctx.clear(CGRect(x: 0, y: 0, width: width, height: height))

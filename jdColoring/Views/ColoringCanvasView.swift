@@ -302,6 +302,7 @@ struct ColoringCanvasView: View {
             toolToggle
 
             railDivider
+            // 굵기 — 브러쉬/색연필용. 페인트통 활성 중엔 동작에 영향 없어 흐리게(§35-2).
             VStack(spacing: 10) {
                 ForEach(Array(Palette.brushWidths.enumerated()), id: \.offset) { idx, w in
                     Button { brushWidth = w } label: {
@@ -316,6 +317,7 @@ struct ColoringCanvasView: View {
                     .accessibilityLabel("브러쉬 굵기 \(idx + 1)")
                 }
             }
+            .opacity(tool == .fill && !isEraser ? 0.4 : 1)
 
             railDivider
             Button { isEraser.toggle() } label: {
@@ -327,6 +329,19 @@ struct ColoringCanvasView: View {
             }
             .buttonStyle(.plain)
             .accessibilityLabel("지우개")
+
+            // 채우기 Undo — 마지막 채우기 1회 되돌리기(§35-4). 상태 기반 활성/비활성.
+            railDivider
+            Button { saver.undoFill() } label: {
+                Image(systemName: "arrow.uturn.backward")
+                    .font(.system(size: 22))
+                    .foregroundStyle(saver.canUndoFill ? Color(hex: 0x6E6258) : Color(hex: 0xD9CFC4))
+                    .frame(width: 50, height: 44)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .disabled(!saver.canUndoFill)
+            .accessibilityLabel("채우기 되돌리기")
         }
         .padding(.vertical, 22)
         .padding(.horizontal, 14)
@@ -340,12 +355,13 @@ struct ColoringCanvasView: View {
         Rectangle().fill(Theme.cardBorder).frame(height: 2).padding(.horizontal, 8)
     }
 
-    /// 도구 전환 — 브러쉬(단색) ↔ 색연필(질감). 디자인 §20-1. 세로 2칸, 활성은 코랄 강조.
-    /// 라벨은 제거(아이콘만) — 접근성 라벨로 식별.
+    /// 도구 전환 — 브러쉬(단색) · 색연필(질감) · 페인트통(영역 채우기). 디자인 §20-1·§35-1.
+    /// 세로 3칸, 활성은 코랄 강조. 라벨은 제거(아이콘만) — 접근성 라벨로 식별.
     private var toolToggle: some View {
         VStack(spacing: 8) {
             toolButton(.marker, symbol: "paintbrush.pointed")
             toolButton(.pencil, symbol: "pencil")
+            toolButton(.fill, symbol: "drop.fill")
         }
     }
 
@@ -363,7 +379,15 @@ struct ColoringCanvasView: View {
                 .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .accessibilityLabel(t == .marker ? "브러쉬" : "색연필")
+        .accessibilityLabel(toolLabel(t))
+    }
+
+    private func toolLabel(_ t: BrushTool) -> String {
+        switch t {
+        case .marker: return "브러쉬"
+        case .pencil: return "색연필"
+        case .fill:   return "페인트통"
+        }
     }
 
     /// '색' → 우측에서 슬라이드되는 팔레트 패널(최근색 + 72색). 캔버스 위 오버레이.

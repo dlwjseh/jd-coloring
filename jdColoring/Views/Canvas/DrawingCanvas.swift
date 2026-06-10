@@ -2,13 +2,21 @@ import SwiftUI
 
 /// 캔버스 엔진에 대한 명령 핸들(부모 → 엔진). 화면 이탈 시 즉시 저장(flush),
 /// 색칠 초기화(reset)를 부모가 **동기로** 트리거하기 위해 사용한다.
-/// ⚠️ flush·reset 클로저는 DrawingCanvas.onAppear에서 채워진다.
+/// ⚠️ flush·reset·undoFill 클로저는 DrawingCanvas.onAppear에서 채워진다.
 /// 캔버스가 화면에 나타난 뒤에만 호출해야 하며, 그 이전엔 no-op이다.
+///
+/// `@Observable` — `canUndoFill`(채우기 Undo 가능 여부)을 엔진이 갱신하면
+/// 부모(레일 Undo 버튼)가 관찰해 활성/비활성을 따라간다(§35-4).
+@Observable
 final class CanvasSaver {
-    var flush: () -> Void = {}
+    @ObservationIgnored var flush: () -> Void = {}
     /// 저장 완료 후 completion 호출 (엔진 미준비 시 즉시 호출).
-    var flushThen: (_ completion: @escaping () -> Void) -> Void = { $0() }
-    var reset: () -> Void = {}
+    @ObservationIgnored var flushThen: (_ completion: @escaping () -> Void) -> Void = { $0() }
+    @ObservationIgnored var reset: () -> Void = {}
+    /// 마지막 채우기 1회 되돌리기(§35-4).
+    @ObservationIgnored var undoFill: () -> Void = {}
+    /// 채우기 Undo 가능 여부 — 엔진이 갱신, 레일 Undo 버튼이 관찰.
+    var canUndoFill = false
 }
 
 /// 채색 표면. iPad 전용 — 라인아트를 칸으로 분할해 브러시가 검은 선을
@@ -53,6 +61,7 @@ struct DrawingCanvas: View {
                         engine.strokeChanged(at: loc, viewSize: geo.size, pressure: pressure)
                     },
                     onEnded:   { engine.strokeEnded() },
+                    onCancel:  { engine.strokeCancelled() },
                     onPinch:   onPinch,
                     onPan:     onPan,
                     onZoomReset: onZoomReset
@@ -67,6 +76,9 @@ struct DrawingCanvas: View {
                 saver.flush = { engine.flush() }
                 saver.flushThen = { engine.flushThen($0) }
                 saver.reset = { engine.clear() }
+                saver.undoFill = { engine.undoFill() }
+                // 엔진의 채우기 Undo 가능 여부 → saver(관찰 대상)로 반영해 레일 버튼 활성 동기화.
+                engine.onFillUndoChange = { available in saver.canUndoFill = available }
             }
             .onDisappear {
                 engine.stopDisplayLink()
@@ -139,6 +151,8 @@ struct PenOnlyGestureView: UIViewRepresentable {
     /// (위치, 필압) — 필압은 Apple Pencil일 때 0~1, 손가락/미지원은 nil.
     var onChanged: (CGPoint, CGFloat?) -> Void
     var onEnded: () -> Void
+    /// 진행 중 터치가 줌/팬 제스처 시작·시스템 취소로 끊김(정상 탭 업과 구분 — 페인트통 미채움).
+    var onCancel: () -> Void
     var onPinch: (CGFloat, Bool) -> Void
     var onPan: (CGSize, Bool) -> Void
     var onZoomReset: () -> Void
@@ -148,14 +162,14 @@ struct PenOnlyGestureView: UIViewRepresentable {
         v.backgroundColor = .clear
         v.isMultipleTouchEnabled = false   // 색칠 touchesBegan 단일 터치 보장 (제스처 인식기는 무관)
         v.apply(penOnly: penOnly,
-                onChanged: onChanged, onEnded: onEnded,
+                onChanged: onChanged, onEnded: onEnded, onCancel: onCancel,
                 onPinch: onPinch, onPan: onPan, onZoomReset: onZoomReset)
         return v
     }
 
     func updateUIView(_ v: Inner, context: Context) {
         v.apply(penOnly: penOnly,
-                onChanged: onChanged, onEnded: onEnded,
+                onChanged: onChanged, onEnded: onEnded, onCancel: onCancel,
                 onPinch: onPinch, onPan: onPan, onZoomReset: onZoomReset)
     }
 
@@ -167,6 +181,7 @@ struct PenOnlyGestureView: UIViewRepresentable {
         private var penOnly = true
         private var onChanged: ((CGPoint, CGFloat?) -> Void)?
         private var onEnded: (() -> Void)?
+        private var onCancel: (() -> Void)?
         /// 진행 중인 터치 추적 — touchesBegan에서 수락한 터치만 이후 이벤트에서 처리
         private weak var activeTouch: UITouch?
 
@@ -188,12 +203,14 @@ struct PenOnlyGestureView: UIViewRepresentable {
         func apply(penOnly: Bool,
                    onChanged: @escaping (CGPoint, CGFloat?) -> Void,
                    onEnded: @escaping () -> Void,
+                   onCancel: @escaping () -> Void,
                    onPinch: @escaping (CGFloat, Bool) -> Void,
                    onPan: @escaping (CGSize, Bool) -> Void,
                    onZoomReset: @escaping () -> Void) {
             self.penOnly = penOnly
             self.onChanged = onChanged
             self.onEnded = onEnded
+            self.onCancel = onCancel
             self.onPinch = onPinch
             self.onPan = onPan
             self.onZoomReset = onZoomReset
@@ -293,7 +310,7 @@ struct PenOnlyGestureView: UIViewRepresentable {
         private func cancelActiveDrawStroke() {
             guard activeTouch != nil else { return }
             activeTouch = nil
-            onEnded?()
+            onCancel?()   // 정상 탭 업(onEnded)과 구분 → 페인트통이 채우지 않음
         }
 
         // MARK: 색칠 터치 핸들러
@@ -336,7 +353,7 @@ struct PenOnlyGestureView: UIViewRepresentable {
 
         override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
             activeTouch = nil
-            onEnded?()
+            onCancel?()   // 시스템 취소 → 페인트통 미채움
         }
 
         // MARK: 헬퍼
