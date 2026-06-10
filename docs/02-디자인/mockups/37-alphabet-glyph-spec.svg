@@ -1,0 +1,102 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1180" height="820" viewBox="0 0 1180 820" font-family="'SF Pro Rounded','Apple SD Gothic Neo','Helvetica Neue',sans-serif">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#FFF4EC"/>
+    </linearGradient>
+    <filter id="shCard" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="6" stdDeviation="10" flood-color="#C9A88C" flood-opacity="0.28"/>
+    </filter>
+    <clipPath id="screen"><rect width="1180" height="820"/></clipPath>
+  </defs>
+
+  <g clip-path="url(#screen)">
+  <rect width="1180" height="820" fill="url(#bg)"/>
+  <circle cx="70" cy="160" r="120" fill="#8A6CFF" opacity="0.08"/>
+  <circle cx="1120" cy="700" r="140" fill="#36C5C0" opacity="0.08"/>
+
+  <text x="590" y="58" font-size="34" font-weight="800" fill="#3B3A4E" text-anchor="middle">알파벳 대·소문자 도안 — 글리프 윤곽 렌더 스펙</text>
+  <text x="590" y="88" font-size="18" fill="#9A8F86" text-anchor="middle">한글 글리프 렌더러를 일반화해 글자만 라틴으로 교체 (결정적·선 항상 닫힘)</text>
+
+  <!-- =============== Frame A : filled glyph → outline =============== -->
+  <g filter="url(#shCard)"><rect x="40" y="112" width="340" height="448" rx="28" fill="#FFFFFF" stroke="#EBDFD2" stroke-width="2"/></g>
+  <text x="210" y="152" font-size="20" font-weight="800" fill="#3B3A4E" text-anchor="middle">① 글리프 → 윤곽선</text>
+
+  <!-- filled glyph -->
+  <text x="210" y="272" font-size="150" font-weight="900" fill="#3B3A4E" text-anchor="middle">A</text>
+  <text x="210" y="300" font-size="14" fill="#9A8F86" text-anchor="middle">폰트의 채워진 글리프</text>
+
+  <!-- arrow -->
+  <path d="M 210 318 L 210 356" fill="none" stroke="#FF7A59" stroke-width="5" stroke-linecap="round"/>
+  <path d="M 198 344 L 210 358 L 222 344" fill="none" stroke="#FF7A59" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- outline glyph (coloring template) -->
+  <text x="210" y="496" font-size="150" font-weight="900" fill="#FFFFFF" stroke="#3B3A4E" stroke-width="4" stroke-linejoin="round" paint-order="stroke" text-anchor="middle">A</text>
+  <text x="210" y="528" font-size="14" fill="#9A8F86" text-anchor="middle">윤곽선만 stroke · 속은 흰색 = 도안</text>
+
+  <!-- =============== Frame B : fill regions (counters) =============== -->
+  <g filter="url(#shCard)"><rect x="420" y="112" width="340" height="448" rx="28" fill="#FFFFFF" stroke="#EBDFD2" stroke-width="2"/></g>
+  <text x="590" y="152" font-size="20" font-weight="800" fill="#3B3A4E" text-anchor="middle">② 칠하기 영역 (구멍/카운터)</text>
+
+  <!-- 'B' : body colored, two counters stay bg, outside stays white -->
+  <text x="582" y="438" font-size="280" font-weight="900" fill="#BFE0FF" stroke="#3B3A4E" stroke-width="4" stroke-linejoin="round" paint-order="stroke" text-anchor="middle">B</text>
+
+  <!-- annotations -->
+  <g font-size="13" font-weight="700">
+    <path d="M 700 232 L 612 286" fill="none" stroke="#FF7A59" stroke-width="2.5"/>
+    <circle cx="700" cy="232" r="4" fill="#FF7A59"/>
+    <text x="708" y="228" fill="#FF7A59">글자 몸통 = 한 칸 (칠해짐)</text>
+
+    <path d="M 712 392 L 626 360" fill="none" stroke="#9A8F86" stroke-width="2.5" stroke-dasharray="4 4"/>
+    <circle cx="712" cy="392" r="4" fill="#9A8F86"/>
+    <text x="720" y="396" fill="#9A8F86">구멍(카운터)은 별도 영역</text>
+  </g>
+  <text x="590" y="520" font-size="13" fill="#9A8F86" text-anchor="middle">구멍 있는 글자: A B D O P Q R · a b d e g o p q</text>
+  <text x="590" y="540" font-size="13" fill="#9A8F86" text-anchor="middle">검은 선이 경계 — ㅇ·ㅎ과 같은 원리</text>
+
+  <!-- =============== Frame C : cover + font spec =============== -->
+  <g filter="url(#shCard)"><rect x="800" y="112" width="340" height="448" rx="28" fill="#FFFFFF" stroke="#EBDFD2" stroke-width="2"/></g>
+  <text x="970" y="152" font-size="20" font-weight="800" fill="#3B3A4E" text-anchor="middle">③ 앨범 커버 자동 생성</text>
+
+  <!-- mini cover : soft-mint tone -->
+  <rect x="848" y="176" width="244" height="184" rx="22" fill="#E6F5EC"/>
+  <g font-weight="900" text-anchor="middle" stroke="#3B3A4E" stroke-width="2.5" stroke-linejoin="round" paint-order="stroke" font-size="62">
+    <text x="912" y="262" fill="#FFFFFF">A</text>
+    <text x="1028" y="262" fill="#FFD7E9">B</text>
+    <text x="912" y="346" fill="#FFE9A8">a</text>
+    <text x="1028" y="346" fill="#FFFFFF">b</text>
+  </g>
+  <text x="970" y="392" font-size="13" fill="#9A8F86" text-anchor="middle">같은 렌더로 커버도 생성 (전용 에셋 불필요)</text>
+
+  <!-- font / stroke spec list -->
+  <g font-size="14" fill="#3B3A4E">
+    <text x="824" y="436" font-weight="800">렌더 파라미터 (한글과 동일)</text>
+    <text x="824" y="464">• stroke ≈ 도안 짧은변의 2.6% · 라운드 캡/조인</text>
+    <text x="824" y="490">• glyphRatio 0.76 (여백 ~12% letterbox)</text>
+    <text x="824" y="516">• 폰트 = 둥근 굵은 라틴체 (한글과 톤 맞춤)</text>
+    <text x="838" y="540" fill="#9A8F86" font-size="13">SF Pro Rounded / Helvetica Heavy 1순위 · 둥근 무료폰트 번들 여지</text>
+  </g>
+
+  <!-- =============== bottom : pipeline + ensure-exists + deltas =============== -->
+  <g filter="url(#shCard)"><rect x="40" y="592" width="1100" height="196" rx="28" fill="#FFFFFF" stroke="#EBDFD2" stroke-width="2"/></g>
+  <text x="72" y="632" font-size="20" font-weight="800" fill="#3B3A4E">생성 파이프라인 + 한글 대비 차이점 (개발 인계)</text>
+
+  <!-- pipeline chips -->
+  <g font-size="14" font-weight="700" text-anchor="middle">
+    <rect x="72" y="650" width="190" height="46" rx="14" fill="#EEF2FF"/><text x="167" y="678" fill="#4A5B8A">CTFont 라틴 글리프 path</text>
+    <rect x="300" y="650" width="172" height="46" rx="14" fill="#EEF2FF"/><text x="386" y="678" fill="#4A5B8A">모서리 라운딩 + stroke</text>
+    <rect x="510" y="650" width="200" height="46" rx="14" fill="#FFF1EC"/><text x="610" y="671" fill="#FF7A59">flood-fill 52자 재검증</text><text x="610" y="688" fill="#FF7A59" font-size="11">enclosed≥1 확인</text>
+    <rect x="748" y="650" width="158" height="46" rx="14" fill="#EEF2FF"/><text x="827" y="678" fill="#4A5B8A">라스터 다운샘플</text>
+    <rect x="944" y="650" width="170" height="46" rx="14" fill="#E0F6E9"/><text x="1029" y="671" fill="#3FA86B">Template.imageData</text><text x="1029" y="688" fill="#3FA86B" font-size="12">+ thumbnailData</text>
+  </g>
+  <!-- arrows between chips -->
+  <g stroke="#C8BAAE" stroke-width="3" stroke-linecap="round" fill="none">
+    <path d="M 266 673 L 296 673"/><path d="M 476 673 L 506 673"/><path d="M 714 673 L 744 673"/><path d="M 910 673 L 940 673"/>
+  </g>
+
+  <text x="72" y="736" font-size="14" font-weight="700" fill="#3B3A4E">시작 시 ensure-exists:</text>
+  <text x="210" y="736" font-size="14" fill="#9A8F86">'한글'·'알파벳' 두 시스템 앨범 + 각 글자(name 키)가 다 있나 확인 → 없으면 백그라운드 생성 (있으면 렌더 0회).</text>
+  <text x="72" y="760" font-size="14" fill="#9A8F86">구분자 <tspan font-weight="700" fill="#3B3A4E">Category.systemKind</tspan>("hangul"/"alphabet") 신설 — 순서·키 판정을 이름 문자열에 의존하지 않게. 기존 '한글' 행 백필.</text>
+  <text x="72" y="780" font-size="14" fill="#9A8F86">Category.isSystem / Template.isSystem = true 로 보호 · 경량 마이그레이션(기본값 false/nil, 기존 데이터 무영향).</text>
+  </g>
+</svg>

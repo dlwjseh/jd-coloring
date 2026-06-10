@@ -1,41 +1,62 @@
 import UIKit
 import CoreText
 
-/// 한글 자음·모음 글자를 **"검은 외곽선 + 흰 속"** 색칠 도안 이미지로 렌더한다.
-/// (기획/디자인 §기본 제공 한글 앨범 — 일러스트 에셋이 아니라 폰트 글리프 윤곽을 앱 내에서 생성.)
+/// 폰트를 받는 **범용 글리프 윤곽 렌더러** — 글자 한 자를 "검은 외곽선 + 흰 속" 색칠 도안으로 그린다.
+/// (기획/디자인 §기본 제공 한글/알파벳 앨범 — 일러스트 에셋이 아니라 폰트 글리프 윤곽을 앱 내에서 생성.)
+///
+/// 원래 `HangulGlyphRenderer`(한글 전용·increment8 검증)를 **글자/폰트만 바꿔 재사용**할 수 있게
+/// 일반화한 것. path 추출·모서리 라운딩·fill+stroke 드로잉 로직은 한글과 **동일**(룩 회귀 0).
+/// 폰트만 `GlyphFont`로 주입 → 한글(Apple SD Gothic Neo Heavy)·알파벳(System Rounded Heavy) 공유.
 ///
 /// 원리: CoreText 로 글리프 **외곽선 path** 를 뽑아 `CGContext` 로 그린다.
 ///  - 속(interior)은 fill(흰/파스텔), 경계는 stroke(잉크) → `RegionPaintEngine` 이 글자 속을 "칸"으로 잡는다.
-///  - **fill+stroke 를 직접 제어**하므로 NSAttributedString 으로는 못 하던 **둥근 모서리(`lineJoin/Cap = .round`)** 가 가능.
-///
-/// "더 뚱뚱하게 + 색칠 영역 넓힘"(2026-06-09 요청):
-///  - 가장 굵은 한글 웨이트(**Heavy**)로 글자 몸통을 두껍게 → 칠할 속이 넓어짐.
-///  - 글자가 도안에서 차지하는 비율(`glyphRatio`)을 키움(여백 축소).
-///  - 모서리는 둥근 조인/캡으로 부드럽게.
+///  - **fill+stroke 를 직접 제어**하므로 둥근 모서리(`lineJoin/Cap = .round`)가 가능.
 ///
 /// UIKit/CoreText 렌더링은 백그라운드 스레드에서 안전하므로 `nonisolated` 로 둔다(시더가 오프메인 호출).
-enum HangulGlyphRenderer {
+enum GlyphOutlineRenderer {
 
-    /// 외곽선 잉크색 = 디자인 Theme.ink (#3B3A4E). 채색 엔진의 경계 판정(어두운 픽셀)에 충분히 진하다.
-    private static let ink = UIColor(red: 0x3B/255, green: 0x3A/255, blue: 0x4E/255, alpha: 1)
-    /// 글리프가 도안에서 차지하는 비율(여백 ~12% → 76%). 클수록 색칠 영역↑.
-    private static let glyphRatio: CGFloat = 0.76
-    /// 외곽선 두께 = 도안 짧은변의 ~2.6%. (선은 얇게 유지 → 색칠 영역 안 깎임. 모서리 둥글기는 아래 path 라운딩이 담당.)
-    private static let strokeRatio: CGFloat = 0.026
-    /// 모서리 라운딩 반경 = 글리프 짧은변의 비율. 선 두께와 무관하게 **글리프 path 자체의 직선-직선 모서리**를 둥글린다.
-    private static let cornerRoundFactor: CGFloat = 0.18
+    /// 글리프를 뽑을 폰트 제공자. `make(size)` 가 베이스 `CTFont` 를 만든다(언어별로 다른 폰트 주입).
+    struct GlyphFont: Sendable {
+        let make: @Sendable (CGFloat) -> CTFont
 
-    /// 가장 굵은(Heavy) 한글 웨이트 우선 — 글자 몸통이 두꺼워 색칠 영역이 넓다.
-    nonisolated private static func boldKoreanFontName() -> String {
-        for name in ["AppleSDGothicNeo-Heavy", "AppleSDGothicNeo-ExtraBold", "AppleSDGothicNeo-Bold"] {
-            if UIFont(name: name, size: 12) != nil { return name }
+        /// 한글 — 가장 굵은(Heavy) Apple SD Gothic Neo 우선(글자 몸통이 두꺼워 색칠 영역이 넓다).
+        /// (기존 `HangulGlyphRenderer.boldKoreanFontName()` 와 동일 후보 → 한글 글리프 byte-동일.)
+        static let korean = GlyphFont { size in
+            for name in ["AppleSDGothicNeo-Heavy", "AppleSDGothicNeo-ExtraBold", "AppleSDGothicNeo-Bold"] {
+                if UIFont(name: name, size: size) != nil {
+                    return CTFontCreateWithName(name as CFString, size, nil)
+                }
+            }
+            let fallback = UIFont.systemFont(ofSize: size, weight: .black).fontName
+            return CTFontCreateWithName(fallback as CFString, size, nil)
         }
-        return UIFont.systemFont(ofSize: 12, weight: .black).fontName
+
+        /// 알파벳 — 시스템 둥근(rounded) Heavy 웨이트(한글 Heavy와 톤 맞춤: 굵고 동글동글).
+        /// rounded 디자인은 폰트명으로 못 잡으므로 `UIFontDescriptor.withDesign(.rounded)` 로 만들어 CTFont 변환.
+        static let latinRounded = GlyphFont { size in
+            let base = UIFont.systemFont(ofSize: size, weight: .heavy)
+            let ui: UIFont
+            if let rounded = base.fontDescriptor.withDesign(.rounded) {
+                ui = UIFont(descriptor: rounded, size: size)
+            } else {
+                ui = base
+            }
+            return CTFontCreateWithFontDescriptor(ui.fontDescriptor as CTFontDescriptor, size, nil)
+        }
     }
 
-    /// 글자 → 글리프 외곽선 CGPath(폰트 좌표, y-up). 폰트가 한글 글리프를 못 가지면 cascade(`CTFontCreateForString`)로 보강.
-    nonisolated private static func glyphPath(_ glyph: String, fontSize: CGFloat) -> CGPath? {
-        let base = CTFontCreateWithName(boldKoreanFontName() as CFString, fontSize, nil)
+    /// 외곽선 잉크색 = 디자인 Theme.ink (#3B3A4E). 채색 엔진의 경계 판정(어두운 픽셀)에 충분히 진하다.
+    nonisolated static let ink = UIColor(red: 0x3B/255, green: 0x3A/255, blue: 0x4E/255, alpha: 1)
+    /// 글리프가 도안에서 차지하는 비율(여백 ~12% → 76%). 클수록 색칠 영역↑.
+    nonisolated private static let glyphRatio: CGFloat = 0.76
+    /// 외곽선 두께 = 도안 짧은변의 ~2.6%. (선은 얇게 유지 → 색칠 영역 안 깎임. 모서리 둥글기는 path 라운딩 담당.)
+    nonisolated private static let strokeRatio: CGFloat = 0.026
+    /// 모서리 라운딩 반경 = 글리프 짧은변의 비율. 선 두께와 무관하게 **글리프 path 자체의 직선-직선 모서리**를 둥글린다.
+    nonisolated private static let cornerRoundFactor: CGFloat = 0.18
+
+    /// 글자 → 글리프 외곽선 CGPath(폰트 좌표, y-up). 폰트가 그 글자를 못 가지면 cascade(`CTFontCreateForString`)로 보강.
+    nonisolated private static func glyphPath(_ glyph: String, font: GlyphFont, fontSize: CGFloat) -> CGPath? {
+        let base = font.make(fontSize)
         let ctFont = CTFontCreateForString(base, glyph as CFString,
                                            CFRange(location: 0, length: (glyph as NSString).length))
         let utf16 = Array(glyph.utf16)
@@ -45,10 +66,10 @@ enum HangulGlyphRenderer {
         return CTFontCreatePathForGlyph(ctFont, g, nil)
     }
 
-    // MARK: 모서리 라운딩 (직선-직선 모서리를 기하학적으로 둥글림)
+    // MARK: 모서리 라운딩 (직선-직선 모서리를 기하학적으로 둥글림 — 한글 increment8 검증 로직 그대로)
 
     /// 글리프 path 의 **직선만으로 이뤄진 윤곽(subpath)** 의 모서리를 반경 R 로 둥글린다.
-    /// 곡선이 섞인 윤곽(ㅅ·ㅎ·ㅇ 등)은 원형 보존을 위해 그대로 통과. 선 두께와 무관하게 모서리만 다듬는다.
+    /// 곡선이 섞인 윤곽은 원형 보존을 위해 그대로 통과. 선 두께와 무관하게 모서리만 다듬는다.
     nonisolated private static func roundedCorners(_ path: CGPath, factor: CGFloat) -> CGPath {
         enum Seg { case line(CGPoint); case quad(CGPoint, CGPoint); case curve(CGPoint, CGPoint, CGPoint) }
         struct Sub { var start = CGPoint.zero; var segs: [Seg] = []; var closed = false; var has = false }
@@ -85,7 +106,7 @@ enum HangulGlyphRenderer {
                 let poly = dedupAdjacent(v)         // 인접 중복 정점 제거(0길이 변 방지, 시작==끝 포함)
                 if poly.count >= 3 { roundedPolygon(poly, radius: R, into: out); continue }
             }
-            // 곡선 포함 윤곽(ㅅ·ㅎ·ㅇ) 또는 라운딩 부적합 → 원본 그대로 복제.
+            // 곡선 포함 윤곽 또는 라운딩 부적합 → 원본 그대로 복제.
             out.move(to: s.start)
             for seg in s.segs {
                 switch seg {
@@ -139,8 +160,8 @@ enum HangulGlyphRenderer {
     }
 
     /// 글자 한 자를 `rect` 중앙에 그린다(흰/파스텔 속 채움 + 둥근 잉크 외곽선).
-    nonisolated private static func draw(_ glyph: String, in rect: CGRect, fill: UIColor, cg: CGContext) {
-        guard let raw = glyphPath(glyph, fontSize: 256) else { return }
+    nonisolated private static func draw(_ glyph: String, in rect: CGRect, fill: UIColor, font: GlyphFont, cg: CGContext) {
+        guard let raw = glyphPath(glyph, font: font, fontSize: 256) else { return }
         let path = roundedCorners(raw, factor: cornerRoundFactor)
         let bbox = path.boundingBoxOfPath
         guard bbox.width > 0, bbox.height > 0 else { return }
@@ -167,7 +188,7 @@ enum HangulGlyphRenderer {
 
     /// 글자 한 자 → 흰 배경 정사각 PNG(검은 외곽선 + 흰 속 = 색칠 도안).
     /// 색칠용(side≈1024)·썸네일용(side≈480)을 각각 직접 렌더해 선이 흐려지지 않게 한다.
-    nonisolated static func outlineImage(_ glyph: String, side: CGFloat, fill: UIColor = .white) -> Data? {
+    nonisolated static func outlineImage(_ glyph: String, side: CGFloat, font: GlyphFont, fill: UIColor = .white) -> Data? {
         let format = UIGraphicsImageRendererFormat.default()
         format.scale = 1                       // 픽셀=포인트(이미 픽셀 크기로 지정)
         format.opaque = true
@@ -176,34 +197,28 @@ enum HangulGlyphRenderer {
             let cg = ctx.cgContext
             cg.setFillColor(UIColor.white.cgColor)
             cg.fill(CGRect(x: 0, y: 0, width: side, height: side))
-            draw(glyph, in: CGRect(x: 0, y: 0, width: side, height: side), fill: fill, cg: cg)
+            draw(glyph, in: CGRect(x: 0, y: 0, width: side, height: side), fill: fill, font: font, cg: cg)
         }
         return image.pngData()
     }
 
-    /// '한글' 앨범 커버 자동 생성 — 소프트 블루(#E9EEFF) 배경에 윤곽 글자 4자(2×2),
-    /// 일부는 옅게 채워(인비팅). 전용 에셋 불필요(디자인 §32-1).
-    nonisolated static func coverImage(side: CGFloat) -> Data? {
+    /// 앨범 커버 자동 생성 — 톤 배경에 윤곽 글자 4자(2×2), 일부 옅게 채워(인비팅). 전용 에셋 불필요(디자인 §32-1·§33-1).
+    /// `layout` = (글자, 채움색, 열, 행). 한글/알파벳이 톤·글자만 달리해 공유한다.
+    nonisolated static func coverImage(side: CGFloat, background: UIColor,
+                                       layout: [(String, UIColor, Int, Int)], font: GlyphFont) -> Data? {
         let format = UIGraphicsImageRendererFormat.default()
         format.scale = 1
         format.opaque = true
         let renderer = UIGraphicsImageRenderer(size: CGSize(width: side, height: side), format: format)
         let image = renderer.image { ctx in
             let cg = ctx.cgContext
-            cg.setFillColor(UIColor(red: 0xE9/255, green: 0xEE/255, blue: 0xFF/255, alpha: 1).cgColor)
+            cg.setFillColor(background.cgColor)
             cg.fill(CGRect(x: 0, y: 0, width: side, height: side))
 
             let cell = side / 2
-            // (글자, 채움) — ㄴ 핑크 / ㅏ 옐로는 옅게 채워 "칠하는 앨범" 느낌.
-            let pink = UIColor(red: 1, green: 0xD7/255, blue: 0xE9/255, alpha: 1)
-            let yellow = UIColor(red: 1, green: 0xE9/255, blue: 0xA8/255, alpha: 1)
-            let layout: [(String, UIColor, Int, Int)] = [
-                ("ㄱ", .white, 0, 0), ("ㄴ", pink, 1, 0),
-                ("ㅏ", yellow, 0, 1), ("ㅑ", .white, 1, 1),
-            ]
             for (glyph, fill, col, row) in layout {
                 let rect = CGRect(x: CGFloat(col) * cell, y: CGFloat(row) * cell, width: cell, height: cell)
-                draw(glyph, in: rect, fill: fill, cg: cg)
+                draw(glyph, in: rect, fill: fill, font: font, cg: cg)
             }
         }
         return image.pngData()

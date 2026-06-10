@@ -87,7 +87,7 @@ struct AlbumCarouselView: View {
             appeared = false
             Task { @MainActor in appeared = true }
             // M-2 안전 재시도: 시드가 부분 완료/실패했어도 앨범 화면 진입 시 자가복구(완료 상태면 0작업).
-            HangulSeeder.ensure(context: context)
+            GlyphAlbumSeeder.ensureAll(context: context)
         }
         .onDisappear { exitTask?.cancel() }
         .navigationBarBackButtonHidden(true)
@@ -117,8 +117,24 @@ struct AlbumCarouselView: View {
             if let a = t.album { counts[a.persistentModelID, default: 0] += 1 }
             else { uncategorized += 1 }
         }
-        // 시스템 앨범('한글')은 생성순과 무관하게 **맨 앞 고정**(디자인 §32-1). 미분류는 맨 뒤.
-        let ordered = albums.filter(\.isSystem) + albums.filter { !$0.isSystem }
+        // 시스템 앨범은 생성순과 무관하게 **앞쪽 고정** — 한글(0) → 알파벳(1) (디자인 §33-1). 미분류는 맨 뒤.
+        // systemKind 우선, 백필 전이면 이름으로 보정(pre-마이그레이션 안전).
+        func systemPriority(_ a: Album) -> Int {
+            switch a.systemKind {
+            case "hangul": return 0
+            case "alphabet": return 1
+            default:
+                if a.name == "한글" { return 0 }
+                if a.name == "알파벳" { return 1 }
+                return 50
+            }
+        }
+        let systemAlbums = albums.filter(\.isSystem).sorted {
+            let pa = systemPriority($0), pb = systemPriority($1)
+            return pa != pb ? pa < pb : $0.createdAt < $1.createdAt
+        }
+        let userAlbums = albums.filter { !$0.isSystem }   // @Query 가 createdAt 정렬
+        let ordered = systemAlbums + userAlbums
         var result = ordered.map { AlbumItem(kind: .album($0), count: counts[$0.persistentModelID] ?? 0) }
         if uncategorized > 0 {
             result.append(AlbumItem(kind: .uncategorized, count: uncategorized))
